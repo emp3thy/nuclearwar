@@ -551,7 +551,7 @@ Expected: FAIL — module not found.
 - [ ] **Step 3.3: Write `src/engine/balance.ts`**
 
 ```ts
-import type { LeaderId, Yield } from './types';
+import type { BonusRule, LeaderId, Yield } from './types';
 
 export const LEADER_PROFILES: Record<
   LeaderId,

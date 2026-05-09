@@ -1,0 +1,51 @@
+import { describe, it, expect } from 'vitest';
+import { applyWooing, decayFavourability } from '../../src/engine/diplomacy';
+import { initialState } from '../../src/engine/state';
+import { WOO_FAVOURABILITY_DECAY } from '../../src/engine/balance';
+import type { Order } from '../../src/engine/types';
+
+describe('applyWooing', () => {
+  it('adds woo points to target.favourability[sender]', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
+    const orders: Partial<Record<'chump' | 'carnage', Order[]>> = {
+      chump: [{ kind: 'woo', target: 'carnage', points: 3 }],
+      carnage: [],
+    };
+    const r = applyWooing(s, orders);
+    expect(r.state.leaders.carnage.favourability.chump).toBe(3);
+    expect(r.events).toEqual([{ kind: 'WooApplied', from: 'chump', to: 'carnage', points: 3 }]);
+  });
+
+  it('accumulates across multiple woo orders', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
+    s.leaders.carnage.favourability.chump = 2;
+    const orders = {
+      chump: [{ kind: 'woo' as const, target: 'carnage' as const, points: 4 }],
+      carnage: [],
+    };
+    const r = applyWooing(s, orders);
+    expect(r.state.leaders.carnage.favourability.chump).toBe(6);
+  });
+
+  it('skips wooing dead targets', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
+    s.leaders.carnage.alive = false;
+    const orders = {
+      chump: [{ kind: 'woo' as const, target: 'carnage' as const, points: 3 }],
+      carnage: [],
+    };
+    const r = applyWooing(s, orders);
+    expect(r.events).toHaveLength(0);
+  });
+});
+
+describe('decayFavourability', () => {
+  it('reduces every favourability entry by WOO_FAVOURABILITY_DECAY, floored at 0', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
+    s.leaders.carnage.favourability.chump = 5;
+    s.leaders.chump.favourability.carnage = 1;
+    const r = decayFavourability(s);
+    expect(r.leaders.carnage.favourability.chump).toBe(5 - WOO_FAVOURABILITY_DECAY);
+    expect(r.leaders.chump.favourability.carnage).toBe(0);
+  });
+});

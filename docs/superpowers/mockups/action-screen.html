@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>nuke — Action / Resolution screen mockup (world map)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0; padding: 32px 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #1a1a1a; color: #e8d8c0;
+      min-height: 100vh; box-sizing: border-box;
+    }
+    h2 { color: #f4ede2; margin: 0 0 6px; text-align: center; }
+    .subtitle { text-align: center; color: #a89880; margin: 0 0 24px; font-size: 13px; }
+
+    .phone {
+      max-width: 380px;
+      margin: 0 auto;
+      background: #1a1a1a;
+      border: 8px solid #2b2b2b;
+      border-radius: 32px;
+      overflow: hidden;
+      font-size: 12px;
+      color: #f4ede2;
+    }
+    .header-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 12px; background: #2b2b2b; color: #f4ede2; font-size: 11px;
+    }
+    .header-bar .round { font-weight: 700; letter-spacing: 0.05em; }
+    .header-bar .ctrl { display: flex; gap: 10px; opacity: 0.85; }
+
+    .phase-track {
+      display: flex; padding: 6px 10px; gap: 4px; background: #1a1a1a;
+      font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid #3a3a3a;
+    }
+    .phase {
+      flex: 1; text-align: center; padding: 3px 0;
+      background: #2a2a2a; border-radius: 3px; color: #6a6a6a;
+    }
+    .phase.done { background: #3a4a3a; color: #a0c0a0; }
+    .phase.active { background: #6b1d1d; color: #f4ede2; font-weight: 700; }
+
+    .event-banner {
+      background: #6b1d1d; padding: 8px 12px;
+      font-size: 11px; line-height: 1.35;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .event-banner .e-tag { display: inline-block; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; margin-bottom: 2px; }
+    .event-banner strong { color: #fff8eb; }
+
+    .map-wrap {
+      position: relative;
+      background: #0e1a2c;
+      height: 580px;
+      overflow: hidden;
+    }
+    .world-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+    .portrait {
+      position: absolute;
+      width: 80px;
+      background: #f4ede2;
+      border: 3px solid #2b2b2b;
+      border-radius: 50%;
+      aspect-ratio: 1;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px;
+      z-index: 4;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    }
+    .portrait.actor { left: 230px; top: 165px; }
+    .portrait.receiver { left: 32px; top: 145px; background: #f4d4d4; }
+    .portrait.empty {
+      font-size: 11px; font-style: italic; color: #5a4a3a;
+      text-align: center; line-height: 1.1;
+    }
+    .name-tag {
+      position: absolute;
+      background: #2b2b2b; color: #f4ede2;
+      font-size: 9px; padding: 2px 6px; border-radius: 3px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      z-index: 5;
+    }
+    .name-tag.actor { left: 232px; top: 250px; }
+    .name-tag.receiver { left: 42px; top: 230px; }
+
+    .bubble {
+      position: absolute;
+      background: #f4ede2; color: #1a1a1a;
+      padding: 8px 11px;
+      border-radius: 14px;
+      border: 2px solid #2b2b2b;
+      font-size: 11px;
+      line-height: 1.3;
+      font-style: italic;
+      z-index: 5;
+      max-width: 160px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .bubble.actor { left: 200px; top: 280px; }
+    .bubble.receiver { left: 110px; top: 90px; max-width: 130px; }
+    .bubble::before {
+      content: ''; position: absolute;
+      width: 12px; height: 12px;
+      background: #f4ede2; border: 2px solid #2b2b2b;
+    }
+    .bubble.actor::before { top: -8px; left: 30px; transform: rotate(-135deg); border-bottom: none; border-right: none; }
+    .bubble.receiver::before { bottom: -8px; left: 30px; transform: rotate(45deg); border-top: none; border-left: none; }
+
+    .damage-badge {
+      position: absolute;
+      background: #ff3030; color: #fff8eb;
+      font-size: 14px; font-weight: 800;
+      padding: 4px 10px; border-radius: 4px;
+      border: 2px solid #2b2b2b;
+      z-index: 6;
+      transform: rotate(-8deg);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .damage-badge.r { left: 30px; top: 100px; }
+
+    .footer-bar {
+      background: #1a1a1a; padding: 8px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 10px; color: #a89880;
+      border-top: 1px solid #3a3a3a;
+    }
+    .footer-bar .casualty-counter strong { color: #ff6b6b; font-size: 13px; font-weight: 700; }
+
+    .annotations {
+      max-width: 380px; margin: 24px auto 0; font-size: 12px; color: #c8b89a;
+      background: #2b2b2b; padding: 14px; border-radius: 8px; border: 1px dashed #5a4a3a;
+    }
+    .annotations strong { color: #f4ede2; }
+    .annotations ul { margin: 6px 0 0 18px; padding: 0; }
+    .meta-footer {
+      max-width: 380px; margin: 24px auto 0; font-size: 11px; color: #6a5a4a; text-align: center;
+    }
+    .art-note {
+      max-width: 380px; margin: 12px auto 0;
+      padding: 10px 14px;
+      background: #3a2a1a; color: #f4ede2;
+      border-radius: 6px;
+      font-size: 12px; line-height: 1.4;
+      border: 1px solid #6b5a4a;
+    }
+    .art-note strong { color: #ffc080; }
+  </style>
+</head>
+<body>
+  <h2>Action / Resolution screen — world-map layout (approved)</h2>
+  <p class="subtitle">Frozen moment from Round 4: Khameneverhere has just launched at Chump. Two reaction faces — actor + receiver — with their in-the-moment quotes. Missile arcs across the world. Other leaders dimly visible at their countries.</p>
+
+  <div class="art-note">
+    <strong>Note:</strong> this is a wireframe, not a final visual. Production version will use a proper hand-drawn world map (cream/parchment with bolder country outlines, ocean texture) and hand-drawn caricature portraits per leader (golden-haired Chump, hockey-stance Carnage, bomb-diagram Netanyahoo, leather-jacket-with-chainsaw Mileigh-hem, grey-suit-with-awkward-thumbs-up Starmless, ornate empty-chair tableau cycling for Khameneverhere). Emoji are placeholders only.
+  </div>
+
+  <div class="phone">
+    <div class="header-bar">
+      <span class="round">ROUND 4 · ACTION</span>
+      <span class="ctrl">⏸ pause &nbsp; ⏭ fast resolve</span>
+    </div>
+    <div class="phase-track">
+      <div class="phase done">Defence</div>
+      <div class="phase done">Builds</div>
+      <div class="phase done">Propaganda</div>
+      <div class="phase active">Launches</div>
+      <div class="phase">Final Retal.</div>
+    </div>
+    <div class="event-banner">
+      <div class="e-tag">Now firing</div>
+      <strong>Khameneverhere</strong> launches 5MT at <strong>Chump</strong> · People targeted
+    </div>
+
+    <div class="map-wrap">
+      <svg class="world-svg" viewBox="0 0 380 580" preserveAspectRatio="none">
+        <defs>
+          <pattern id="dots" patternUnits="userSpaceOnUse" width="6" height="6">
+            <circle cx="3" cy="3" r="0.4" fill="#1a3a5a" opacity="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="380" height="580" fill="url(#dots)"/>
+
+        <!-- Continents -->
+        <path d="M 25,90 Q 60,70 110,75 Q 160,72 180,100 Q 200,135 195,180 Q 180,225 150,245 Q 110,260 80,255 Q 50,235 35,210 Q 20,170 25,130 Z" fill="#d8c8a8" stroke="#2b2b2b" stroke-width="1.2"/>
+        <path d="M 130,290 Q 165,280 180,310 Q 195,360 175,420 Q 160,470 140,490 Q 125,490 115,460 Q 105,400 110,350 Q 115,310 130,290 Z" fill="#d8c8a8" stroke="#2b2b2b" stroke-width="1.2"/>
+        <path d="M 195,100 Q 220,95 240,110 Q 250,130 235,150 Q 215,160 200,150 Q 190,130 195,110 Z" fill="#d8c8a8" stroke="#2b2b2b" stroke-width="1.2"/>
+        <path d="M 240,150 Q 270,145 290,160 Q 305,185 295,210 Q 270,225 250,215 Q 235,195 240,170 Z" fill="#d8c8a8" stroke="#2b2b2b" stroke-width="1.2"/>
+        <path d="M 215,170 Q 250,180 270,220 Q 280,280 250,330 Q 220,350 200,330 Q 185,280 195,220 Q 205,180 215,170 Z" fill="#d8c8a8" stroke="#2b2b2b" stroke-width="1.2"/>
+        <path d="M 290,90 Q 360,80 380,110 L 380,210 Q 350,225 310,215 Q 285,195 290,150 Z" fill="#d8c8a8" stroke="#2b2b2b" stroke-width="1.2"/>
+        <path d="M 320,400 Q 360,395 375,420 Q 380,445 360,460 Q 335,460 320,440 Z" fill="#d8c8a8" stroke="#2b2b2b" stroke-width="1.2"/>
+
+        <!-- Country highlights -->
+        <ellipse cx="100" cy="115" rx="55" ry="25" fill="#a02525" opacity="0.55"/>
+        <ellipse cx="105" cy="180" rx="60" ry="30" fill="#c9a040" opacity="0.55"/>
+        <circle cx="208" cy="115" r="11" fill="#a02030" opacity="0.65"/>
+        <circle cx="252" cy="180" r="9" fill="#3b5b8b" opacity="0.7"/>
+        <ellipse cx="280" cy="185" rx="16" ry="12" fill="#2a4a2a" opacity="0.7"/>
+        <ellipse cx="140" cy="450" rx="14" ry="22" fill="#d8b020" opacity="0.6"/>
+
+        <!-- Country labels -->
+        <text x="100" y="118" fill="#2b2b2b" font-size="9" font-weight="700" text-anchor="middle" font-family="sans-serif">CANADA</text>
+        <text x="105" y="183" fill="#2b2b2b" font-size="9" font-weight="700" text-anchor="middle" font-family="sans-serif">USA</text>
+        <text x="208" y="118" fill="#2b2b2b" font-size="7" font-weight="700" text-anchor="middle" font-family="sans-serif">UK</text>
+        <text x="252" y="183" fill="#2b2b2b" font-size="6" font-weight="700" text-anchor="middle" font-family="sans-serif">ISR</text>
+        <text x="280" y="188" fill="#fff8eb" font-size="8" font-weight="700" text-anchor="middle" font-family="sans-serif">IRAN</text>
+        <text x="140" y="455" fill="#2b2b2b" font-size="8" font-weight="700" text-anchor="middle" font-family="sans-serif">ARG</text>
+
+        <!-- Inactive leader icons -->
+        <text x="100" y="105" font-size="14" text-anchor="middle">🍁</text>
+        <text x="208" y="105" font-size="11" text-anchor="middle">🤵</text>
+        <text x="252" y="170" font-size="11" text-anchor="middle">📊</text>
+        <text x="140" y="438" font-size="13" text-anchor="middle">🪚</text>
+
+        <!-- Attack ring + missile arc + firing pulse -->
+        <ellipse cx="105" cy="180" rx="68" ry="36" fill="none" stroke="#ff3030" stroke-width="2" stroke-dasharray="3 3" opacity="0.85"/>
+        <path d="M 280,185 Q 200,40 105,180" stroke="#ff8030" stroke-width="2" stroke-dasharray="5 4" fill="none" opacity="0.9"/>
+        <text x="218" y="80" font-size="20" text-anchor="middle">🚀</text>
+        <circle cx="280" cy="185" r="22" fill="none" stroke="#90ff90" stroke-width="1.5" opacity="0.7"/>
+      </svg>
+
+      <div class="portrait actor empty">[ empty<br>chair ]</div>
+      <div class="name-tag actor">🇮🇷 Khameneverhere</div>
+      <div class="bubble actor">Death to America, and to anyone who reorganises kitchen drawers.</div>
+
+      <div class="portrait receiver">😱</div>
+      <div class="name-tag receiver">🇺🇸 Chump</div>
+      <div class="bubble receiver">FAKE NEWS! These weren't even real bombs.</div>
+      <div class="damage-badge r">−4 M</div>
+    </div>
+
+    <div class="footer-bar">
+      <span class="casualty-counter">Round casualties: <strong>14M</strong></span>
+      <span>🔊 sfx · 🎵 music</span>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <p><strong>Layout:</strong> stylised world map with countries highlighted in signature colours, name-labelled, with small dimmed leader icons at their location.</p>
+    <p><strong>Active event</strong> brings up two large portrait popups — actor (left, over their region) and receiver (right) — each with a speech-bubble line. Missile arcs from actor's country to receiver's country with 🚀 mid-flight. Receiver gets red dashed glow ring; actor gets green firing pulse.</p>
+    <p><strong>Khameneverhere never appears</strong> — his portrait is the empty-chair tableau (cycles between empty-chair / hospital-leg / cardboard-cutout each round). His bubble still pops up, faxed-in.</p>
+    <p><strong>Damage badge</strong> floats over receiver's country, tilted comic-book style.</p>
+    <p><strong>Pacing:</strong> each event ~1.8s — green pulse on actor → missile launch → arc → impact + red ring + damage badge → portraits and bubbles materialise → bubbles dwell ~0.6s → all fade → next event. Fast Resolve = 3× speed.</p>
+    <p><strong>How the map handles other phases:</strong></p>
+    <ul>
+      <li><strong>Defence intercepts:</strong> 🛡 burst on the arc; missile fades before reaching target; receiver's portrait shows relief; no damage badge.</li>
+      <li><strong>Defence builds:</strong> 🛡 icon pops up over the building country; no arc.</li>
+      <li><strong>Factory builds:</strong> ⚙ icon pops up; pop counter ticks up next round.</li>
+      <li><strong>Propaganda:</strong> paper-aeroplane / pamphlet trail arcs from sender to receiver; receiver's pop counter ticks down.</li>
+      <li><strong>Wooing:</strong> heart / handshake icon arcs gently between two countries with a brief flash of mutual portraits.</li>
+      <li><strong>Final Retaliation:</strong> eliminated country's icon goes black, starburst of arcs fires from it to all grudge targets simultaneously.</li>
+      <li><strong>Multi-impact</strong> (3 missiles converging on one target): all arrive in roughly one beat; receiver's portrait stays up across all impacts; damage badges stack and pulse.</li>
+    </ul>
+  </div>
+
+  <div class="meta-footer">
+    Reference mockup, captured during brainstorming session 2026-05-08.<br>
+    Self-contained HTML — open directly in any browser.
+  </div>
+</body>
+</html>

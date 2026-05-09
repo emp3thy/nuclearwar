@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>nuke — Round Summary mockup (merged Reactions + stats)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0; padding: 32px 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #1a1a1a; color: #e8d8c0;
+      min-height: 100vh; box-sizing: border-box;
+    }
+    h2 { color: #f4ede2; margin: 0 0 6px; text-align: center; }
+    .subtitle { text-align: center; color: #a89880; margin: 0 0 24px; font-size: 13px; }
+
+    .phone {
+      max-width: 380px;
+      margin: 0 auto;
+      background: #2b2b2b;
+      border: 8px solid #2b2b2b;
+      border-radius: 32px;
+      overflow: hidden;
+      font-family: Georgia, "Times New Roman", serif;
+      color: #1a1a1a;
+    }
+    .paper {
+      background: #f4ede2;
+      background-image:
+        radial-gradient(ellipse at top, rgba(255,255,255,0.4) 0%, transparent 60%),
+        repeating-linear-gradient(45deg, transparent 0 4px, rgba(0,0,0,0.015) 4px 5px);
+      padding: 12px 14px 60px;
+      position: relative;
+    }
+    .masthead { border-bottom: 4px double #1a1a1a; padding-bottom: 6px; margin-bottom: 8px; text-align: center; }
+    .masthead .title {
+      font-family: "Georgia", serif;
+      font-size: 32px; font-weight: 900; letter-spacing: 0.02em; line-height: 1; color: #1a1a1a;
+      text-shadow: 1px 0 0 #1a1a1a;
+    }
+    .masthead .subtitle-line {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em;
+      color: #5a4a3a; margin-top: 4px;
+      display: flex; justify-content: space-between;
+      border-top: 1px solid #5a4a3a;
+      padding-top: 3px;
+    }
+    .headline {
+      font-family: "Arial Black", "Helvetica", sans-serif;
+      font-size: 30px; font-weight: 900; line-height: 0.95; letter-spacing: -0.02em;
+      color: #1a1a1a; text-transform: uppercase; margin: 6px 0 4px; text-align: center;
+    }
+    .subhead {
+      font-family: Georgia, serif;
+      font-size: 12px; font-style: italic; color: #3a2a1a; line-height: 1.3;
+      text-align: center; margin-bottom: 8px;
+    }
+    .subhead strong { color: #6b1d1d; font-style: normal; font-weight: 700; }
+    .photo {
+      background: #1a1a1a; color: #f4ede2; height: 110px; margin-bottom: 4px;
+      display: flex; align-items: flex-end; justify-content: center;
+      position: relative; overflow: hidden;
+      border: 1px solid #1a1a1a;
+    }
+    .photo svg { width: 100%; height: 100%; }
+    .photo .damage-stamp {
+      position: absolute; top: 8px; right: 8px;
+      background: #c91010; color: #fff8eb;
+      font-family: "Arial Black", sans-serif; font-size: 14px; font-weight: 900;
+      padding: 4px 8px; transform: rotate(-6deg);
+      border: 2px solid #fff8eb; box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    }
+    .photo .caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.7); color: #d8c8a8; font-size: 9px; font-style: italic;
+      padding: 3px 8px; text-align: center;
+    }
+    .casualty-strip {
+      background: #1a1a1a; color: #f4ede2; font-family: Arial, sans-serif;
+      display: flex; justify-content: space-between; padding: 5px 8px;
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 12px;
+    }
+    .casualty-strip strong { color: #ff8030; font-size: 13px; font-weight: 800; }
+    .section-head {
+      font-family: "Arial Black", sans-serif; font-size: 11px; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 2px; margin: 10px 0 6px; color: #1a1a1a;
+    }
+    .leader-story {
+      border-bottom: 1px dashed #8a7a6b; padding: 8px 0;
+      display: flex; gap: 9px; align-items: flex-start;
+    }
+    .leader-story:last-of-type { border-bottom: none; }
+    .ls-portrait {
+      width: 42px; height: 42px; flex-shrink: 0; border-radius: 50%;
+      background: #d8c8a8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; line-height: 1;
+      border: 2px solid #1a1a1a; position: relative;
+    }
+    .ls-portrait .flag {
+      position: absolute; bottom: -2px; right: -3px;
+      background: #f4ede2; border-radius: 50%; font-size: 10px; padding: 1px 2px;
+      border: 1px solid #1a1a1a;
+    }
+    .ls-portrait.empty { font-size: 8px; font-style: italic; color: #5a4a3a; }
+    .ls-body { flex: 1; min-width: 0; }
+    .ls-name {
+      font-family: "Arial Black", sans-serif;
+      font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em;
+      color: #1a1a1a;
+      display: flex; justify-content: space-between; align-items: baseline;
+    }
+    .ls-name .pop-delta {
+      font-family: "Courier New", monospace;
+      font-size: 11px; font-weight: 700; text-transform: none; letter-spacing: 0;
+    }
+    .ls-name .pop-delta.harm { color: #c91010; }
+    .ls-name .pop-delta.gain { color: #2b6b2b; }
+    .ls-name .pop-delta.neutral { color: #5a4a3a; }
+    .ls-quote {
+      font-family: Georgia, serif; font-size: 11px; font-style: italic; line-height: 1.35;
+      color: #3a2a1a; margin: 3px 0 4px;
+    }
+    .ls-quote::before { content: '"'; }
+    .ls-quote::after { content: '"'; }
+    .ls-badges { display: flex; flex-wrap: wrap; gap: 3px; }
+    .badge {
+      font-size: 9px; padding: 2px 5px; border-radius: 2px;
+      font-family: Arial, sans-serif;
+      text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700;
+    }
+    .badge.harm { background: #c91010; color: #fff8eb; }
+    .badge.gain { background: #2b6b2b; color: #fff8eb; }
+    .badge.neutral { background: #5a4a3a; color: #fff8eb; }
+    .continue-bar {
+      background: #1a1a1a; padding: 12px; text-align: center;
+      border-top: 4px double #c91010;
+    }
+    .continue-bar button {
+      background: #c91010; color: #fff8eb; border: 2px solid #fff8eb;
+      padding: 8px 24px;
+      font-family: "Arial Black", sans-serif;
+      font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em;
+      cursor: pointer; border-radius: 3px;
+    }
+    .annotations {
+      max-width: 380px; margin: 24px auto 0; font-size: 12px; color: #c8b89a;
+      background: #2b2b2b; padding: 14px; border-radius: 8px; border: 1px dashed #5a4a3a;
+    }
+    .annotations strong { color: #f4ede2; }
+    .annotations ul { margin: 6px 0 0 18px; padding: 0; }
+    .meta-footer {
+      max-width: 380px; margin: 24px auto 0; font-size: 11px; color: #6a5a4a; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Round Summary — merged front page (approved)</h2>
+  <p class="subtitle">One screen replaces the original separate Reactions + Summary screens. Tabloid newspaper format. Masthead rotates round-by-round; this example shows "THE END TIMES".</p>
+
+  <div class="phone">
+    <div class="paper">
+      <div class="masthead">
+        <div class="title">THE END TIMES</div>
+        <div class="subtitle-line">
+          <span>VOL. IV · ROUND 4</span>
+          <span>MORNING EDITION</span>
+          <span>FREE WHILE STOCKS LAST</span>
+        </div>
+      </div>
+      <div class="headline">CHUMP CLOBBERED</div>
+      <div class="subhead">
+        Carnage, Khameneverhere &amp; Netanyahoo deliver coordinated strike on US — <strong>15M dead.</strong> President: "fake news, frankly."
+      </div>
+      <div class="photo">
+        <svg viewBox="0 0 380 110" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <radialGradient id="boom" cx="50%" cy="80%" r="60%">
+              <stop offset="0%" stop-color="#ffb060"/>
+              <stop offset="40%" stop-color="#c91010"/>
+              <stop offset="80%" stop-color="#3a1010"/>
+              <stop offset="100%" stop-color="#1a1a1a"/>
+            </radialGradient>
+          </defs>
+          <rect width="380" height="110" fill="#1a1a1a"/>
+          <rect y="80" width="380" height="30" fill="#3a2a1a"/>
+          <ellipse cx="190" cy="90" rx="80" ry="14" fill="url(#boom)"/>
+          <ellipse cx="190" cy="55" rx="38" ry="22" fill="url(#boom)"/>
+          <rect x="180" y="58" width="20" height="32" fill="url(#boom)"/>
+          <ellipse cx="190" cy="35" rx="50" ry="18" fill="url(#boom)" opacity="0.8"/>
+          <ellipse cx="190" cy="60" rx="120" ry="50" fill="url(#boom)" opacity="0.3"/>
+        </svg>
+        <div class="damage-stamp">−15M</div>
+        <div class="caption">An eyewitness sketch of the impact zone over Washington, DC (artist's impression).</div>
+      </div>
+      <div class="casualty-strip">
+        <span>This round: <strong>15M</strong></span>
+        <span>War to date: <strong>47M</strong></span>
+        <span>Survivors: <strong>120M</strong></span>
+      </div>
+
+      <div class="section-head">★ World Reactions ★</div>
+
+      <div class="leader-story">
+        <div class="ls-portrait">😱<span class="flag">🇺🇸</span></div>
+        <div class="ls-body">
+          <div class="ls-name">Chump <span class="pop-delta harm">33M → 18M</span></div>
+          <div class="ls-quote">FAKE NEWS! These weren't real bombs. Many people are saying nobody hit me.</div>
+          <div class="ls-badges">
+            <span class="badge harm">−15M citizens</span>
+            <span class="badge harm">−2 factories</span>
+            <span class="badge neutral">no retaliation queued</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="leader-story">
+        <div class="ls-portrait">🍁<span class="flag">🇨🇦</span></div>
+        <div class="ls-body">
+          <div class="ls-name">Carnage <span class="pop-delta neutral">25M</span></div>
+          <div class="ls-quote">Elbows up. We don't forget.</div>
+          <div class="ls-badges">
+            <span class="badge neutral">wooing of Starmless expires R5</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="leader-story">
+        <div class="ls-portrait empty">[ empty<br>chair ]<span class="flag">🇮🇷</span></div>
+        <div class="ls-body">
+          <div class="ls-name">Khameneverhere <span class="pop-delta neutral">28M</span></div>
+          <div class="ls-quote">Death to America, and to anyone who reorganises kitchen drawers.</div>
+          <div class="ls-badges">
+            <span class="badge neutral">grudge cleared: Chump (settled)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="leader-story">
+        <div class="ls-portrait">📊<span class="flag">🇮🇱</span></div>
+        <div class="ls-body">
+          <div class="ls-name">Netanyahoo <span class="pop-delta neutral">18M</span></div>
+          <div class="ls-quote">If it looks like a duck, walks like a duck — Carnage has the biggest arsenal now.</div>
+          <div class="ls-badges">
+            <span class="badge neutral">target shift → Carnage</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="leader-story">
+        <div class="ls-portrait">🤵<span class="flag">🇬🇧</span></div>
+        <div class="ls-body">
+          <div class="ls-name">Starmless <span class="pop-delta neutral">25M</span></div>
+          <div class="ls-quote">Long-term decisions. Sound foundations. Working people.</div>
+          <div class="ls-badges">
+            <span class="badge gain">+1 factory built (+0.5 AP/round)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="leader-story">
+        <div class="ls-portrait">🪚<span class="flag">🇦🇷</span></div>
+        <div class="ls-body">
+          <div class="ls-name">Mileigh-hem <span class="pop-delta neutral">22M</span></div>
+          <div class="ls-quote">Banking. Cooking. ¡Viva la libertad, carajo!</div>
+          <div class="ls-badges">
+            <span class="badge gain">+1 AP banked → 4 AP next round</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="continue-bar">
+      <button>Round 5 → Plan</button>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <p><strong>Layout:</strong> single tabloid front page. Masthead (rotating, 15-name pool). Bold headline + italic subhead. Stylised SVG mushroom-cloud "photo" with comic-tilted red damage stamp. Casualty strip showing this-round / war-total / survivors. "World Reactions" section with per-leader stories — portrait, name, monospace pop-delta, italic quote, state-change badges.</p>
+    <p><strong>Special-case variants:</strong></p>
+    <ul>
+      <li><strong>Apocalypse round</strong>: masthead becomes "THE END TIMES — FINAL EDITION"; headline is just "<strong>THE END.</strong>" centred; quotes still appear from any survivors.</li>
+      <li><strong>Eliminated leaders</strong> in this round: portrait greyed, framed in black border, name prefixed "OBITUARY:", quote = their last words / Final Retaliation flavour.</li>
+      <li><strong>"The Failing New York Times" gag</strong>: when this masthead lands in a round Chump's in, his next planning-screen mood line shows <em>"Failing New York Times. Sad."</em> as a meta payoff.</li>
+    </ul>
+    <p><strong>What this replaces:</strong> the original separate Reactions screen (auto-advancing first-person beats) AND the original separate Round Summary. Same content, one screen instead of two.</p>
+  </div>
+
+  <div class="meta-footer">
+    Reference mockup, captured during brainstorming session 2026-05-08.<br>
+    Self-contained HTML — open directly in any browser.
+  </div>
+</body>
+</html>

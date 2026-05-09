@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>nuke — Reactions screen mockup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0; padding: 32px 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #1a1a1a; color: #e8d8c0;
+      min-height: 100vh; box-sizing: border-box;
+    }
+    h2 { color: #f4ede2; margin: 0 0 6px; text-align: center; }
+    .subtitle { text-align: center; color: #a89880; margin: 0 0 24px; font-size: 13px; }
+
+    .phone {
+      max-width: 380px;
+      margin: 0 auto;
+      background: #f4ede2;
+      border: 8px solid #2b2b2b;
+      border-radius: 32px;
+      overflow: hidden;
+      font-size: 13px;
+      color: #1a1a1a;
+    }
+    .header-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px; background: #2b2b2b; color: #f4ede2; font-size: 12px;
+    }
+    .header-bar .title { font-weight: 700; letter-spacing: 0.05em; }
+    .header-bar .controls { display: flex; gap: 12px; font-size: 11px; opacity: 0.85; }
+    .progress-dots {
+      display: flex; gap: 5px; padding: 8px 14px; background: #2b2b2b; border-bottom: 1px solid #1a1a1a;
+    }
+    .dot {
+      flex: 1; height: 3px; background: #5a4a3a; border-radius: 2px;
+    }
+    .dot.done { background: #f4ede2; }
+    .dot.current { background: #c9a06b; }
+
+    .reaction {
+      display: flex; gap: 10px; padding: 12px 14px;
+      border-bottom: 1px solid #d0c8b8;
+      align-items: flex-start;
+    }
+    .reaction:last-child { border-bottom: none; }
+    .reaction.focus { background: #fff8eb; }
+    .portrait {
+      width: 56px; height: 56px;
+      background: #d0c8b8; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; flex-shrink: 0; position: relative;
+      border: 2px solid #2b2b2b;
+    }
+    .portrait .flag {
+      position: absolute; bottom: -3px; right: -3px;
+      background: #f4ede2; border-radius: 50%; padding: 1px 3px;
+      font-size: 12px; border: 1px solid #2b2b2b;
+    }
+    .body { flex: 1; min-width: 0; }
+    .leader-name {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #6b1d1d; font-weight: 700;
+    }
+    .quote {
+      font-style: italic; font-size: 13px; line-height: 1.35; margin: 3px 0 6px;
+      color: #1a1a1a;
+    }
+    .quote::before { content: '"'; }
+    .quote::after { content: '"'; }
+    .state-change {
+      display: inline-block;
+      font-size: 10px; padding: 2px 6px; border-radius: 3px;
+      background: #5a3a1a; color: #f4ede2;
+      text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;
+    }
+    .state-change.harm { background: #8a1a1a; }
+    .state-change.gain { background: #2b6b2b; }
+    .state-change.neutral { background: #6b5a4a; }
+
+    .portrait.khameneverhere {
+      background: #c9b89a;
+      font-size: 16px; font-style: italic;
+      color: #5a4a3a;
+      text-align: center;
+    }
+
+    .annotations {
+      max-width: 380px; margin: 24px auto 0; font-size: 12px; color: #c8b89a;
+      background: #2b2b2b; padding: 14px; border-radius: 8px; border: 1px dashed #5a4a3a;
+    }
+    .annotations strong { color: #f4ede2; }
+    .annotations ul { margin: 6px 0 0 18px; padding: 0; }
+    .meta-footer {
+      max-width: 380px; margin: 24px auto 0; font-size: 11px; color: #6a5a4a; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Reactions screen — approved layout</h2>
+  <p class="subtitle">After Round 4 resolves: Carnage, Khameneverhere, and Netanyahoo all hit Chump (a coward who took the worst of it). In motion, beats auto-advance one at a time over ~8 seconds. The mockup shows all six at once for review.</p>
+
+  <div class="phone">
+    <div class="header-bar">
+      <span class="title">REACTIONS · R4</span>
+      <span class="controls">⏸ pause &nbsp; ⏭ skip</span>
+    </div>
+    <div class="progress-dots">
+      <div class="dot done"></div>
+      <div class="dot current"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+
+    <!-- Chump (just got hit by 3 people, predictably defensive) -->
+    <div class="reaction">
+      <div class="portrait">🟧<span class="flag">🇺🇸</span></div>
+      <div class="body">
+        <div class="leader-name">Chump</div>
+        <div class="quote">FAKE NEWS! These weren't real bombs. Many people are saying nobody hit me. We're winning, big league.</div>
+        <span class="state-change harm">−15M citizens · −2 factories · no retaliation (coward)</span>
+      </div>
+    </div>
+
+    <!-- Carnage (focus — currently speaking) -->
+    <div class="reaction focus">
+      <div class="portrait">🍁<span class="flag">🇨🇦</span></div>
+      <div class="body">
+        <div class="leader-name">Carnage  ← speaking now</div>
+        <div class="quote">Elbows up. We don't forget.</div>
+        <span class="state-change neutral">wooing of Starmless expires next round</span>
+      </div>
+    </div>
+
+    <!-- Khameneverhere (empty chair / cardboard) -->
+    <div class="reaction">
+      <div class="portrait khameneverhere">[ empty ]<span class="flag">🇮🇷</span></div>
+      <div class="body">
+        <div class="leader-name">Khameneverhere  <span style="color:#8a7a6b;font-weight:400;text-transform:none;font-size:10px;">(orders received by fax)</span></div>
+        <div class="quote">Death to America, and to anyone who reorganises kitchen drawers.</div>
+        <span class="state-change neutral">grudge cleared: Chump (settled)</span>
+      </div>
+    </div>
+
+    <!-- Netanyahoo (drawing fresh red line) -->
+    <div class="reaction">
+      <div class="portrait">🟦<span class="flag">🇮🇱</span></div>
+      <div class="body">
+        <div class="leader-name">Netanyahoo</div>
+        <div class="quote">If it looks like a duck, walks like a duck — Carnage has the biggest arsenal now.</div>
+        <span class="state-change neutral">target shift → Carnage</span>
+      </div>
+    </div>
+
+    <!-- Starmless (proportional, scapegoat) -->
+    <div class="reaction">
+      <div class="portrait">⬜<span class="flag">🇬🇧</span></div>
+      <div class="body">
+        <div class="leader-name">Starmless</div>
+        <div class="quote">Long-term decisions. Sound foundations. Working people.</div>
+        <span class="state-change gain">+1 factory built (+0.5 AP/round)</span>
+      </div>
+    </div>
+
+    <!-- Mileigh-hem (banking, glass cannon priming) -->
+    <div class="reaction">
+      <div class="portrait">🪚<span class="flag">🇦🇷</span></div>
+      <div class="body">
+        <div class="leader-name">Mileigh-hem</div>
+        <div class="quote">Banking. Cooking. ¡Viva la libertad, carajo!</div>
+        <span class="state-change gain">+1 AP banked → 4 AP next round (glass cannon priming)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <p><strong>Sequence in motion:</strong> each beat is ~1.3 seconds — portrait shifts in, quote types out, state-change badge slides in, beat ends. Total ~8 seconds for 6 leaders. Skip jumps to Round Summary.</p>
+    <p><strong>State-change badges:</strong> red (harm), green (gain), brown (neutral state shift). They carry the mechanical impact in plain language so the player learns the rules through narrative.</p>
+    <p><strong>Khameneverhere's portrait</strong> is always "empty" — the cardboard cutout / hospital tableau / empty chair cycles each round. His "voice" is faxed/printed.</p>
+    <p><strong>Eliminated leaders</strong> get a single dramatic beat at the end of Resolution (not in Reactions) — body slumps, then their warheads launch (Final Retaliation). Reactions only shows surviving leaders.</p>
+    <p><strong>Reduced motion</strong> setting: all 6 cards appear at once with no animation, auto-advances after 4 seconds.</p>
+  </div>
+
+  <div class="meta-footer">
+    Reference mockup, captured during brainstorming session 2026-05-08.<br>
+    Self-contained HTML — open directly in any browser.
+  </div>
+</body>
+</html>

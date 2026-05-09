@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>nuke — Planning screen mockup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0; padding: 32px 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #1a1a1a; color: #e8d8c0;
+      min-height: 100vh; box-sizing: border-box;
+    }
+    h2 { color: #f4ede2; margin: 0 0 6px; text-align: center; }
+    .subtitle { text-align: center; color: #a89880; margin: 0 0 24px; font-size: 13px; }
+
+    .phone {
+      max-width: 380px;
+      margin: 0 auto;
+      background: #f4ede2;
+      border: 8px solid #2b2b2b;
+      border-radius: 32px;
+      overflow: hidden;
+      font-size: 13px;
+      color: #1a1a1a;
+    }
+    .phone .panel {
+      padding: 12px 14px;
+      border-bottom: 1px solid #d0c8b8;
+    }
+    .phone .panel:last-child { border-bottom: none; }
+    .phone .panel-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8a7a6b;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .phone .own { background: #e8d8c0; }
+    .phone .own .row { display: flex; justify-content: space-between; margin: 2px 0; }
+    .phone .own .stat { font-weight: 600; color: #6b1d1d; }
+    .phone .own .ap-bar {
+      background: #c9b89a; height: 8px; border-radius: 4px; margin-top: 6px; overflow: hidden;
+    }
+    .phone .own .ap-fill { background: #6b1d1d; height: 100%; width: 100%; }
+    .phone .ap-meta { font-size: 11px; color: #5a4a3a; margin-top: 4px; }
+
+    .history-strip { display: flex; gap: 6px; overflow-x: auto; }
+    .history-event {
+      background: #fff8eb; border: 1px solid #d0c8b8; border-radius: 6px;
+      padding: 4px 7px; font-size: 11px; white-space: nowrap;
+    }
+    .history-event.attack { color: #8a1a1a; }
+
+    .table-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .leader-card {
+      background: #fff8eb; border: 1px solid #d0c8b8; border-radius: 8px;
+      padding: 8px; cursor: pointer;
+    }
+    .leader-card .lc-head { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+    .leader-card .lc-stats { font-size: 11px; color: #5a4a3a; margin-top: 3px; }
+    .leader-card .lc-badges { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 4px; }
+    .badge {
+      font-size: 9px; padding: 2px 5px; border-radius: 3px;
+      text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;
+    }
+    .badge.hit-you { background: #8a1a1a; color: white; }
+    .badge.wooing-you { background: #2b6b2b; color: white; }
+    .badge.you-wooed { background: #6b8a2b; color: white; }
+    .badge.grudge { background: #5a3a1a; color: white; }
+    .badge.mood { background: #d8c8a8; color: #3a2a1a; font-style: italic; font-weight: 500; text-transform: none; }
+
+    .orders-list { background: #fff8eb; border-radius: 8px; padding: 8px 10px; border: 1px solid #d0c8b8; }
+    .order { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #d0c8b8; font-size: 12px; }
+    .order:last-of-type { border-bottom: none; }
+    .order .label { color: #2a2a2a; }
+    .order .cost { color: #6b1d1d; font-weight: 600; }
+    .ap-summary { margin-top: 6px; font-size: 11px; color: #5a4a3a; display: flex; justify-content: space-between; }
+    .order-actions { display: flex; gap: 6px; margin-top: 8px; }
+    .btn {
+      flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 12px;
+      font-weight: 600; cursor: pointer;
+    }
+    .btn.primary { background: #6b1d1d; color: white; }
+    .btn.secondary { background: #d0c8b8; color: #2a2a2a; }
+    .btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+    .header-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px; background: #2b2b2b; color: #f4ede2; font-size: 12px;
+    }
+    .header-bar .round { font-weight: 700; letter-spacing: 0.05em; }
+    .header-bar .actions { display: flex; gap: 8px; font-size: 11px; opacity: 0.85; }
+
+    .annotations {
+      max-width: 380px; margin: 24px auto 0; font-size: 12px; color: #c8b89a;
+      background: #2b2b2b; padding: 14px; border-radius: 8px; border: 1px dashed #5a4a3a;
+    }
+    .annotations strong { color: #f4ede2; }
+    .annotations ul { margin: 6px 0 0 18px; padding: 0; }
+    .meta-footer {
+      max-width: 380px; margin: 24px auto 0; font-size: 11px; color: #6a5a4a; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Planning screen — approved layout</h2>
+  <p class="subtitle">Round 4. You are Carnage 🇨🇦. Vertical mobile layout. Scroll to see all sections.</p>
+
+  <div class="phone">
+    <div class="header-bar">
+      <span class="round">ROUND 4</span>
+      <span class="actions">save · fast resolve</span>
+    </div>
+
+    <!-- Own country panel -->
+    <div class="panel own">
+      <div class="panel-title">Your country</div>
+      <div class="row"><span>🇨🇦 <strong>Carnage</strong> · pop <span class="stat">25 M</span></span><span>AP <span class="stat">3 / 3</span></span></div>
+      <div class="row"><span>⚙ 6 factories · ⚔ 4M / 2B / 3W</span></div>
+      <div class="row"><span>🛡 1 shield · ✈ 2 anti-aircraft · 🏦 banked 0</span></div>
+      <div class="ap-bar"><div class="ap-fill"></div></div>
+      <div class="ap-meta">Bonus this round: — · Banked AP carries to next round (max 2)</div>
+    </div>
+
+    <!-- History strip -->
+    <div class="panel">
+      <div class="panel-title">Last 3 rounds</div>
+      <div class="history-strip">
+        <div class="history-event attack">R3: Chump → 🇨🇦 (people, 2M)</div>
+        <div class="history-event">R3: Milei → 🇮🇷 propaganda</div>
+        <div class="history-event attack">R2: 🇨🇦 → Netanyahoo (infra)</div>
+        <div class="history-event">R2: Starmless → 🇨🇦 wooing</div>
+      </div>
+    </div>
+
+    <!-- The Table -->
+    <div class="panel">
+      <div class="panel-title">The Table</div>
+      <div class="table-grid">
+        <div class="leader-card">
+          <div class="lc-head">🇺🇸 Chump</div>
+          <div class="lc-stats">33M · 10 ⚙ · ⚔ many · 🛡 heavy</div>
+          <div class="lc-badges">
+            <span class="badge hit-you">hit you R3</span>
+            <span class="badge mood">"They're losers, sad"</span>
+          </div>
+        </div>
+        <div class="leader-card">
+          <div class="lc-head">🇮🇱 Netanyahoo</div>
+          <div class="lc-stats">14M · 4 ⚙ · ⚔ light · 🛡 low</div>
+          <div class="lc-badges">
+            <span class="badge mood">"Eyes the largest arsenal"</span>
+          </div>
+        </div>
+        <div class="leader-card">
+          <div class="lc-head">🇮🇷 Khameneverhere</div>
+          <div class="lc-stats">28M · 6 ⚙ · ⚔ unknown · 🛡 medium</div>
+          <div class="lc-badges">
+            <span class="badge grudge">grudge: Chump</span>
+            <span class="badge mood">"Cardboard tilts"</span>
+          </div>
+        </div>
+        <div class="leader-card">
+          <div class="lc-head">🇬🇧 Starmless</div>
+          <div class="lc-stats">25M · 7 ⚙ · ⚔ modest · 🛡 medium</div>
+          <div class="lc-badges">
+            <span class="badge you-wooed">you woo'd him</span>
+            <span class="badge mood">"Long-term decisions"</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders -->
+    <div class="panel">
+      <div class="panel-title">Your orders</div>
+      <div class="orders-list">
+        <div class="order"><span class="label">Launch ✈ + 5MT → 🇺🇸 Chump · <em>People</em></span><span class="cost">2 AP</span></div>
+        <div class="order"><span class="label">Build factory</span><span class="cost">3 AP</span></div>
+        <div class="ap-summary">
+          <span>Spending <strong>5 / 3 AP</strong> 🚫 over budget</span>
+          <span>0 will bank</span>
+        </div>
+      </div>
+      <div class="order-actions">
+        <button class="btn secondary">+ Add</button>
+        <button class="btn primary" disabled>Seal Orders</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <p>Mockup intentionally shows an <strong>over-budget state</strong> — Carnage has queued 5 AP of orders against a 3-AP budget. The "Seal Orders" button is disabled and the AP summary calls it out. The "+ Add" button stays enabled so the player can still adjust.</p>
+    <p>Things to note:</p>
+    <ul>
+      <li><strong>Open stockpiles:</strong> you can see Chump's 33M / 10 factories. Stocks are always visible. The only hidden information is what each leader will *do* this round.</li>
+      <li><strong>Relationship badges:</strong> "hit you R3" (red), "you woo'd him" (olive), "grudge: Chump" (brown), "wooing you" (green — not shown here).</li>
+      <li><strong>Mood lines:</strong> flavour-only nudges from each AI. Not deterministic — they hint at temperament, not exact orders.</li>
+      <li><strong>History strip:</strong> last 3 rounds, scrollable horizontally. Red items are attacks.</li>
+      <li><strong>No timer.</strong> Take what time you need (unless Fast Play enabled in setup).</li>
+    </ul>
+  </div>
+
+  <div class="meta-footer">
+    Reference mockup, captured during brainstorming session 2026-05-08.<br>
+    Self-contained HTML — open directly in any browser.
+  </div>
+</body>
+</html>

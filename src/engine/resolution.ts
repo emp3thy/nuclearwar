@@ -1,0 +1,154 @@
+import type { GameState, LeaderId, Order, ResolutionEvent } from './types';
+import { applyDefenceBuilds, applyOtherBuilds } from './builds';
+import { applyPropaganda } from './propaganda';
+import { applyWooing, decayFavourability } from './diplomacy';
+import { applyLaunches, collectLaunches, consumeStockFor, makeIncomingCounter } from './launches';
+import { applyFinalRetaliation } from './finalRetaliation';
+import { checkOutcome } from './winConditions';
+import { AP_BANK_CAP, FACTORY_AP_RATE, LEADER_PROFILES } from './balance';
+
+export interface ResolveResult {
+  state: GameState;
+  events: ResolutionEvent[];
+}
+
+export function resolveRound(state: GameState): ResolveResult {
+  const events: ResolutionEvent[] = [];
+  let s: GameState = structuredClone(state);
+
+  const startOfRoundPop: Partial<Record<LeaderId, number>> = {};
+  for (const id of s.cast) startOfRoundPop[id] = s.leaders[id].population;
+
+  // OrdersSealed events first (cast id-ASC).
+  for (const id of [...s.cast].sort()) {
+    const sealed = s.pendingOrders[id];
+    if (sealed) {
+      events.push({ kind: 'OrdersSealed', leaderId: id, orderCount: sealed.orders.length });
+    }
+  }
+
+  // Phase: Defences (defence builds resolve first so this round's shields/AA count).
+  for (const id of [...s.cast].sort()) {
+    const sealed = s.pendingOrders[id];
+    if (!sealed) continue;
+    const r = applyDefenceBuilds(s, id, sealed.orders);
+    s = r.state;
+    events.push(...r.events);
+  }
+
+  // Phase: other Builds.
+  for (const id of [...s.cast].sort()) {
+    const sealed = s.pendingOrders[id];
+    if (!sealed) continue;
+    const r = applyOtherBuilds(s, id, sealed.orders);
+    s = r.state;
+    events.push(...r.events);
+  }
+
+  // Phase: Propaganda.
+  const allOrders: Partial<Record<LeaderId, Order[]>> = {};
+  for (const id of s.cast) allOrders[id] = s.pendingOrders[id]?.orders ?? [];
+  {
+    const r = applyPropaganda(s, allOrders);
+    s = r.state;
+    events.push(...r.events);
+  }
+
+  // Phase: Wooing.
+  {
+    const r = applyWooing(s, allOrders);
+    s = r.state;
+    events.push(...r.events);
+  }
+
+  // Phase: Launches. Three-step flow per Task 11 split:
+  //   collectLaunches → consumeStockFor (validates + consumes) → applyLaunches.
+  // Final Retaliation has its own consumption loop (Task 12) but lands in the
+  // same `applyLaunches` so intercepts and damage stay symmetric.
+  //
+  // The incoming counter is round-scoped (spec §6): we initialise it once here
+  // and thread it through both the regular launch phase and the FR cascade so
+  // the Nth-incoming tally accumulates correctly across calls.
+  const launches = collectLaunches(allOrders);
+  const incomingCounter = makeIncomingCounter(s.cast);
+  {
+    const consumed = consumeStockFor(s, launches);
+    s = consumed.state;
+    const r = applyLaunches(s, consumed.validLaunches, incomingCounter);
+    s = r.state;
+    events.push(...r.events);
+    Object.assign(incomingCounter, r.incoming);
+  }
+
+  // Status: mark newly-eliminated leaders.
+  const newlyDead: LeaderId[] = [];
+  for (const id of s.cast) {
+    const l = s.leaders[id];
+    if (l.alive && l.population <= 0) {
+      l.alive = false;
+      l.population = 0;
+      events.push({ kind: 'LeaderEliminated', id });
+      newlyDead.push(id);
+    }
+  }
+
+  // Phase: Final Retaliation cascade.
+  if (newlyDead.length > 0) {
+    const r = applyFinalRetaliation(s, newlyDead, incomingCounter);
+    s = r.state;
+    events.push(...r.events);
+  }
+
+  // Decay relationships.
+  s = decayFavourability(s);
+
+  // AP refresh + banking + bonuses (survivors only).
+  // IMPORTANT: bonus rule reads from the ORIGINAL `state` parameter (not `s`),
+  // because s.pendingOrders has already been cleared mid-function via allOrders snapshot.
+  // We read state.pendingOrders[id]?.orders to get this round's sealed orders.
+  for (const id of s.cast) {
+    const l = s.leaders[id];
+    if (!l.alive) continue;
+    const banked = Math.min(AP_BANK_CAP, Math.max(0, Math.floor(l.ap)));
+    l.apBanked = banked;
+    const factoryAp = Math.floor(l.factories * FACTORY_AP_RATE);
+    const bonus = leaderBonusAp(id, state.pendingOrders[id]?.orders ?? []);
+    l.ap = factoryAp + banked + bonus;
+  }
+
+  // Clear pending, advance round.
+  s.pendingOrders = {};
+  s.round += 1;
+
+  // Win check.
+  const outcome = checkOutcome(s, startOfRoundPop);
+  if (outcome) {
+    s.outcome = outcome;
+    events.push({ kind: 'OutcomeReached', outcome });
+  }
+
+  // Append to persistent log.
+  s.log = [...s.log, ...events];
+
+  return { state: s, events };
+}
+
+function leaderBonusAp(id: LeaderId, thisRoundsOrders: Order[]): number {
+  const profile = LEADER_PROFILES[id];
+  switch (profile.bonusRule) {
+    case 'netanyahoo-launch-bonus':
+      return thisRoundsOrders.some((o) => o.kind === 'launch') ? 1 : 0;
+    case 'mileigh-aggression-bonus': {
+      if (thisRoundsOrders.length === 0) return 0;
+      const aggressive = thisRoundsOrders.every(
+        (o) => o.kind === 'launch' || o.kind === 'propaganda',
+      );
+      return aggressive ? 2 : 0;
+    }
+    case 'chump-defence-waste':
+      // Phase 2 implements the -1 penalty when defences pile beyond useful depth.
+      return 0;
+    default:
+      return 0;
+  }
+}

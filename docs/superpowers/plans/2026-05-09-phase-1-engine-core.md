@@ -297,6 +297,8 @@ export type TargetType = 'people' | 'infra';
 
 export type WinType = 'survivor' | 'pyrrhic' | 'apocalypse' | 'dominance';
 
+export type BonusRule = 'chump-defence-waste' | 'mileigh-aggression-bonus' | 'netanyahoo-launch-bonus';
+
 export interface Stockpile {
   missiles: number;
   bombers: number;
@@ -323,8 +325,7 @@ export interface Leader {
   grudge: Partial<Record<LeaderId, number>>;
   /** Carnage threat-doubling input; rounds since *they* hit me */
   recentAggressionFrom: Partial<Record<LeaderId, number>>;
-  /** balance.ts bonus rule key, if any */
-  bonusRule?: string;
+  bonusRule?: BonusRule;
 }
 
 export type Order =
@@ -369,10 +370,9 @@ export interface GameConfig {
   fastPlay: boolean;
 }
 
-export interface WinOutcome {
-  type: WinType;
-  winner?: LeaderId;
-}
+export type WinOutcome =
+  | { type: 'apocalypse' }
+  | { type: 'survivor' | 'pyrrhic' | 'dominance'; winner: LeaderId };
 
 export interface GameState {
   round: number;
@@ -551,7 +551,7 @@ Expected: FAIL — module not found.
 - [ ] **Step 3.3: Write `src/engine/balance.ts`**
 
 ```ts
-import type { LeaderId, Yield } from './types';
+import type { BonusRule, LeaderId, Yield } from './types';
 
 export const LEADER_PROFILES: Record<
   LeaderId,
@@ -561,7 +561,7 @@ export const LEADER_PROFILES: Record<
     startPop: number;
     startFactories: number;
     startAp: number;
-    bonusRule?: string;
+    bonusRule?: BonusRule;
   }
 > = {
   chump: {
@@ -1970,7 +1970,8 @@ describe('applyLaunches (assumes stock pre-consumed)', () => {
 Run: `npm run test:run -- tests/engine/launches.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 11.3: Write `src/engine/launches.ts`**
+- [x] **Step 11.3: Write `src/engine/launches.ts`**
+  > **BugBot fix (PR #1):** Added `IncomingCounter` type and `makeIncomingCounter(cast)` factory (both exported). `applyLaunches` now accepts an optional `incoming?: IncomingCounter` parameter (fresh counter default — backward-compatible) and returns `{ state, events, incoming }` so callers can thread the round-scoped Nth-incoming tally across multiple calls. The counter is cloned on entry and the mutated copy returned. `IncomingCounter` lives in `launches.ts`; no separate `types.ts` export needed.
 
 ```ts
 import type {
@@ -2219,7 +2220,8 @@ describe('applyFinalRetaliation', () => {
 Run: `npm run test:run -- tests/engine/finalRetaliation.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 12.3: Write `src/engine/finalRetaliation.ts`**
+- [x] **Step 12.3: Write `src/engine/finalRetaliation.ts`**
+  > **BugBot fix (PR #1):** `applyFinalRetaliation` now accepts an optional `incoming?: IncomingCounter` parameter (fresh counter default). The counter is threaded through every `applyLaunches` call inside the cascade loop — each firing passes the previous call's returned counter so Nth-incoming accumulates correctly across cascade firings. `FinalRetaliationResult` shape is unchanged (`{ state, events }`).
 
 ```ts
 import type {
@@ -2657,7 +2659,8 @@ describe('resolveRound', () => {
 Run: `npm run test:run -- tests/engine/resolution.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 14.3: Write `src/engine/resolution.ts`**
+- [x] **Step 14.3: Write `src/engine/resolution.ts`**
+  > **BugBot fix (PR #1):** The round-scoped Nth-incoming counter is now initialised once via `makeIncomingCounter(s.cast)` before the regular launch phase, updated from `r.incoming` after `applyLaunches`, and passed to `applyFinalRetaliation`. This ensures the FR cascade's intercept rolls continue from the correct Nth index rather than restarting at 1.
 
 ```ts
 import type { GameState, LeaderId, Order, ResolutionEvent } from './types';
@@ -2915,7 +2918,8 @@ describe('reduce — LOAD_STATE', () => {
 Run: `npm run test:run -- tests/engine/reducer.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 15.3: Write `src/engine/reducer.ts`**
+- [x] **Step 15.3: Write `src/engine/reducer.ts`**
+  > **BugBot fix (PR #1):** `SUBMIT_ORDERS` now validates orders against a projected state rather than the original state. A `projected` variable starts as `state`; for each valid launch order, `projected` is `structuredClone`d and the relevant delivery + warhead fields decremented before the next order's `validateOrder` call. Non-launch orders (builds, propaganda, woo) do not update the projection. The actual committed state (with `pendingOrders` set and AP deducted) is still derived from the original `state` via a single `structuredClone` after all validations pass.
 
 ```ts
 import type { Action, GameState } from './types';
@@ -3138,6 +3142,15 @@ describe('integration — three-leader scripted game', () => {
         cast: ['chump', 'carnage', 'starmless'],
         difficulty: 'normal',
         seed,
+        // dominanceThreshold=1.5 ensures termination within ~80 rounds with the
+        // scripted-orders cycle. The cycle includes a `build-defence/shield`
+        // pattern that accumulates shields without bound; combined with the
+        // step-function intercept curve and propaganda's 1M/round transfer cap,
+        // the default threshold of 2× requires ~150 rounds of population drift.
+        // 1.5× is reachable in ~78 rounds. P2's `planAi` will avoid the stockpile
+        // stalemate naturally and Task 18's determinism test should adopt the
+        // same override.
+        config: { dominanceThreshold: 1.5 },
       });
       let rounds = 0;
       while (!s.outcome && rounds < 100) {
@@ -3190,7 +3203,15 @@ import { scriptedOrders } from '../helpers/scripted-orders';
 import type { GameState, LeaderId } from '../../src/engine/types';
 
 function runGame(seed: string, cast: LeaderId[], maxRounds = 80): GameState {
-  let s = initialState({ cast, difficulty: 'normal', seed });
+  // dominanceThreshold=1.5 — see Task 17 second test for context. The scripted-orders
+  // cycle creates an unbounded shield-stockpile + slow propaganda dynamic that
+  // makes 2× dominance require ~150 rounds; 1.5× terminates within ~80.
+  let s = initialState({
+    cast,
+    difficulty: 'normal',
+    seed,
+    config: { dominanceThreshold: 1.5 },
+  });
   while (!s.outcome && s.round <= maxRounds) {
     for (const id of cast) {
       const orders = scriptedOrders(s, id);

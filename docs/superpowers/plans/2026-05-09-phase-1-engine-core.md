@@ -3138,6 +3138,15 @@ describe('integration — three-leader scripted game', () => {
         cast: ['chump', 'carnage', 'starmless'],
         difficulty: 'normal',
         seed,
+        // dominanceThreshold=1.5 ensures termination within ~80 rounds with the
+        // scripted-orders cycle. The cycle includes a `build-defence/shield`
+        // pattern that accumulates shields without bound; combined with the
+        // step-function intercept curve and propaganda's 1M/round transfer cap,
+        // the default threshold of 2× requires ~150 rounds of population drift.
+        // 1.5× is reachable in ~78 rounds. P2's `planAi` will avoid the stockpile
+        // stalemate naturally and Task 18's determinism test should adopt the
+        // same override.
+        config: { dominanceThreshold: 1.5 },
       });
       let rounds = 0;
       while (!s.outcome && rounds < 100) {
@@ -3190,7 +3199,15 @@ import { scriptedOrders } from '../helpers/scripted-orders';
 import type { GameState, LeaderId } from '../../src/engine/types';
 
 function runGame(seed: string, cast: LeaderId[], maxRounds = 80): GameState {
-  let s = initialState({ cast, difficulty: 'normal', seed });
+  // dominanceThreshold=1.5 — see Task 17 second test for context. The scripted-orders
+  // cycle creates an unbounded shield-stockpile + slow propaganda dynamic that
+  // makes 2× dominance require ~150 rounds; 1.5× terminates within ~80.
+  let s = initialState({
+    cast,
+    difficulty: 'normal',
+    seed,
+    config: { dominanceThreshold: 1.5 },
+  });
   while (!s.outcome && s.round <= maxRounds) {
     for (const id of cast) {
       const orders = scriptedOrders(s, id);

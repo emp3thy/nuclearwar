@@ -59,11 +59,15 @@ Per the standing convention (memory `b85a1ac4`), surface design assumptions BEHI
 
 ### 🔴 Real concerns (resolve before / during execution)
 
-1. **Hard-mode "sees one round ahead" is ambiguous in spec.** §7 says only "Hard: 0% randomised; AI sees one round ahead in target scoring." Three interpretations:
-   - **A.** Predict opponent intent from their last-round orders. Hard AI scores targets assuming opponents will repeat last round's actions.
-   - **B.** Simulate one round forward with all opponents using their non-Hard AI; score targets against the simulated next-state.
-   - **C.** Predict opponent will build one more defence per type next round. Score intercept probability against `defenders + 1` for each target.
-   - **Plan default: C** — minimum implementation cost, deterministic, has clear gameplay effect (Hard AIs prefer attacking *now* before defences come up). Documented inline in `chump.ts` etc. Surface as a real concern so user can override in plan review.
+1. **Hard-mode "sees one round ahead" — committed to 1-ply expectiminimax for target scoring.** Spec §7 says "Hard: 0% randomised; AI sees one round ahead in target scoring." User confirmed (2026-05-09): proper minimax-style lookahead is the right interpretation, not an ad-hoc projection. Concrete algorithm:
+   - For each candidate launch target `T`, build `ordersByLeader` with Hard AI's baseline orders (current personality output) but with the launch retargeted at `T`.
+   - For every other living leader, generate their orders via `planAi(state, id, 'normal')` — opponents simulated at NORMAL difficulty (no recursion into Hard).
+   - Run `simulateOneRound(state, ordersByLeader)` (a thin wrapper: `reduce(s, SUBMIT_ORDERS)` per leader, then `reduce(s, RESOLVE_ROUND)`). Returns projected next-round state.
+   - Compute `scoreState(state, viewer) = me.population - max(other.population)` (with ±1000 swings for outright win/loss).
+   - Pick the target with the highest projected score.
+   - **K bound:** at most 5 candidate targets per decision (the engine has at most 5 living non-self leaders). Cost: ~50 ms per Hard AI per round.
+   - **Why expectiminimax-flavour, not pure minimax**: 5 simultaneous players, hidden orders, stochastic intercepts. True minimax tree is intractable; per-target 1-ply lookahead is the practical equivalent of "AI sees one round ahead" while staying within compute budget.
+   - Defers to P4: K-step lookahead beyond 1 ply, opponent-belief modelling beyond "they use normal AI", richer scoring functions.
 2. **AI scoring weights are first-pass numbers, not playtested.** Spec §7 gives qualitative rules ("Chump: high build-defence bias", "Netanyahoo: high base launch bias"); concrete weights are picked from designer intuition. The AI-duel test (Task 12) catches gross outliers (≥60 %, ≤5 % win rate) but not subtle imbalance. **Mitigation**: weights live in `balance.ts` as `AI_SCORING_WEIGHTS` so tuning is a one-file edit; full balance pass is deferred to P4.
 3. **AI-duel balance bounds.** "No leader wins 0 % or fewer than 5 %, no more than 60 %" is a heuristic, not a spec value. With 100 games + 5-leader subsets, distribution variance can be high. Lenient bounds ([2 %, 75 %]) chosen to avoid flakiness; tighter bounds revisited in P4. Surface as real concern so user can adjust if first run is wildly skewed.
 
@@ -101,13 +105,13 @@ Per the standing rule (memory `dde30588` / `413d47550e`): every task gets a perc
 | 8 | Starmless (Cautious + Scapegoat) | 91 % | Lifted from 89 %: scapegoat target is "leader with highest aggregate threat-from-others according to Carnage-style scoring" (concrete formula in plan). |
 | 9 | Mileigh-hem (Glass cannon) | 91 % | Activation trigger `banked + base ≥ 4` is unambiguous; tests pin both modes (diplomatic + all-out). |
 | 10 | `planAi` dispatcher + Easy/Normal randomization | 93 % | Switch over `leaderId`; randomization is `state.rngState`-driven; deterministic. |
-| 11 | Hard difficulty lookahead | 91 % | **Lifted from 87 %** by committing to interpretation C (`defenders + 1` projection) inline in plan; Option A and B documented as future-work in real-concerns. |
+| 11 | Hard difficulty 1-ply expectiminimax lookahead | 91 % | **Lifted from 88 %** by concretising the algorithm (K=5 candidate targets, opponents sim'd at normal difficulty, `scoreState = me.pop − max(other.pop)`) inline in plan, plus dedicated `src/engine/ai/lookahead.ts` module with focused unit tests. |
 | 12 | AI-duel headless mode | 91 % | **Lifted from 88 %** by widening bounds to [2 %, 75 %] and asserting "no shutout / no monopoly" rather than tight balance. Distribution printed for review. |
 | 13 | Final integration + README | 99 % | Trivial. |
 
 **Pre-execution lift summary:**
 - Task 8 (Starmless) lifted by concretising the scapegoat-target formula in the plan (was vague; now has a defined computation).
-- Task 11 (Hard lookahead) lifted by picking interpretation C and committing to it; alternatives documented as deferred.
+- Task 11 (Hard lookahead) lifted by committing to 1-ply expectiminimax (per-target round-forward simulation; opponents at normal difficulty; concrete `scoreState` formula). Pure minimax to greater depth deferred to P4.
 - Task 12 (AI-duel bounds) lifted by widening bounds and asserting only the qualitative "balanced" property.
 
 **Recommendations the executor should NOT skip:**
@@ -129,6 +133,7 @@ Per the standing rule (memory `dde30588` / `413d47550e`): every task gets a perc
 - `src/engine/ai/starmless.ts` — Cautious + scapegoat.
 - `src/engine/ai/mileighhem.ts` — Glass cannon.
 - `src/engine/ai/index.ts` — `planAi` dispatcher + difficulty wrapper.
+- `src/engine/ai/lookahead.ts` — Hard-mode 1-ply expectiminimax helpers (`simulateOneRound`, `scoreState`, `bestTargetByLookahead`).
 - `tests/engine/ai/scoring.test.ts`
 - `tests/engine/ai/chump.test.ts`
 - `tests/engine/ai/khameneverhere.test.ts`
@@ -136,7 +141,8 @@ Per the standing rule (memory `dde30588` / `413d47550e`): every task gets a perc
 - `tests/engine/ai/carnage.test.ts`
 - `tests/engine/ai/starmless.test.ts`
 - `tests/engine/ai/mileighhem.test.ts`
-- `tests/engine/ai/dispatcher.test.ts` — `planAi` + difficulty + Hard lookahead
+- `tests/engine/ai/dispatcher.test.ts` — `planAi` + difficulty randomization
+- `tests/engine/ai/lookahead.test.ts` — Hard-mode lookahead helpers (round simulation + state scoring + best-target selection)
 - `tests/engine/ai-duel.test.ts` — 100-game balance check.
 
 ### Modified files
@@ -205,8 +211,10 @@ export const AI_SCORING_WEIGHTS = {
   mileighActivationApThreshold: 4,
   // Khameneverhere grudge weight per impact (multiplied by warhead yield index 1/2/4).
   grudgePerImpact: { small: 1, medium: 2, large: 4 } as const,
-  // Hard mode lookahead: extra defenders assumed per type next round.
-  hardLookaheadDefenderBoost: 1,
+  // Hard-mode lookahead: outcome scoring constants (see lookahead.ts).
+  scoreWinBonus: 1000,
+  scoreLossPenalty: -1000,
+  scoreApocalypsePenalty: -500,
 } as const;
 ```
 
@@ -1078,8 +1086,9 @@ export function planAi(state: GameState, leaderId: LeaderId, difficulty?: Diffic
   const me = state.leaders[leaderId];
   if (!me || !me.alive) return [];
 
-  // Hard mode lookahead is implemented inside per-leader scorers via a "+1 defenders"
-  // hint stored in state.config.hardLookahead — see Task 11. The dispatcher just routes.
+  // Hard-mode lookahead is implemented inside per-leader files via
+  // bestTargetByLookahead (see Task 11). The dispatcher itself just routes by
+  // leaderId and applies the Easy/Normal randomization wrapper.
   let orders = dispatch(state, leaderId);
 
   // Easy / Normal randomization: replace each order with probability difficulty-pct.
@@ -1178,60 +1187,298 @@ git commit -m "ai: add planAi dispatcher + Easy/Normal randomization"
 
 ---
 
-## Task 11: Hard difficulty lookahead
+## Task 11: Hard difficulty 1-ply expectiminimax lookahead
 
-**Confidence: 91 %** — committed to interpretation C (`defenders + 1` projection) inline. Implements a thin wrapper that boosts each opponent's defence count by 1 in scoring.
+**Confidence: 91 %** — lifted from 88 % by concretising the algorithm fully in this section. Hard AIs evaluate launch targets by simulating one round forward (their move + opponents' normal-difficulty AI moves) and picking the target whose projected post-round state scores best from the Hard AI's perspective.
 
 **Files:**
-- Modify: `src/engine/ai/scoring.ts` (add `effectiveDefenders` helper that respects Hard mode)
-- Modify: `src/engine/ai/index.ts` (set Hard-mode flag before dispatch)
-- Modify: `src/engine/types.ts` (add `_hardLookahead?: boolean` to `GameState` as a transient flag — or pass via parameter)
-- Create: tests in `tests/engine/ai/dispatcher.test.ts`
+- Create: `src/engine/ai/lookahead.ts` — three helpers: `simulateOneRound`, `scoreState`, `bestTargetByLookahead`.
+- Create: `tests/engine/ai/lookahead.test.ts` — focused unit tests.
+- Modify: per-leader files (Tasks 4–9) — when `state.difficulty === 'hard'` AND the personality is choosing a launch target, route the choice through `bestTargetByLookahead` instead of the personality's heuristic target picker.
 
-**Decision:** Pass Hard-mode as a parameter to scoring functions rather than as state, to keep `GameState` clean. Scoring helpers gain an optional `opts: { hardLookahead?: boolean }` parameter.
+**Algorithm (committed):**
 
-**Per-leader tasks (4–9) WITH this in mind:** when calling `defenceVisibilityScore` / `opportunismScore`, pass `{ hardLookahead: difficulty === 'hard' }` if available. For per-leader files, the difficulty is read from `state.difficulty`.
+For a Hard AI choosing among K candidate launch targets:
 
-**Sketch:**
+1. Build a baseline `Order[]` from the personality's normal logic (everything except the launch target).
+2. For each candidate target T (K ≤ 5):
+   a. Construct `selfOrders` = baseline + `{ kind: 'launch', target: T, ... }`.
+   b. Construct `opponentsOrders[id]` for every other living leader via `planAi(state, id, 'normal')` — opponents simulated at normal difficulty (no recursion into Hard).
+   c. Run `simulateOneRound(state, { [self]: selfOrders, ...opponentsOrders })`.
+   d. Score the result via `scoreState(projected, self)`.
+3. Return the candidate target with the highest score.
 
-```ts
-// In scoring.ts:
-export function defenceVisibilityScore(
-  state: GameState, target: LeaderId,
-  opts: { hardLookahead?: boolean } = {},
-): number {
-  const t = state.leaders[target];
-  if (!t) return 0;
-  const boost = opts.hardLookahead ? AI_SCORING_WEIGHTS.hardLookaheadDefenderBoost : 0;
-  return (t.stockpile.shields + boost) + (t.stockpile.aa + boost);
-}
+**Why expectiminimax-flavour, not pure minimax:**
+- 5 simultaneous players, hidden orders, stochastic intercepts → true minimax tree intractable.
+- Per-target 1-ply lookahead is the practical equivalent of "AI sees one round ahead" (spec §7) within compute budget.
+- ~50 ms per Hard AI per round at K=5.
 
-export function opportunismScore(
-  state: GameState, target: LeaderId,
-  opts: { hardLookahead?: boolean } = {},
-): number {
-  // ... uses defenceVisibilityScore with opts ...
-}
-```
+**Why opponents are simulated at normal difficulty:**
+- Avoids infinite recursion (Hard AI calling Hard AI calling Hard AI…).
+- Opponents using their own Hard logic would create a stable equilibrium computation that breaks the 1-ply bound.
+- Normal difficulty is a reasonable approximation of "expected opponent behaviour".
 
-Per-leader files read `state.difficulty === 'hard'` and pass `{ hardLookahead: true }` to scoring helpers.
+- [ ] **Step 11.1: Write the failing test**
 
-**Test idea:**
+`tests/engine/ai/lookahead.test.ts`:
 
 ```ts
-it('Hard difficulty makes Chump less likely to launch at a defended target', () => {
-  const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'hard', seed: 'h1' });
-  s.leaders.chump.stockpile.missiles = 1;
-  s.leaders.chump.stockpile.warheadsSmall = 1;
-  s.leaders.carnage.stockpile.shields = 0; // appears undefended in Easy/Normal
-  // Hard mode treats it as having 1 shield — Chump's "low defence" check should fail.
-  const orders = planAi(s, 'chump');
-  const launch = orders.find((o) => o.kind === 'launch');
-  expect(launch).toBeUndefined();
+import { describe, it, expect } from 'vitest';
+import { simulateOneRound, scoreState, bestTargetByLookahead } from '../../../src/engine/ai/lookahead';
+import { initialState } from '../../../src/engine/state';
+
+describe('simulateOneRound', () => {
+  it('runs one round forward without mutating the input state', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'lh1' });
+    const before = JSON.stringify(s);
+    const projected = simulateOneRound(s, {
+      chump: [{ kind: 'build-factory' }],
+      carnage: [],
+    });
+    expect(JSON.stringify(s)).toBe(before); // input unchanged
+    expect(projected.round).toBe(2);
+    expect(projected.leaders.chump.factories).toBe(11); // factory built
+  });
+});
+
+describe('scoreState', () => {
+  it('returns me.pop − max(other.pop) when no winner', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'lh2' });
+    expect(scoreState(s, 'chump')).toBe(33 - 25); // chump 33, carnage 25
+  });
+
+  it('returns +1000 when viewer is the winner', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'lh3' });
+    s.outcome = { type: 'survivor', winner: 'chump' };
+    expect(scoreState(s, 'chump')).toBe(1000);
+  });
+
+  it('returns −1000 when another leader is the winner', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'lh4' });
+    s.outcome = { type: 'survivor', winner: 'carnage' };
+    expect(scoreState(s, 'chump')).toBe(-1000);
+  });
+});
+
+describe('bestTargetByLookahead', () => {
+  it('picks the target whose projected post-round state scores highest', () => {
+    // 3-leader setup: chump can launch at carnage OR starmless. Both are weak (pop=5).
+    // Carnage has shields=0 (launch lands); starmless has shields=5 (launch always intercepts).
+    // Hard AI should prefer carnage (where the launch actually does damage, raising score).
+    const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'hard', seed: 'lh5' });
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsLarge = 1;
+    s.leaders.carnage.population = 5;
+    s.leaders.carnage.stockpile.shields = 0;
+    s.leaders.starmless.population = 5;
+    s.leaders.starmless.stockpile.shields = 5;
+    const baseline = []; // no other orders this round
+    const candidates: ['carnage', 'starmless'] = ['carnage', 'starmless'];
+    const best = bestTargetByLookahead(s, 'chump', baseline, candidates, {
+      delivery: 'missile', warhead: 'large', targetType: 'people',
+    });
+    expect(best).toBe('carnage');
+  });
+
+  it('returns null when candidates is empty', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'hard', seed: 'lh6' });
+    const best = bestTargetByLookahead(s, 'chump', [], [], {
+      delivery: 'missile', warhead: 'small', targetType: 'people',
+    });
+    expect(best).toBeNull();
+  });
 });
 ```
 
-- [ ] **Step 11.1–11.5:** TDD. Commit: `ai: add Hard difficulty defence-projection lookahead`.
+- [ ] **Step 11.2: Run, expect FAIL**
+
+Run: `npm run test:run -- tests/engine/ai/lookahead.test.ts`
+Expected: FAIL — module not found.
+
+- [ ] **Step 11.3: Write `src/engine/ai/lookahead.ts`**
+
+```ts
+import type { DeliveryType, GameState, LeaderId, Order, TargetType, Yield } from '../types';
+import { reduce } from '../reducer';
+import { planAi } from './index';
+
+export interface LookaheadLaunchSpec {
+  delivery: DeliveryType;
+  warhead: Yield;
+  targetType: TargetType;
+}
+
+/**
+ * Run one round forward with the supplied per-leader orders. Caller-supplied
+ * orders for `viewer`-leaders override; missing leaders default to empty
+ * order list. The function does NOT mutate input state.
+ *
+ * Used by Hard-mode lookahead: try a candidate move, see what happens, score.
+ */
+export function simulateOneRound(
+  state: GameState,
+  ordersByLeader: Partial<Record<LeaderId, Order[]>>,
+): GameState {
+  let s = state;
+  for (const id of state.cast) {
+    const orders = ordersByLeader[id] ?? [];
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: id, orders });
+    if (s === state) {
+      // Order set was rejected (e.g., AP overrun). Fall back to empty orders so
+      // the simulation still progresses; AI personalities may pass orders that
+      // exceed budget when constructing speculative candidates.
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: id, orders: [] });
+    }
+  }
+  s = reduce(s, { type: 'RESOLVE_ROUND' });
+  return s;
+}
+
+/**
+ * Score a state from `viewer`'s perspective. Higher is better for `viewer`.
+ *
+ *   - Outcome with viewer winning → +1000
+ *   - Outcome with anyone else winning → −1000
+ *   - Apocalypse (no winner) → −500 (better than losing, worse than surviving)
+ *   - Otherwise: viewer.population − max(other living leader's population)
+ */
+export function scoreState(state: GameState, viewer: LeaderId): number {
+  if (state.outcome) {
+    if (state.outcome.type === 'apocalypse') return -500;
+    if (state.outcome.winner === viewer) return 1000;
+    return -1000;
+  }
+  const me = state.leaders[viewer];
+  if (!me) return -1000;
+  const others = state.cast
+    .filter((id) => id !== viewer)
+    .map((id) => state.leaders[id])
+    .filter((l) => l && l.alive);
+  if (others.length === 0) return 1000; // we're the only one alive — effectively win
+  const maxOther = Math.max(...others.map((o) => o.population));
+  return me.population - maxOther;
+}
+
+/**
+ * Pick the candidate launch target whose projected post-round state scores
+ * highest from `viewer`'s perspective. Opponents are simulated at NORMAL
+ * difficulty (no recursion into Hard).
+ *
+ * `baseline` are non-launch orders (builds, propaganda, etc.) the viewer is
+ * already committed to this round; `launch` describes the launch shape that
+ * gets re-targeted across candidates.
+ *
+ * Returns `null` if `candidates` is empty.
+ */
+export function bestTargetByLookahead(
+  state: GameState,
+  viewer: LeaderId,
+  baseline: Order[],
+  candidates: readonly LeaderId[],
+  launch: LookaheadLaunchSpec,
+): LeaderId | null {
+  if (candidates.length === 0) return null;
+
+  let best: LeaderId | null = null;
+  let bestScore = -Infinity;
+
+  for (const target of candidates) {
+    const selfOrders: Order[] = [
+      ...baseline,
+      { kind: 'launch', target, ...launch },
+    ];
+    const ordersByLeader: Partial<Record<LeaderId, Order[]>> = {
+      [viewer]: selfOrders,
+    };
+    for (const id of state.cast) {
+      if (id === viewer) continue;
+      const opp = state.leaders[id];
+      if (!opp || !opp.alive) continue;
+      // Force NORMAL difficulty for opponent simulation to avoid Hard→Hard recursion.
+      ordersByLeader[id] = planAi(state, id, 'normal');
+    }
+    const projected = simulateOneRound(state, ordersByLeader);
+    const score = scoreState(projected, viewer);
+    if (score > bestScore) {
+      bestScore = score;
+      best = target;
+    }
+  }
+
+  return best;
+}
+```
+
+- [ ] **Step 11.4: Run, expect PASS**
+
+Run: `npm run test:run -- tests/engine/ai/lookahead.test.ts`
+Expected: PASS, 5 tests.
+
+- [ ] **Step 11.5: Wire Hard-mode lookahead into per-leader files**
+
+For each of `chump.ts`, `khameneverhere.ts`, `netanyahoo.ts`, `carnage.ts`, `starmless.ts`, `mileighhem.ts`: when the personality has decided to launch AND `state.difficulty === 'hard'`, use `bestTargetByLookahead` to choose among candidate targets instead of the personality's heuristic.
+
+Example (in `chump.ts`):
+
+```ts
+const candidates: LeaderId[] = state.cast.filter(
+  (id) => id !== leaderId && state.leaders[id].alive && (me.favourability[id] ?? 0) <= 0,
+);
+
+let target: LeaderId | null;
+if (state.difficulty === 'hard' && candidates.length > 0) {
+  target = bestTargetByLookahead(state, leaderId, baselineOrders, candidates, {
+    delivery: 'missile', warhead: 'small', targetType: 'people',
+  });
+} else {
+  // existing heuristic — find first weak/undefended candidate
+  target = candidates.find(
+    (t) => opportunismScore(state, t) > 0 || defenceVisibilityScore(state, t) === 0,
+  ) ?? null;
+}
+```
+
+- [ ] **Step 11.6: Add a per-leader integration test**
+
+In `tests/engine/ai/dispatcher.test.ts`:
+
+```ts
+it('Hard Chump picks the target whose projected outcome favours him', () => {
+  const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'hard', seed: 'hard-chump' });
+  s.leaders.chump.stockpile.missiles = 1;
+  s.leaders.chump.stockpile.warheadsSmall = 1;
+  // Carnage is wide-open (shields=0) — a launch lands, hurting carnage's threat to Chump.
+  // Starmless has shields=5 — any launch always intercepts, no real progress.
+  s.leaders.carnage.population = 8;
+  s.leaders.carnage.stockpile.shields = 0;
+  s.leaders.starmless.population = 8;
+  s.leaders.starmless.stockpile.shields = 5;
+  const orders = planAi(s, 'chump');
+  const launch = orders.find((o) => o.kind === 'launch');
+  expect(launch).toBeDefined();
+  if (launch?.kind === 'launch') {
+    expect(launch.target).toBe('carnage');
+  }
+});
+```
+
+- [ ] **Step 11.7: Run, expect PASS**
+
+Run: `npm run test:run -- tests/engine/ai`
+Expected: PASS (all AI tests + new lookahead tests).
+
+- [ ] **Step 11.8: Commit**
+
+```bash
+git add src/engine/ai/lookahead.ts tests/engine/ai/lookahead.test.ts \
+        src/engine/ai/chump.ts src/engine/ai/khameneverhere.ts \
+        src/engine/ai/netanyahoo.ts src/engine/ai/carnage.ts \
+        src/engine/ai/starmless.ts src/engine/ai/mileighhem.ts \
+        tests/engine/ai/dispatcher.test.ts
+git commit -m "ai: add Hard-difficulty 1-ply expectiminimax lookahead"
+```
+
+**Cycle-detection note for executor:** the recursion `Hard → planAi(opponent, 'normal')` is bounded because opponents are forced to normal difficulty. Don't add `state.difficulty` reads inside `bestTargetByLookahead`'s opponent loop without re-checking the recursion bound.
 
 ---
 

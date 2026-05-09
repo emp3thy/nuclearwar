@@ -1,0 +1,132 @@
+import { describe, it, expect } from 'vitest';
+import { apCostOf, totalApCost, validateOrder } from '../../src/engine/orders';
+import { initialState } from '../../src/engine/state';
+
+describe('apCostOf', () => {
+  it('matches spec costs', () => {
+    expect(apCostOf({ kind: 'build-factory' })).toBe(3);
+    expect(apCostOf({ kind: 'build-missile' })).toBe(1);
+    expect(apCostOf({ kind: 'build-bomber' })).toBe(1);
+    expect(apCostOf({ kind: 'build-warhead', yield: 'small' })).toBe(1);
+    expect(apCostOf({ kind: 'build-warhead', yield: 'medium' })).toBe(2);
+    expect(apCostOf({ kind: 'build-warhead', yield: 'large' })).toBe(3);
+    expect(apCostOf({ kind: 'build-defence', type: 'shield' })).toBe(2);
+    expect(apCostOf({ kind: 'build-defence', type: 'aa' })).toBe(2);
+    expect(
+      apCostOf({
+        kind: 'launch',
+        target: 'carnage',
+        delivery: 'missile',
+        warhead: 'small',
+        targetType: 'people',
+      }),
+    ).toBe(2);
+    expect(apCostOf({ kind: 'propaganda', target: 'carnage' })).toBe(1);
+    expect(apCostOf({ kind: 'woo', target: 'carnage', points: 3 })).toBe(3);
+  });
+});
+
+describe('totalApCost', () => {
+  it('sums costs across an order list', () => {
+    expect(
+      totalApCost([
+        { kind: 'build-factory' },
+        { kind: 'build-missile' },
+        { kind: 'build-warhead', yield: 'small' },
+      ]),
+    ).toBe(5);
+  });
+
+  it('returns 0 for empty list', () => {
+    expect(totalApCost([])).toBe(0);
+  });
+});
+
+describe('validateOrder', () => {
+  const baseState = initialState({
+    cast: ['chump', 'carnage'],
+    difficulty: 'normal',
+    seed: 'x',
+  });
+
+  it('rejects launches with no missile in stockpile', () => {
+    const r = validateOrder(baseState, 'chump', {
+      kind: 'launch',
+      target: 'carnage',
+      delivery: 'missile',
+      warhead: 'small',
+      targetType: 'people',
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('rejects launches with no warhead in stockpile', () => {
+    const s = structuredClone(baseState);
+    s.leaders.chump.stockpile.missiles = 1;
+    const r = validateOrder(s, 'chump', {
+      kind: 'launch',
+      target: 'carnage',
+      delivery: 'missile',
+      warhead: 'small',
+      targetType: 'people',
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('accepts a launch when delivery and warhead are stocked', () => {
+    const s = structuredClone(baseState);
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    const r = validateOrder(s, 'chump', {
+      kind: 'launch',
+      target: 'carnage',
+      delivery: 'missile',
+      warhead: 'small',
+      targetType: 'people',
+    });
+    expect(r.ok).toBe(true);
+  });
+
+  it('rejects self-targeted launches', () => {
+    const s = structuredClone(baseState);
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    const r = validateOrder(s, 'chump', {
+      kind: 'launch',
+      target: 'chump',
+      delivery: 'missile',
+      warhead: 'small',
+      targetType: 'people',
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('rejects launches at dead targets', () => {
+    const s = structuredClone(baseState);
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    s.leaders.carnage.alive = false;
+    const r = validateOrder(s, 'chump', {
+      kind: 'launch',
+      target: 'carnage',
+      delivery: 'missile',
+      warhead: 'small',
+      targetType: 'people',
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('rejects woo orders with non-positive points', () => {
+    const r = validateOrder(baseState, 'chump', {
+      kind: 'woo',
+      target: 'carnage',
+      points: 0,
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('accepts build orders unconditionally', () => {
+    expect(validateOrder(baseState, 'chump', { kind: 'build-factory' }).ok).toBe(true);
+    expect(validateOrder(baseState, 'chump', { kind: 'build-defence', type: 'shield' }).ok).toBe(true);
+  });
+});

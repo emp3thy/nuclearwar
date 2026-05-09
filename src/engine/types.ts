@@ -18,6 +18,8 @@ export type TargetType = 'people' | 'infra';
 
 export type WinType = 'survivor' | 'pyrrhic' | 'apocalypse' | 'dominance';
 
+export type BonusRule = 'chump-defence-waste' | 'mileigh-aggression-bonus' | 'netanyahoo-launch-bonus';
+
 export interface Stockpile {
   missiles: number;
   bombers: number;
@@ -44,8 +46,7 @@ export interface Leader {
   grudge: Partial<Record<LeaderId, number>>;
   /** Carnage threat-doubling input; rounds since *they* hit me */
   recentAggressionFrom: Partial<Record<LeaderId, number>>;
-  /** balance.ts bonus rule key, if any */
-  bonusRule?: string;
+  bonusRule?: BonusRule;
 }
 
 export type Order =
@@ -90,10 +91,9 @@ export interface GameConfig {
   fastPlay: boolean;
 }
 
-export interface WinOutcome {
-  type: WinType;
-  winner?: LeaderId;
-}
+export type WinOutcome =
+  | { type: 'apocalypse' }
+  | { type: 'survivor' | 'pyrrhic' | 'dominance'; winner: LeaderId };
 
 export interface GameState {
   round: number;

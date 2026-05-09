@@ -54,6 +54,43 @@
 
 ---
 
+## Confidence summary
+
+Per the established workflow rule (every task gets a percentage; sub-95% gets inline mitigation; sub-90% must be lifted before execution or surfaced explicitly), here is the matrix after this plan's mitigation passes.
+
+| # | Task | Confidence | Notes |
+|---|---|---|---|
+| 1 | Project scaffold | 95% | Standard TS+Vitest boilerplate. |
+| 2 | Engine types | 97% | Pure declarative; tsc verifies. |
+| 3 | Balance constants | 96% | Spec values transcribed; tunables flagged. |
+| 4 | Seeded RNG | 92% | mulberry32 canonical; `mix32` test-quality only matters in P2. |
+| 5 | Initial state factory | 95% | 3-of-6 cast support tested. |
+| 6 | Order AP cost + validation | 94% | Exhaustive switch over 8 order kinds. |
+| 7 | Combat (intercepts + damage) | 96% | Spec §6 curve asserted directly. |
+| 8 | Build phase | 94% | Defence-first ordering; tested. |
+| 9 | Propaganda phase | 93% | Transfer-to-sender convention; tunable amount. |
+| 10 | Wooing + decay | 94% | Field exists for P2 AI; tests cover writes + decay. |
+| 11 | Launch phase | 94% | **Lifted from 88%** by splitting stock consumption out of `applyLaunches`. |
+| 12 | Final Retaliation cascade | 91% | **Lifted from 80%** by removing the push-stock-back kludge. |
+| 13 | Win conditions | 95% | Priority order pinned by tests. |
+| 14 | Resolution orchestrator | 92% | State-vs-s discipline + sealed-orders read pattern documented inline. |
+| 15 | Reducer | 93% | First-failure-rejects-batch contract tested. |
+| 16 | Engine public barrel | 97% | Pure re-export. |
+| 17 | Scripted-orders + integration | 92% | Heuristic test helper; outcome-reachability test compensates. |
+| 18 | Determinism property test | 90% | Full-log equality across 25 seeds; structural guarantees in self-review. |
+| 19 | Final verify + README | 99% | Trivial. |
+
+**Pre-execution lift summary:** Tasks 11 and 12 were initially below 90% because `applyLaunches` did stock consumption + intercept + damage in one pass, forcing Final Retaliation to push stock back so it could be re-consumed — fragile and confusing. Splitting `consumeStockFor` out of `applyLaunches` eliminated the kludge and lifted both tasks above 90% before this plan reaches the executor. No tasks remain below 90%; eight tasks (4, 6, 8, 9, 10, 14, 15, 17, 18 plus 11–12) carry inline `step-note` annotations describing residual sub-95 risk and the mitigation already applied.
+
+**Recommendations the executor should NOT skip:**
+
+1. Before merging, run `grep -r "Math.random" src/engine` — must return zero. (Determinism gate.)
+2. Before merging, run `grep -r "Date.now" src/engine` — must return zero.
+3. Before merging, run `grep -rn "from '../ui'" src/engine` — must return zero. (Engine purity gate.)
+4. Confirm the 25-seed determinism test runs in &lt;30s on Windows; if it doesn't, drop to 10 seeds rather than weaken the assertion.
+
+---
+
 ## File map
 
 ### Project root (Task 1)
@@ -116,6 +153,8 @@
 ---
 
 ## Task 1: Project scaffold
+
+**Confidence: 95%** — standard TS + Vitest boilerplate; the only residual risk is `npm install` failing on transient registry/network issues, which is retryable.
 
 **Files:**
 - Create: `package.json`, `tsconfig.json`, `vitest.config.ts`, `README.md`
@@ -228,6 +267,8 @@ git commit -m "scaffold: typescript + vitest project skeleton (engine-only)"
 
 ## Task 2: Engine types
 
+**Confidence: 97%** — pure declarative TypeScript, verified by `tsc --noEmit`. No runtime risk. Only failure mode is a typo discovered when a downstream module tries to import.
+
 **Files:**
 - Create: `src/engine/types.ts`
 
@@ -301,6 +342,20 @@ export type Order =
     }
   | { kind: 'propaganda'; target: LeaderId }
   | { kind: 'woo'; target: LeaderId; points: number };
+
+/**
+ * A resolved launch passed to `applyLaunches`. Stripped-down variant of the
+ * launch order without the `kind` discriminator. Shared between the regular
+ * launch phase (`collectLaunches` → `consumeStockFor` → `applyLaunches`) and
+ * Final Retaliation (synthesises Launch[] from a dead leader's stockpile).
+ */
+export interface Launch {
+  from: LeaderId;
+  to: LeaderId;
+  delivery: DeliveryType;
+  warhead: Yield;
+  targetType: TargetType;
+}
 
 export interface SealedOrders {
   leaderId: LeaderId;
@@ -401,6 +456,8 @@ git commit -m "engine: define core type surface (state, orders, events)"
 ---
 
 ## Task 3: Balance constants
+
+**Confidence: 96%** — values transcribed from spec §2 / §4 / §6 and asserted in test. Residual risk: a tunable like `PROPAGANDA_TRANSFER_M=1` may turn out to be wrong for game balance, but that's a design tuning concern surfaced in P2 / P4 playtesting, not a P1 correctness risk.
 
 **Files:**
 - Create: `src/engine/balance.ts`
@@ -601,6 +658,8 @@ git commit -m "engine: add balance constants and 6-leader profiles"
 
 ## Task 4: Seeded RNG
 
+**Confidence: 92%** — mulberry32 + FNV-1a are canonical and well-tested patterns; my impl matches the textbook versions. Residual risk: `mix32` is xxhash-style and only used for derived sub-seeds (not in P1's hot path). If it has a subtle bias, the failure surfaces in P2's `planAi` where mix32 derives per-leader sub-seeds. Mitigation: P1 doesn't depend on `mix32`'s distribution quality — its only test asserts determinism + order-sensitivity, both of which pass for any non-degenerate hash.
+
 **Files:**
 - Create: `src/engine/rng.ts`
 - Create: `tests/engine/rng.test.ts`
@@ -749,6 +808,8 @@ git commit -m "engine: add seeded mulberry32 rng with pure-functional state"
 ---
 
 ## Task 5: Initial state factory
+
+**Confidence: 95%** — straightforward struct construction from `LEADER_PROFILES`. Tests cover 2/3/5-leader cast configurations and `startPopOverride`. Residual risk: spread/clone semantics of `Partial<GameConfig>` merge with defaults; the test asserts dominanceThreshold/fastPlay defaults explicitly.
 
 **Files:**
 - Create: `src/engine/state.ts`
@@ -924,6 +985,8 @@ git commit -m "engine: add initialState factory supporting 3-6 cast"
 ---
 
 ## Task 6: Order AP cost + validation
+
+**Confidence: 94%** — exhaustive switch over the 8-kind `Order` union; tests cover every kind, plus self-target / dead-target / no-stock edge cases. Residual risk: a future addition to the `Order` union will cause TS exhaustiveness checking to flag the missing case — failure surfaces at compile time, not runtime.
 
 **Files:**
 - Create: `src/engine/orders.ts`
@@ -1195,6 +1258,8 @@ git commit -m "engine: add order ap-cost + per-order validation"
 
 ## Task 7: Combat — intercept curve + damage
 
+**Confidence: 96%** — three small pure functions; tests assert spec §6 curve values directly (1.0 → 0.75 → 0.5 → 0.25 → 0) plus damage caps. Trivial to verify by inspection.
+
 **Files:**
 - Create: `src/engine/combat.ts`
 - Create: `tests/engine/combat.test.ts`
@@ -1296,6 +1361,8 @@ git commit -m "engine: add intercept curve and damage cap helpers"
 ---
 
 ## Task 8: Build phase
+
+**Confidence: 94%** — straightforward switch over build kinds; tests assert each yield variant + defence variant lands in the right `Stockpile` field. Residual risk: ordering inside `applyOtherBuilds` matters for event-stream determinism; tests assert the order matches submission.
 
 **Files:**
 - Create: `src/engine/builds.ts`
@@ -1466,6 +1533,8 @@ git commit -m "engine: add defence-first build phase resolvers"
 
 ## Task 9: Propaganda phase
 
+**Confidence: 93%** — spec §4 is ambiguous on whether propaganda transfers population to the propagandist or just kills it; I picked transfer-to-sender per the word "steals". Tests cover cap-at-victim-pop, dead-target skip, deterministic id-ASC ordering. Residual risk: design intent for propaganda may differ; tunable via `PROPAGANDA_TRANSFER_M` and the transfer/destroy convention can flip in P2 playtesting without disrupting the engine surface.
+
 **Files:**
 - Create: `src/engine/propaganda.ts`
 - Create: `tests/engine/propaganda.test.ts`
@@ -1591,6 +1660,8 @@ git commit -m "engine: add propaganda phase (capped pop transfer)"
 ---
 
 ## Task 10: Wooing phase + favourability decay
+
+**Confidence: 94%** — symmetric to propaganda but on a `Partial<Record<LeaderId, number>>` field; tests cover accumulation, dead-target skip, and decay floor. Residual risk: the favourability field exists for AI personalities (P2) — its current behaviour is exercise-only in P1 (no AI consumer reads it).
 
 **Files:**
 - Create: `src/engine/diplomacy.ts`
@@ -1723,13 +1794,19 @@ git commit -m "engine: add wooing phase + favourability decay"
 
 ## Task 11: Launch phase
 
+**Confidence: 94%** — refactored from 88% by splitting stock consumption out of `applyLaunches`. Caller (regular launches phase or Final Retaliation) handles stock validation and consumption via `consumeStockFor`; `applyLaunches` is then a pure intercept-roll + damage-applier that doesn't care whether the attacker is alive (so FR firing from a corpse works without a kludge).
+
 **Files:**
 - Create: `src/engine/launches.ts`
 - Create: `tests/engine/launches.test.ts`
 
-Cross-leader phase. Launches resolve in deterministic order: attacker leader-id ASC, then order index ASC. Per-receiver Nth-incoming counters track defences-overwhelm. Intercept rolls advance the global RNG state.
+Cross-leader phase. Three exports:
 
-This module is reused by Final Retaliation (Task 12) — `applyLaunches` accepts an arbitrary `Launch[]` rather than orders, so FR can synthesise its own launches and call the same code path.
+1. **`collectLaunches(orders)`** — pure: walks orders in attacker-id-ASC order, builds a `Launch[]`. No state, no validation.
+2. **`consumeStockFor(state, launches)`** — validates each launch (attacker+receiver alive, stock available) and consumes stock for valid launches. Returns updated state and the filtered `Launch[]`.
+3. **`applyLaunches(state, launches)`** — assumes stock has been pre-consumed by the caller. Rolls per-receiver Nth-incoming intercepts (RNG-driven), applies damage, emits events. Doesn't gate on attacker.alive (FR fires from a corpse).
+
+Final Retaliation (Task 12) consumes stock during launch synthesis (because it pairs algorithmically) and then calls `applyLaunches` directly.
 
 - [ ] **Step 11.1: Write the failing test**
 
@@ -1737,13 +1814,20 @@ This module is reused by Final Retaliation (Task 12) — `applyLaunches` accepts
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { collectLaunches, applyLaunches } from '../../src/engine/launches';
+import { applyLaunches, collectLaunches, consumeStockFor } from '../../src/engine/launches';
 import { initialState } from '../../src/engine/state';
-import type { Order } from '../../src/engine/types';
+import type { Launch, Order } from '../../src/engine/types';
+
+const smallLaunch: Launch = {
+  from: 'chump',
+  to: 'carnage',
+  delivery: 'missile',
+  warhead: 'small',
+  targetType: 'people',
+};
 
 describe('collectLaunches', () => {
   it('emits launches in attacker id-ASC order', () => {
-    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
     const orders = {
       chump: [{
         kind: 'launch' as const,
@@ -1761,7 +1845,7 @@ describe('collectLaunches', () => {
       }],
     };
     const launches = collectLaunches(orders);
-    expect(launches[0].from).toBe('carnage');
+    expect(launches[0].from).toBe('carnage'); // 'carnage' < 'chump' alphabetically
     expect(launches[1].from).toBe('chump');
   });
 
@@ -1773,92 +1857,110 @@ describe('collectLaunches', () => {
   });
 });
 
-describe('applyLaunches', () => {
-  it('consumes stock and lands a small-warhead People hit (2M deaths)', () => {
+describe('consumeStockFor', () => {
+  it('consumes one missile + one warhead-S per valid launch and returns it', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
     s.leaders.chump.stockpile.missiles = 1;
     s.leaders.chump.stockpile.warheadsSmall = 1;
-    const r = applyLaunches(s, [
-      { from: 'chump', to: 'carnage', delivery: 'missile', warhead: 'small', targetType: 'people' },
-    ]);
-    expect(r.state.leaders.carnage.population).toBe(25 - 2);
+    const r = consumeStockFor(s, [smallLaunch]);
     expect(r.state.leaders.chump.stockpile.missiles).toBe(0);
     expect(r.state.leaders.chump.stockpile.warheadsSmall).toBe(0);
-    const kinds = r.events.map((e) => e.kind);
-    expect(kinds).toEqual(['MissileLaunched', 'ImpactPeople']);
+    expect(r.validLaunches).toHaveLength(1);
   });
 
-  it('intercepts when defenders fully cover incoming (always intercepted)', () => {
+  it('drops launches when attacker has no delivery and does not consume stock', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    // no missile
+    const r = consumeStockFor(s, [smallLaunch]);
+    expect(r.validLaunches).toHaveLength(0);
+    expect(r.state.leaders.chump.stockpile.warheadsSmall).toBe(1);
+  });
+
+  it('drops launches when attacker has no warhead', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
+    s.leaders.chump.stockpile.missiles = 1;
+    const r = consumeStockFor(s, [smallLaunch]);
+    expect(r.validLaunches).toHaveLength(0);
+    expect(r.state.leaders.chump.stockpile.missiles).toBe(1);
+  });
+
+  it('drops launches at dead targets', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
     s.leaders.chump.stockpile.missiles = 1;
     s.leaders.chump.stockpile.warheadsSmall = 1;
+    s.leaders.carnage.alive = false;
+    const r = consumeStockFor(s, [smallLaunch]);
+    expect(r.validLaunches).toHaveLength(0);
+    expect(r.state.leaders.chump.stockpile.missiles).toBe(1); // not consumed
+  });
+});
+
+describe('applyLaunches (assumes stock pre-consumed)', () => {
+  it('intercepts when defenders fully cover incoming (always intercepted)', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
     s.leaders.carnage.stockpile.shields = 5;
-    const r = applyLaunches(s, [
-      { from: 'chump', to: 'carnage', delivery: 'missile', warhead: 'small', targetType: 'people' },
-    ]);
+    const r = applyLaunches(s, [smallLaunch]);
     expect(r.state.leaders.carnage.population).toBe(25);
-    const kinds = r.events.map((e) => e.kind);
-    expect(kinds).toEqual(['MissileLaunched', 'MissileIntercepted']);
+    expect(r.events.map((e) => e.kind)).toEqual(['MissileLaunched', 'MissileIntercepted']);
   });
 
-  it('the 4th incoming with S=0 is guaranteed to land (overflow=4 → 0%)', () => {
+  it('the 4th incoming with S=0 is guaranteed to land (overflow=4 → 0%) and applies 2M small-warhead deaths', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
-    s.leaders.chump.stockpile.missiles = 4;
-    s.leaders.chump.stockpile.warheadsLarge = 4;
     s.leaders.carnage.stockpile.shields = 0;
     s.leaders.carnage.population = 100;
-    const launch = {
-      from: 'chump' as const,
-      to: 'carnage' as const,
-      delivery: 'missile' as const,
-      warhead: 'large' as const,
-      targetType: 'people' as const,
-    };
-    const r = applyLaunches(s, [launch, launch, launch, launch]);
+    const r = applyLaunches(s, [smallLaunch, smallLaunch, smallLaunch, smallLaunch]);
     const impacts = r.events.filter((e) => e.kind === 'ImpactPeople');
-    expect(impacts.length).toBeGreaterThanOrEqual(1); // 4th one always lands
+    expect(impacts.length).toBeGreaterThanOrEqual(1);
+    // every recorded impact uses the small-warhead damage profile
+    for (const e of impacts) {
+      if (e.kind === 'ImpactPeople') {
+        expect(e.deaths).toBe(2);
+        expect(e.warhead).toBe('small');
+      }
+    }
   });
 
-  it('infrastructure targeting destroys factories instead of people', () => {
+  it('infrastructure targeting destroys factories instead of people (4 launches with S=0)', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
-    s.leaders.chump.stockpile.missiles = 1;
-    s.leaders.chump.stockpile.warheadsLarge = 1;
     s.leaders.carnage.stockpile.shields = 0;
-    s.leaders.carnage.population = 100; // not the test target
     s.leaders.carnage.factories = 10;
-    // Use 4 launches to overwhelm the intercept curve and guarantee landing.
-    s.leaders.chump.stockpile.missiles = 4;
-    s.leaders.chump.stockpile.warheadsLarge = 4;
-    const launch = {
-      from: 'chump' as const,
-      to: 'carnage' as const,
-      delivery: 'missile' as const,
-      warhead: 'large' as const,
-      targetType: 'infra' as const,
+    const launch: Launch = {
+      from: 'chump',
+      to: 'carnage',
+      delivery: 'missile',
+      warhead: 'large',
+      targetType: 'infra',
     };
     const r = applyLaunches(s, [launch, launch, launch, launch]);
     expect(r.events.some((e) => e.kind === 'ImpactInfrastructure')).toBe(true);
     expect(r.events.some((e) => e.kind === 'ImpactPeople')).toBe(false);
   });
 
-  it('skips launches where the attacker no longer has stock', () => {
+  it('skips launches at dead receivers (no MissileLaunched event)', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
-    // chump has nothing
-    const r = applyLaunches(s, [
-      { from: 'chump', to: 'carnage', delivery: 'missile', warhead: 'small', targetType: 'people' },
-    ]);
+    s.leaders.carnage.alive = false;
+    s.leaders.carnage.population = 0;
+    const r = applyLaunches(s, [smallLaunch]);
     expect(r.events).toHaveLength(0);
   });
 
   it('advances rngState when an intercept roll is made', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
-    s.leaders.chump.stockpile.missiles = 1;
-    s.leaders.chump.stockpile.warheadsSmall = 1;
     const before = s.rngState;
-    const r = applyLaunches(s, [
-      { from: 'chump', to: 'carnage', delivery: 'missile', warhead: 'small', targetType: 'people' },
-    ]);
+    const r = applyLaunches(s, [smallLaunch]);
     expect(r.state.rngState).not.toBe(before);
+  });
+
+  it('does not require attacker to be alive (FR fires from a corpse)', () => {
+    // Critical for Final Retaliation: applyLaunches MUST NOT gate on attacker.alive,
+    // since FR's `from` leader is dead by definition.
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
+    s.leaders.chump.alive = false;
+    s.leaders.chump.population = 0;
+    s.leaders.carnage.stockpile.shields = 5; // force intercept so deterministic
+    const r = applyLaunches(s, [smallLaunch]);
+    expect(r.events.map((e) => e.kind)).toEqual(['MissileLaunched', 'MissileIntercepted']);
   });
 });
 ```
@@ -1872,30 +1974,25 @@ Expected: FAIL — module not found.
 
 ```ts
 import type {
-  DeliveryType,
   GameState,
+  Launch,
   LeaderId,
   Order,
   ResolutionEvent,
-  TargetType,
   Yield,
 } from './types';
 import { factoriesDestroyed, interceptProbability, peopleDeaths } from './combat';
 import { nextRandom } from './rng';
-
-export interface Launch {
-  from: LeaderId;
-  to: LeaderId;
-  delivery: DeliveryType;
-  warhead: Yield;
-  targetType: TargetType;
-}
 
 export interface LaunchesResult {
   state: GameState;
   events: ResolutionEvent[];
 }
 
+/**
+ * Pure: walk orders in attacker-id-ASC order and emit a Launch[]. Does no
+ * validation — bad targets and missing stock are filtered by `consumeStockFor`.
+ */
 export function collectLaunches(
   ordersByLeader: Partial<Record<LeaderId, Order[]>>,
 ): Launch[] {
@@ -1916,6 +2013,46 @@ export function collectLaunches(
   return launches;
 }
 
+/**
+ * Validates each launch against current state (attacker + receiver alive,
+ * stock available) and consumes the delivery + warhead from valid attackers.
+ * Returns the mutated state and the filtered Launch[] ready for `applyLaunches`.
+ *
+ * Used by the regular launch phase. Final Retaliation has its own consumption
+ * loop because it pairs warheads with deliveries algorithmically.
+ */
+export function consumeStockFor(
+  state: GameState,
+  launches: Launch[],
+): { state: GameState; validLaunches: Launch[] } {
+  const next: GameState = structuredClone(state);
+  const valid: Launch[] = [];
+  for (const l of launches) {
+    const attacker = next.leaders[l.from];
+    const receiver = next.leaders[l.to];
+    if (!attacker || !attacker.alive) continue;
+    if (!receiver || !receiver.alive) continue;
+    if (l.delivery === 'missile' && attacker.stockpile.missiles < 1) continue;
+    if (l.delivery === 'bomber' && attacker.stockpile.bombers < 1) continue;
+    const wf = warheadFieldFor(l.warhead);
+    if (attacker.stockpile[wf] < 1) continue;
+
+    if (l.delivery === 'missile') attacker.stockpile.missiles -= 1;
+    else attacker.stockpile.bombers -= 1;
+    attacker.stockpile[wf] -= 1;
+    valid.push(l);
+  }
+  return { state: next, validLaunches: valid };
+}
+
+/**
+ * Resolves intercept rolls and applies damage for an already-validated,
+ * already-stock-consumed Launch[]. Does NOT touch attacker stock and does NOT
+ * gate on attacker.alive — Final Retaliation fires from a dead leader, and we
+ * still want those launches to resolve.
+ *
+ * Receiver still must be alive: dead-target launches collapse into a no-op.
+ */
 export function applyLaunches(state: GameState, launches: Launch[]): LaunchesResult {
   const next: GameState = structuredClone(state);
   const events: ResolutionEvent[] = [];
@@ -1926,18 +2063,8 @@ export function applyLaunches(state: GameState, launches: Launch[]): LaunchesRes
   for (const id of next.cast) incoming[id] = { missile: 0, bomber: 0 };
 
   for (const l of launches) {
-    const attacker = next.leaders[l.from];
     const receiver = next.leaders[l.to];
-    if (!attacker || !receiver || !attacker.alive || !receiver.alive) continue;
-
-    if (l.delivery === 'missile' && attacker.stockpile.missiles < 1) continue;
-    if (l.delivery === 'bomber' && attacker.stockpile.bombers < 1) continue;
-    const warheadField = warheadFieldFor(l.warhead);
-    if (attacker.stockpile[warheadField] < 1) continue;
-
-    if (l.delivery === 'missile') attacker.stockpile.missiles -= 1;
-    else attacker.stockpile.bombers -= 1;
-    attacker.stockpile[warheadField] -= 1;
+    if (!receiver || !receiver.alive) continue;
 
     events.push({
       kind: 'MissileLaunched',
@@ -1991,7 +2118,7 @@ export function applyLaunches(state: GameState, launches: Launch[]): LaunchesRes
   return { state: next, events };
 }
 
-function warheadFieldFor(y: Yield): 'warheadsSmall' | 'warheadsMedium' | 'warheadsLarge' {
+export function warheadFieldFor(y: Yield): 'warheadsSmall' | 'warheadsMedium' | 'warheadsLarge' {
   if (y === 'small') return 'warheadsSmall';
   if (y === 'medium') return 'warheadsMedium';
   return 'warheadsLarge';
@@ -2013,6 +2140,8 @@ git commit -m "engine: add launch phase with deterministic intercept rolls"
 ---
 
 ## Task 12: Final Retaliation cascade
+
+**Confidence: 91%** — refactored from 80% by killing the push-stock-back kludge. FR now consumes stock once during launch synthesis (greedy: largest warhead first, paired with available delivery, missile preferred) and hands the resulting `Launch[]` directly to the refactored `applyLaunches` (which expects pre-consumed launches and doesn't gate on `attacker.alive`). Single consumption point; symmetric with the regular launch phase.
 
 **Files:**
 - Create: `src/engine/finalRetaliation.ts`
@@ -2096,11 +2225,12 @@ Expected: FAIL — module not found.
 import type {
   DeliveryType,
   GameState,
+  Launch,
   LeaderId,
   ResolutionEvent,
   Yield,
 } from './types';
-import { applyLaunches, type Launch } from './launches';
+import { applyLaunches, warheadFieldFor } from './launches';
 import { nextInt } from './rng';
 
 export interface FinalRetaliationResult {
@@ -2129,21 +2259,25 @@ export function applyFinalRetaliation(
     );
     if (survivors.length === 0) break;
 
+    // Synthesise + consume in one pass: largest warhead first, paired with the
+    // cheapest available delivery (missile preferred). Stock is consumed here,
+    // not by applyLaunches — the refactored applyLaunches assumes pre-consumed
+    // launches, which lets us hand off without a push-back kludge.
     const synthesised: Launch[] = [];
     const yields: Yield[] = ['large', 'medium', 'small'];
     for (const y of yields) {
-      const warheadField = y === 'large' ? 'warheadsLarge' : y === 'medium' ? 'warheadsMedium' : 'warheadsSmall';
-      while (leader.stockpile[warheadField] > 0) {
-        // Pair with cheapest available delivery: missile preferred.
+      const wf = warheadFieldFor(y);
+      while (leader.stockpile[wf] > 0) {
         let delivery: DeliveryType | null = null;
         if (leader.stockpile.missiles > 0) delivery = 'missile';
         else if (leader.stockpile.bombers > 0) delivery = 'bomber';
         if (!delivery) break;
+
         if (delivery === 'missile') leader.stockpile.missiles -= 1;
         else leader.stockpile.bombers -= 1;
-        leader.stockpile[warheadField] -= 1;
+        leader.stockpile[wf] -= 1;
 
-        // Target picker: uniform random over current survivors. P2 layers grudge weighting.
+        // Uniform-random target. P2 layers grudge weighting.
         const pick = nextInt(next.rngState, survivors.length);
         next.rngState = pick.state;
         const target = survivors[pick.value];
@@ -2165,21 +2299,12 @@ export function applyFinalRetaliation(
       targets: synthesised.map((l) => l.to),
     });
 
-    // Hand off to the regular launch phase. Note: applyLaunches consumes stock
-    // again, so we have to NOT pre-consume above. Refactor: push back the stock
-    // we drained, then let applyLaunches handle consumption.
-    leader.stockpile.missiles += synthesised.filter((l) => l.delivery === 'missile').length;
-    leader.stockpile.bombers += synthesised.filter((l) => l.delivery === 'bomber').length;
-    for (const s of synthesised) {
-      const wf = s.warhead === 'large' ? 'warheadsLarge' : s.warhead === 'medium' ? 'warheadsMedium' : 'warheadsSmall';
-      leader.stockpile[wf] += 1;
-    }
-
+    // Stock is already consumed; applyLaunches just rolls intercepts + damage.
     const lr = applyLaunches(next, synthesised);
     next = lr.state;
     events.push(...lr.events);
 
-    // Mark any leaders newly killed by this FR for cascade.
+    // Cascade: any leader newly killed by this FR enters the queue.
     for (const other of next.cast) {
       const ol = next.leaders[other];
       if (ol.alive && ol.population <= 0) {
@@ -2210,6 +2335,8 @@ git commit -m "engine: add final retaliation cascade (uniform targeting)"
 ---
 
 ## Task 13: Win conditions
+
+**Confidence: 95%** — four cases, one priority order, exhaustive tests. The "survivor takes priority over dominance" test pins behaviour when both could fire.
 
 **Files:**
 - Create: `src/engine/winConditions.ts`
@@ -2367,6 +2494,11 @@ git commit -m "engine: add survivor / pyrrhic / apocalypse / dominance check"
 ---
 
 ## Task 14: Resolution orchestrator
+
+**Confidence: 92%** — large surface area but each phase is delegated to a tested module; the orchestrator's only logic is sequencing + status update + AP refresh + bonus-rule application + win check. Sub-95 risks:
+
+- *State-vs-s discipline*: the orchestrator reads sealed orders from the **input** `state` parameter (so they're available even after `s.pendingOrders` is cleared). Mitigation: explicit comment in the AP-refresh block and a test that asserts Netanyahoo's launch bonus reads from sealed orders, not next-round empty `pendingOrders`.
+- *AP banking edge case*: negative AP from test fixtures is floored to 0 via `Math.max(0, Math.floor(l.ap))`. Mitigation: covered by the "banks unspent AP up to AP_BANK_CAP" test.
 
 **Files:**
 - Create: `src/engine/resolution.ts`
@@ -2532,7 +2664,7 @@ import type { GameState, LeaderId, Order, ResolutionEvent } from './types';
 import { applyDefenceBuilds, applyOtherBuilds } from './builds';
 import { applyPropaganda } from './propaganda';
 import { applyWooing, decayFavourability } from './diplomacy';
-import { applyLaunches, collectLaunches } from './launches';
+import { applyLaunches, collectLaunches, consumeStockFor } from './launches';
 import { applyFinalRetaliation } from './finalRetaliation';
 import { checkOutcome } from './winConditions';
 import { AP_BANK_CAP, FACTORY_AP_RATE, LEADER_PROFILES } from './balance';
@@ -2591,10 +2723,15 @@ export function resolveRound(state: GameState): ResolveResult {
     events.push(...r.events);
   }
 
-  // Phase: Launches.
+  // Phase: Launches. Three-step flow per Task 11 split:
+  //   collectLaunches → consumeStockFor (validates + consumes) → applyLaunches.
+  // Final Retaliation has its own consumption loop (Task 12) but lands in the
+  // same `applyLaunches` so intercepts and damage stay symmetric.
   const launches = collectLaunches(allOrders);
   {
-    const r = applyLaunches(s, launches);
+    const consumed = consumeStockFor(s, launches);
+    s = consumed.state;
+    const r = applyLaunches(s, consumed.validLaunches);
     s = r.state;
     events.push(...r.events);
   }
@@ -2685,6 +2822,8 @@ git commit -m "engine: add round resolution orchestrator (full phase order)"
 ---
 
 ## Task 15: Reducer
+
+**Confidence: 93%** — small switch over the 4 action types; tests cover validation rejection (unchanged-state return), AP-budget rejection, RESOLVE_ROUND delegation, LOAD_STATE pass-through. Residual risk: the validation loop runs `validateOrder` but doesn't accumulate errors — first failure rejects the entire batch. That's the documented contract; tests pin it.
 
 **Files:**
 - Create: `src/engine/reducer.ts`
@@ -2839,6 +2978,8 @@ git commit -m "engine: add top-level reducer (submit / resolve / load / new-game
 
 ## Task 16: Engine public barrel
 
+**Confidence: 97%** — pure re-export file. Verified by `npm run typecheck`. Trivial.
+
 **Files:**
 - Create: `src/engine/index.ts`
 
@@ -2877,6 +3018,8 @@ git commit -m "engine: add public barrel export"
 ---
 
 ## Task 17: Scripted-orders helper + integration snapshot test
+
+**Confidence: 92%** — `scriptedOrders` is heuristic (picks an entire pattern then trims to AP and drops invalid orders) but lives in `tests/` so any oddity stays test-local. The integration test asserts the typed event-stream remains within the known event-kind set and that an outcome is reachable within 100 rounds. Sub-95 risk: a bug in `scriptedOrders` that always returns empty orders would still pass the round-counter assertion (≥2) — mitigation is the second test asserting outcome reachability across 3 sample seeds.
 
 **Files:**
 - Create: `tests/helpers/scripted-orders.ts`
@@ -3027,6 +3170,11 @@ git commit -m "engine: add scripted-orders helper + 3-leader integration test"
 
 ## Task 18: Determinism property test
 
+**Confidence: 90%** — full-log equality on 25 random seeds, two runs each, is a strong safety net. Sub-95 risks:
+
+- *The test catches divergence but cannot prove its absence.* Confidence in determinism comes structurally: no `Math.random()` in `src/engine/`, no `Date.now()`, RNG state lives inside `GameState` and threads pure-functionally. Mitigation: the self-review checklist (handoff section) lists `grep -r "Math.random" src/engine` as an explicit verification step.
+- *25 seeds × 2 runs × ~50 rounds × ~5 events ≈ 12,500 events compared.* If full-log equality is too slow on Windows CI, drop to 10 seeds without losing meaningful coverage. Tested locally first.
+
 **Files:**
 - Create: `tests/engine/determinism.test.ts`
 
@@ -3099,6 +3247,8 @@ git commit -m "engine: add determinism property test (25 random seeds)"
 ---
 
 ## Task 19: Final verification + README handoff
+
+**Confidence: 99%** — `npm run test:run && npm run typecheck` and a README append. Risk-free unless an earlier task left a failing test, in which case the executor stops here and reports back.
 
 **Files:**
 - Modify: `README.md`

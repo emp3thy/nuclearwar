@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyLaunches, collectLaunches, consumeStockFor } from '../../src/engine/launches';
+import { applyLaunches, collectLaunches, consumeStockFor, makeIncomingCounter } from '../../src/engine/launches';
 import { initialState } from '../../src/engine/state';
 import type { Launch, Order } from '../../src/engine/types';
 
@@ -146,5 +146,37 @@ describe('applyLaunches (assumes stock pre-consumed)', () => {
     s.leaders.carnage.stockpile.shields = 5; // force intercept so deterministic
     const r = applyLaunches(s, [smallLaunch]);
     expect(r.events.map((e) => e.kind)).toEqual(['MissileLaunched', 'MissileIntercepted']);
+  });
+
+  it('threaded incoming counter accumulates across consecutive applyLaunches calls', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
+    s.leaders.carnage.stockpile.shields = 2;
+    // Two separate launches in two separate calls — counter must persist between them.
+    const launch: Launch = {
+      from: 'chump',
+      to: 'carnage',
+      delivery: 'missile',
+      warhead: 'small',
+      targetType: 'people',
+    };
+    const counter = makeIncomingCounter(s.cast);
+
+    const r1 = applyLaunches(s, [launch], counter);
+    // First incoming: nth=1, S=2 → 100% intercept chance.
+    expect(r1.events.find((e) => e.kind === 'MissileIntercepted')).toBeDefined();
+
+    const r2 = applyLaunches(r1.state, [launch], r1.incoming);
+    // Second incoming: nth=2, S=2 → still 100% intercept chance.
+    expect(r2.events.find((e) => e.kind === 'MissileIntercepted')).toBeDefined();
+
+    const r3 = applyLaunches(r2.state, [launch], r2.incoming);
+    // Third incoming: nth=3, S=2, overflow=1 → reduced intercept. No strict assertion.
+
+    const r4 = applyLaunches(r3.state, [launch], r3.incoming);
+    // Fourth incoming: nth=4, S=2, overflow=2 → further reduced. No strict assertion.
+
+    // The KEY invariant: counter mutates correctly across calls.
+    expect(r2.incoming.carnage.missile).toBe(2);
+    expect(r4.incoming.carnage.missile).toBe(4);
   });
 });

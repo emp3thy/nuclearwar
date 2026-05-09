@@ -9,9 +9,18 @@ import type {
 import { factoriesDestroyed, interceptProbability, peopleDeaths } from './combat';
 import { nextRandom } from './rng';
 
+export type IncomingCounter = Record<LeaderId, { missile: number; bomber: number }>;
+
+export function makeIncomingCounter(cast: LeaderId[]): IncomingCounter {
+  const c: IncomingCounter = {} as IncomingCounter;
+  for (const id of cast) c[id] = { missile: 0, bomber: 0 };
+  return c;
+}
+
 export interface LaunchesResult {
   state: GameState;
   events: ResolutionEvent[];
+  incoming: IncomingCounter;
 }
 
 /**
@@ -78,14 +87,18 @@ export function consumeStockFor(
  *
  * Receiver still must be alive: dead-target launches collapse into a no-op.
  */
-export function applyLaunches(state: GameState, launches: Launch[]): LaunchesResult {
+export function applyLaunches(
+  state: GameState,
+  launches: Launch[],
+  incoming?: IncomingCounter,
+): LaunchesResult {
   const next: GameState = structuredClone(state);
   const events: ResolutionEvent[] = [];
-  const incoming: Record<LeaderId, { missile: number; bomber: number }> = {} as Record<
-    LeaderId,
-    { missile: number; bomber: number }
-  >;
-  for (const id of next.cast) incoming[id] = { missile: 0, bomber: 0 };
+  // Thread the counter across calls so the Nth-incoming tally is round-scoped,
+  // not per-call. Clone the provided counter so callers can diff old vs new.
+  const counter: IncomingCounter = incoming
+    ? structuredClone(incoming)
+    : makeIncomingCounter(next.cast);
 
   for (const l of launches) {
     const receiver = next.leaders[l.to];
@@ -100,8 +113,8 @@ export function applyLaunches(state: GameState, launches: Launch[]): LaunchesRes
       targetType: l.targetType,
     });
 
-    incoming[l.to][l.delivery] += 1;
-    const nth = incoming[l.to][l.delivery];
+    counter[l.to][l.delivery] += 1;
+    const nth = counter[l.to][l.delivery];
     const defenders = l.delivery === 'missile' ? receiver.stockpile.shields : receiver.stockpile.aa;
     const p = interceptProbability(nth, defenders);
     const roll = nextRandom(next.rngState);
@@ -140,7 +153,7 @@ export function applyLaunches(state: GameState, launches: Launch[]): LaunchesRes
     }
   }
 
-  return { state: next, events };
+  return { state: next, events, incoming: counter };
 }
 
 export function warheadFieldFor(y: Yield): 'warheadsSmall' | 'warheadsMedium' | 'warheadsLarge' {

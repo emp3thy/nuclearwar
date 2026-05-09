@@ -53,6 +53,27 @@ describe('reduce — SUBMIT_ORDERS', () => {
     });
     expect(s1).toBe(s0);
   });
+
+  it('rejects a multi-launch batch that collectively exceeds the leader\'s stockpile', () => {
+    const s0 = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
+    // 1 missile + 2 warheads-small; AP enough for 2 launches; 2 launches submitted but only 1 missile.
+    s0.leaders.chump.stockpile.missiles = 1;
+    s0.leaders.chump.stockpile.warheadsSmall = 2;
+    s0.leaders.chump.ap = 4;
+    const launch = {
+      kind: 'launch' as const,
+      target: 'carnage' as const,
+      delivery: 'missile' as const,
+      warhead: 'small' as const,
+      targetType: 'people' as const,
+    };
+    const s1 = reduce(s0, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'chump',
+      orders: [launch, launch],
+    });
+    expect(s1).toBe(s0); // rejected; identity-equal returned state
+  });
 });
 
 describe('reduce — RESOLVE_ROUND', () => {

@@ -2,7 +2,7 @@ import type { GameState, LeaderId, Order, ResolutionEvent } from './types';
 import { applyDefenceBuilds, applyOtherBuilds } from './builds';
 import { applyPropaganda } from './propaganda';
 import { applyWooing, decayFavourability } from './diplomacy';
-import { applyLaunches, collectLaunches, consumeStockFor } from './launches';
+import { applyLaunches, collectLaunches, consumeStockFor, makeIncomingCounter } from './launches';
 import { applyFinalRetaliation } from './finalRetaliation';
 import { checkOutcome } from './winConditions';
 import { AP_BANK_CAP, FACTORY_AP_RATE, LEADER_PROFILES } from './balance';
@@ -65,13 +65,19 @@ export function resolveRound(state: GameState): ResolveResult {
   //   collectLaunches → consumeStockFor (validates + consumes) → applyLaunches.
   // Final Retaliation has its own consumption loop (Task 12) but lands in the
   // same `applyLaunches` so intercepts and damage stay symmetric.
+  //
+  // The incoming counter is round-scoped (spec §6): we initialise it once here
+  // and thread it through both the regular launch phase and the FR cascade so
+  // the Nth-incoming tally accumulates correctly across calls.
   const launches = collectLaunches(allOrders);
+  const incomingCounter = makeIncomingCounter(s.cast);
   {
     const consumed = consumeStockFor(s, launches);
     s = consumed.state;
-    const r = applyLaunches(s, consumed.validLaunches);
+    const r = applyLaunches(s, consumed.validLaunches, incomingCounter);
     s = r.state;
     events.push(...r.events);
+    Object.assign(incomingCounter, r.incoming);
   }
 
   // Status: mark newly-eliminated leaders.
@@ -88,7 +94,7 @@ export function resolveRound(state: GameState): ResolveResult {
 
   // Phase: Final Retaliation cascade.
   if (newlyDead.length > 0) {
-    const r = applyFinalRetaliation(s, newlyDead);
+    const r = applyFinalRetaliation(s, newlyDead, incomingCounter);
     s = r.state;
     events.push(...r.events);
   }

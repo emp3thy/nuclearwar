@@ -6,7 +6,8 @@ import type {
   ResolutionEvent,
   Yield,
 } from './types';
-import { applyLaunches, warheadFieldFor } from './launches';
+import { applyLaunches, makeIncomingCounter, warheadFieldFor } from './launches';
+import type { IncomingCounter } from './launches';
 import { nextInt } from './rng';
 
 export interface FinalRetaliationResult {
@@ -17,11 +18,17 @@ export interface FinalRetaliationResult {
 export function applyFinalRetaliation(
   state: GameState,
   newlyDead: LeaderId[],
+  incoming?: IncomingCounter,
 ): FinalRetaliationResult {
   let next: GameState = structuredClone(state);
   const events: ResolutionEvent[] = [];
   const queue = [...newlyDead];
   const fired = new Set<LeaderId>();
+  // Thread the round-scoped Nth-incoming counter through every FR applyLaunches
+  // call so defenders can't absorb more missiles than spec §6 allows.
+  let counter: IncomingCounter = incoming
+    ? structuredClone(incoming)
+    : makeIncomingCounter(next.cast);
 
   while (queue.length > 0) {
     const id = queue.shift()!;
@@ -76,8 +83,11 @@ export function applyFinalRetaliation(
     });
 
     // Stock is already consumed; applyLaunches just rolls intercepts + damage.
-    const lr = applyLaunches(next, synthesised);
+    // Pass and update the round-scoped counter so Nth-incoming accumulates
+    // correctly across cascade firings.
+    const lr = applyLaunches(next, synthesised, counter);
     next = lr.state;
+    counter = lr.incoming;
     events.push(...lr.events);
 
     // Cascade: any leader newly killed by this FR enters the queue.

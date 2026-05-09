@@ -1970,7 +1970,8 @@ describe('applyLaunches (assumes stock pre-consumed)', () => {
 Run: `npm run test:run -- tests/engine/launches.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 11.3: Write `src/engine/launches.ts`**
+- [x] **Step 11.3: Write `src/engine/launches.ts`**
+  > **BugBot fix (PR #1):** Added `IncomingCounter` type and `makeIncomingCounter(cast)` factory (both exported). `applyLaunches` now accepts an optional `incoming?: IncomingCounter` parameter (fresh counter default — backward-compatible) and returns `{ state, events, incoming }` so callers can thread the round-scoped Nth-incoming tally across multiple calls. The counter is cloned on entry and the mutated copy returned. `IncomingCounter` lives in `launches.ts`; no separate `types.ts` export needed.
 
 ```ts
 import type {
@@ -2219,7 +2220,8 @@ describe('applyFinalRetaliation', () => {
 Run: `npm run test:run -- tests/engine/finalRetaliation.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 12.3: Write `src/engine/finalRetaliation.ts`**
+- [x] **Step 12.3: Write `src/engine/finalRetaliation.ts`**
+  > **BugBot fix (PR #1):** `applyFinalRetaliation` now accepts an optional `incoming?: IncomingCounter` parameter (fresh counter default). The counter is threaded through every `applyLaunches` call inside the cascade loop — each firing passes the previous call's returned counter so Nth-incoming accumulates correctly across cascade firings. `FinalRetaliationResult` shape is unchanged (`{ state, events }`).
 
 ```ts
 import type {
@@ -2657,7 +2659,8 @@ describe('resolveRound', () => {
 Run: `npm run test:run -- tests/engine/resolution.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 14.3: Write `src/engine/resolution.ts`**
+- [x] **Step 14.3: Write `src/engine/resolution.ts`**
+  > **BugBot fix (PR #1):** The round-scoped Nth-incoming counter is now initialised once via `makeIncomingCounter(s.cast)` before the regular launch phase, updated from `r.incoming` after `applyLaunches`, and passed to `applyFinalRetaliation`. This ensures the FR cascade's intercept rolls continue from the correct Nth index rather than restarting at 1.
 
 ```ts
 import type { GameState, LeaderId, Order, ResolutionEvent } from './types';
@@ -2915,7 +2918,8 @@ describe('reduce — LOAD_STATE', () => {
 Run: `npm run test:run -- tests/engine/reducer.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 15.3: Write `src/engine/reducer.ts`**
+- [x] **Step 15.3: Write `src/engine/reducer.ts`**
+  > **BugBot fix (PR #1):** `SUBMIT_ORDERS` now validates orders against a projected state rather than the original state. A `projected` variable starts as `state`; for each valid launch order, `projected` is `structuredClone`d and the relevant delivery + warhead fields decremented before the next order's `validateOrder` call. Non-launch orders (builds, propaganda, woo) do not update the projection. The actual committed state (with `pendingOrders` set and AP deducted) is still derived from the original `state` via a single `structuredClone` after all validations pass.
 
 ```ts
 import type { Action, GameState } from './types';

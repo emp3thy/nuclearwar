@@ -78,4 +78,19 @@ describe('initialState', () => {
     expect(s.config.dominanceThreshold).toBe(2);
     expect(s.config.fastPlay).toBe(false);
   });
+
+  it('seeds player1 with default Firefly / Freedonia identity', () => {
+    const s = initialState({
+      cast: ['player1', 'chump'],
+      difficulty: 'normal',
+      seed: 'p25-default',
+    });
+    expect(s.leaders.player1.name).toBe('Rufus T. Firefly');
+    expect(s.leaders.player1.country).toBe('🦆 Freedonia');
+    expect(s.leaders.player1.population).toBe(25);
+    expect(s.leaders.player1.factories).toBe(6);
+    expect(s.leaders.player1.ap).toBe(3);
+    expect(s.leaders.player1.alive).toBe(true);
+    expect(s.leaders.player1.bonusRule).toBeUndefined();
+  });
 });

@@ -56,6 +56,41 @@ export const LEADER_PROFILES: Record<
     startAp: 3,
     bonusRule: 'netanyahoo-launch-bonus',
   },
+  player1: {
+    name: 'Rufus T. Firefly',
+    country: '🦆 Freedonia',
+    startPop: 25,
+    startFactories: 6,
+    startAp: 3,
+  },
+  player2: {
+    name: 'Player 2',
+    country: '🦆 Freedonia 2',
+    startPop: 25,
+    startFactories: 6,
+    startAp: 3,
+  },
+  player3: {
+    name: 'Player 3',
+    country: '🦆 Freedonia 3',
+    startPop: 25,
+    startFactories: 6,
+    startAp: 3,
+  },
+  player4: {
+    name: 'Player 4',
+    country: '🦆 Freedonia 4',
+    startPop: 25,
+    startFactories: 6,
+    startAp: 3,
+  },
+  player5: {
+    name: 'Player 5',
+    country: '🦆 Freedonia 5',
+    startPop: 25,
+    startFactories: 6,
+    startAp: 3,
+  },
 };
 
 export const ACTION_COSTS = {

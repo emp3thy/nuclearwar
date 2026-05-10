@@ -48,9 +48,12 @@ describe('AI-duel headless', () => {
   // counts add up). It prints the win distribution so the P4 balance pass has
   // a reproducible baseline to tune against.
   it('runs 100 all-AI games over full cast without crashing (balance assertions deferred to P4)', () => {
+    // Player1..player5 are zero-initialised because the duel is AI-only and
+    // never includes player slots — kept to satisfy Record<LeaderId | 'NOBODY'>.
     const wins: Record<LeaderId | 'NOBODY', number> = {
       chump: 0, khameneverhere: 0, starmless: 0,
       carnage: 0, 'mileigh-hem': 0, netanyahoo: 0,
+      player1: 0, player2: 0, player3: 0, player4: 0, player5: 0,
       NOBODY: 0,
     };
     let unfinished = 0;

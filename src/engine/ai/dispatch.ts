@@ -20,5 +20,14 @@ export function dispatch(state: GameState, leaderId: LeaderId): Order[] {
     case 'netanyahoo': return planNetanyahoo(state, leaderId);
     case 'starmless': return planStarmless(state, leaderId);
     case 'mileigh-hem': return planMileighHem(state, leaderId);
+    case 'player1':
+    case 'player2':
+    case 'player3':
+    case 'player4':
+    case 'player5':
+      throw new Error(
+        `dispatch() called for human player slot '${leaderId}'. ` +
+        `Human leaders submit orders via SUBMIT_ORDERS, not via the AI dispatcher.`,
+      );
   }
 }

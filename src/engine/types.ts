@@ -4,7 +4,12 @@ export type LeaderId =
   | 'starmless'
   | 'carnage'
   | 'mileigh-hem'
-  | 'netanyahoo';
+  | 'netanyahoo'
+  | 'player1'
+  | 'player2'
+  | 'player3'
+  | 'player4'
+  | 'player5';
 
 export type Difficulty = 'easy' | 'normal' | 'hard';
 

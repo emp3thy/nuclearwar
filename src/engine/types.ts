@@ -108,6 +108,8 @@ export interface GameState {
   rngState: number;
   leaders: Record<LeaderId, Leader>;
   pendingOrders: Partial<Record<LeaderId, SealedOrders>>;
+  /** The most recent round's submitted orders for each leader. Populated by RESOLVE_ROUND before pendingOrders is cleared. Used by Hard-mode lookahead to project human opponents' likely behaviour. */
+  lastOrders: Partial<Record<LeaderId, Order[]>>;
   log: ResolutionEvent[];
   outcome: WinOutcome | null;
   config: GameConfig;

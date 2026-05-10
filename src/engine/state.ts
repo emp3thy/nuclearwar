@@ -9,6 +9,11 @@ export interface NewGameOpts {
   config?: Partial<GameConfig>;
 }
 
+/** Returns true for human player slots ('player1'..'player5'); false for the six AI character ids. Derived from the LeaderId — no stored field. */
+export function isHuman(id: LeaderId): boolean {
+  return id.startsWith('player');
+}
+
 export function initialState(opts: NewGameOpts): GameState {
   const leaders = {} as Record<LeaderId, Leader>;
   for (const id of opts.cast) {
@@ -46,6 +51,7 @@ export function initialState(opts: NewGameOpts): GameState {
     rngState: seedFromString(opts.seed),
     leaders,
     pendingOrders: {},
+    lastOrders: {},
     log: [],
     outcome: null,
     config: {

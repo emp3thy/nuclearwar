@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { initialState } from '../../src/engine/state';
+import { initialState, isHuman } from '../../src/engine/state';
 
 describe('initialState', () => {
   it('seeds Chump and Carnage with their spec values', () => {
@@ -92,5 +92,21 @@ describe('initialState', () => {
     expect(s.leaders.player1.ap).toBe(3);
     expect(s.leaders.player1.alive).toBe(true);
     expect(s.leaders.player1.bonusRule).toBeUndefined();
+  });
+
+  it('seeds lastOrders as an empty object', () => {
+    const s = initialState({
+      cast: ['player1', 'chump'],
+      difficulty: 'normal',
+      seed: 'p25-lastOrders-init',
+    });
+    expect(s.lastOrders).toEqual({});
+  });
+
+  it('isHuman classifies player slots vs AI characters', () => {
+    expect(isHuman('player1')).toBe(true);
+    expect(isHuman('player5')).toBe(true);
+    expect(isHuman('chump')).toBe(false);
+    expect(isHuman('carnage')).toBe(false);
   });
 });

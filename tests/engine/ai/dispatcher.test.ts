@@ -59,4 +59,13 @@ describe('planAi dispatcher', () => {
       expect(launch.target).toBe('carnage');
     }
   });
+
+  it('throws when called for a human player slot', () => {
+    const s = initialState({
+      cast: ['player1', 'chump'],
+      difficulty: 'normal',
+      seed: 'planAi-human',
+    });
+    expect(() => planAi(s, 'player1')).toThrow(/human/i);
+  });
 });

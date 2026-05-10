@@ -1,6 +1,7 @@
 import type { GameState, LeaderId, Order } from '../types';
 import { apCostOf, validateOrder } from '../orders';
 import { defenceVisibilityScore, opportunismScore } from './scoring';
+import { bestTargetByLookahead } from './lookahead';
 
 /**
  * Chump — Coward personality.
@@ -31,15 +32,32 @@ export function planChump(state: GameState, leaderId: LeaderId): Order[] {
 
   // --- Find a weak, unwooed target for a potential launch ---
   const eligible = others.filter((t) => (me.favourability[t] ?? 0) <= 0);
-  const weakTarget = eligible.find(
-    (t) => opportunismScore(state, t) > 0 || defenceVisibilityScore(state, t) === 0,
-  );
 
-  const canLaunch =
-    weakTarget !== undefined &&
+  const hasLaunchResources =
     me.stockpile.missiles >= 1 &&
     me.stockpile.warheadsSmall >= 1 &&
     budget >= LAUNCH_COST;
+
+  let weakTarget: LeaderId | undefined;
+  if (hasLaunchResources && eligible.length > 0) {
+    if (state.difficulty === 'hard') {
+      // Hard mode: use 1-ply lookahead to pick the best target among candidates.
+      // Candidates are all unwooed opponents; K is implicitly bounded by cast size.
+      const baselineOrders: Order[] = []; // builds come after launch decision
+      const lookaheadTarget = bestTargetByLookahead(state, leaderId, baselineOrders, eligible, {
+        delivery: 'missile', warhead: 'small', targetType: 'people',
+      });
+      weakTarget = lookaheadTarget ?? undefined;
+    } else {
+      weakTarget = eligible.find(
+        (t) => opportunismScore(state, t) > 0 || defenceVisibilityScore(state, t) === 0,
+      );
+    }
+  }
+
+  const canLaunch =
+    weakTarget !== undefined &&
+    hasLaunchResources;
 
   // Reserve AP for launch (if feasible) and for propaganda.
   const launchReserve = canLaunch ? LAUNCH_COST : 0;

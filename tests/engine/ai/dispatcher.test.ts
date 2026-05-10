@@ -31,4 +31,22 @@ describe('planAi dispatcher', () => {
     // Skip assertion if both happen to be 0 (rare, RNG-dependent).
     // (Implementation detail; can be skipped or replaced with a seed-dependent assertion.)
   });
+
+  it('Hard Chump picks the target whose projected outcome favours him', () => {
+    const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'hard', seed: 'hard-chump' });
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    // Carnage is wide-open (shields=0) — a launch lands, hurting carnage's threat to Chump.
+    // Starmless has shields=5 — any launch always intercepts, no real progress.
+    s.leaders.carnage.population = 8;
+    s.leaders.carnage.stockpile.shields = 0;
+    s.leaders.starmless.population = 8;
+    s.leaders.starmless.stockpile.shields = 5;
+    const orders = planAi(s, 'chump');
+    const launch = orders.find((o) => o.kind === 'launch');
+    expect(launch).toBeDefined();
+    if (launch?.kind === 'launch') {
+      expect(launch.target).toBe('carnage');
+    }
+  });
 });

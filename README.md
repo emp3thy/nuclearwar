@@ -37,3 +37,45 @@ What's NOT in `src/engine/`:
 - Any UI / Vite / React. Phase 3.
 - Flavour bank wiring, Disparage cameo, masthead rotation. Phase 4.
 - Audio, persistence, replay scrubber, PWA, animations. Phase 4.
+
+## Phase 2 status
+
+Phase 2 ships AI personalities, difficulty levels, and an AI-duel headless test mode. Verification is `npm run test:run` (146 tests, 25 files).
+
+### What's in `src/engine/ai/`
+
+- Six per-leader scoring modules implementing spec §7 personalities:
+  - `chump.ts` — Coward (defence + warhead bias; refuses to launch at leaders wooing him; prefers Infra targeting).
+  - `khameneverhere.ts` — Grudge (launches focus on top of grudge list).
+  - `netanyahoo.ts` — Warmonger (Chump-exception: no launch at Chump until Chump attacks first; propaganda exclusively at Chump; biases toward largest-arsenal target).
+  - `carnage.ts` — Rational + Opportunist (threat = arsenal + recent_aggression; escalation multiplier on attackers).
+  - `starmless.ts` — Cautious + Scapegoat (defensive baseline; 35 % scapegoat roll on retaliation).
+  - `mileighhem.ts` — Glass cannon (two modes gated by `apBanked + ap >= 4`).
+- `scoring.ts` — shared primitives: `threatScore`, `opportunismScore`, `defenceVisibilityScore`, `populationAdvantage`, `wasAttackedBy`, `topGrudgeTarget`.
+- `lookahead.ts` — Hard-mode 1-ply expectiminimax (`simulateOneRound`, `scoreState`, `bestTargetByLookahead`). For each candidate launch target, builds a projected next-round state with all other leaders simulated at Normal difficulty (no recursion), then picks the target with the best projected population delta.
+- `index.ts` — `planAi(state, leaderId, difficulty?)` dispatcher. Difficulty levels: Easy 30 % random moves, Normal 10 % random, Hard 0 % random + lookahead.
+
+### Engine plumbing added in P2
+
+- Resolution-time grudge / aggression updates (`resolution.ts`): bumps `grudge[from]` (yield-weighted) and `recentAggressionFrom[from]` per impact event, including FR cascade impacts.
+- FR target picker switched to grudge-weighted draw with uniform fallback (`finalRetaliation.ts`). Preserves P1 behaviour when grudge map is empty.
+
+### Known balance issues (deferred to P4)
+
+The AI-duel headless test (`tests/engine/ai-duel.test.ts`) runs 100 all-AI games at Normal difficulty and prints the win distribution. The first run produced:
+
+    chump 17 / khameneverhere 0 / starmless 0 / carnage 6 /
+    mileigh-hem 0 / netanyahoo 39 / unfinished 38
+
+Two structural imbalances are responsible:
+
+- Mutual shield-saturation in 6-leader games causes ~38 % stalemates within 100 rounds. Raising `maxRounds` to 300 does not change the distribution — the equilibrium is stable, not just slow.
+- Reactive personalities (Khameneverhere, Starmless, Mileigh-hem) need an attacker to bootstrap. In a grid of passive or woo-heavy AI, they never fire.
+
+Per the standing convention, AI scoring-weight tuning is deferred to a balance pass after P3 lands and humans can play. The duel test in P2 asserts only that the engine ran 100 games without crashing; balance assertions land in P4.
+
+### What's NOT in `src/engine/ai/`
+
+- Production UI / Vite / React. Phase 3.
+- Flavour bank wiring / Disparage cameo / masthead rotation / audio / persistence / replay scrubber / PWA / animations. Phase 4.
+- Per-personality scoring weight tuning. Deferred to P4 balance pass.

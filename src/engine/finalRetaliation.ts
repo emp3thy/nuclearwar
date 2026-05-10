@@ -8,7 +8,7 @@ import type {
 } from './types';
 import { applyLaunches, makeIncomingCounter, warheadFieldFor } from './launches';
 import type { IncomingCounter } from './launches';
-import { nextInt } from './rng';
+import { nextInt, nextRandom } from './rng';
 
 export interface FinalRetaliationResult {
   state: GameState;
@@ -60,10 +60,31 @@ export function applyFinalRetaliation(
         else leader.stockpile.bombers -= 1;
         leader.stockpile[wf] -= 1;
 
-        // Uniform-random target. P2 layers grudge weighting.
-        const pick = nextInt(next.rngState, survivors.length);
-        next.rngState = pick.state;
-        const target = survivors[pick.value];
+        // Weighted by grudge if non-empty, else uniform.
+        const grudge = leader.grudge;
+        const weights = survivors.map((s) => Math.max(0, grudge[s] ?? 0));
+        const totalWeight = weights.reduce((a, b) => a + b, 0);
+        let target: LeaderId;
+        if (totalWeight > 0) {
+          // Weighted draw: pick a value in [0, totalWeight) and walk cumulative weights.
+          const draw = nextRandom(next.rngState);
+          next.rngState = draw.state;
+          let cumulative = 0;
+          const threshold = draw.value * totalWeight;
+          target = survivors[0];
+          for (let i = 0; i < survivors.length; i++) {
+            cumulative += weights[i];
+            if (cumulative > threshold) {
+              target = survivors[i];
+              break;
+            }
+          }
+        } else {
+          // Uniform fallback.
+          const pick = nextInt(next.rngState, survivors.length);
+          next.rngState = pick.state;
+          target = survivors[pick.value];
+        }
 
         synthesised.push({
           from: id,

@@ -87,3 +87,38 @@ export const PROPAGANDA_TRANSFER_M = 1;
 /** Favourability points decayed per round per relationship. Tunable. */
 export const WOO_FAVOURABILITY_DECAY = 1;
 export const DOMINANCE_THRESHOLD_DEFAULT = 2;
+
+/**
+ * Per-leader scoring weights. First-pass values; balance-pass deferred to P4.
+ * Each personality module reads from this table to compose its own scoring function.
+ */
+export const AI_SCORING_WEIGHTS = {
+  // Threat scoring: how dangerous another leader is to me.
+  threat: {
+    perMissile: 1,
+    perBomber: 1,
+    perWarheadSmall: 1,
+    perWarheadMedium: 2,
+    perWarheadLarge: 4,
+    perRecentAggression: 3, // recentAggressionFrom[them] -> their threat to me
+  },
+  // Opportunism: how vulnerable a target is.
+  opportunism: {
+    perPopBelow10M: 4,
+    perFactoryBelow3: 2,
+    perDefenceShield: -1, // defended targets are LESS opportunistic
+    perDefenceAa: -1,
+  },
+  // Carnage's escalation multiplier on attacker's threat next round.
+  carnageEscalationMultiplier: 2,
+  // Starmless's scapegoat probability on retaliation (35 %).
+  starmlessScapegoatPct: 0.35,
+  // Mileigh-hem's all-out activation trigger.
+  mileighActivationApThreshold: 4,
+  // Khameneverhere grudge weight per impact (multiplied by warhead yield index 1/2/4).
+  grudgePerImpact: { small: 1, medium: 2, large: 4 } as const,
+  // Hard-mode lookahead: outcome scoring constants (see lookahead.ts).
+  scoreWinBonus: 1000,
+  scoreLossPenalty: -1000,
+  scoreApocalypsePenalty: -500,
+} as const;

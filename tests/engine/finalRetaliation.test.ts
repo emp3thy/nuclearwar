@@ -78,6 +78,29 @@ describe('applyFinalRetaliation', () => {
     expect(launchedAtChump).toBe(0);
   });
 
+  it('never picks a zero-weight survivor (boundary: strict > not >= in cumulative draw)', () => {
+    // weights=[0, 100]: chump grudge=0, starmless grudge=100.
+    // Regardless of seed, the weighted draw must NEVER pick chump.
+    // This is the regression for the cumulative >= threshold boundary bug:
+    // when RNG returns 0.0, threshold=0 and cumulative=0, so >= would pick
+    // the first survivor (chump, weight=0) incorrectly.
+    for (let i = 0; i < 30; i++) {
+      const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: `fr-boundary-${i}` });
+      s.leaders.carnage.stockpile.missiles = 4;
+      s.leaders.carnage.stockpile.warheadsSmall = 4;
+      s.leaders.carnage.alive = false;
+      s.leaders.carnage.population = 0;
+      s.leaders.carnage.grudge = { chump: 0, starmless: 100 };
+      s.leaders.chump.stockpile.shields = 0;
+      s.leaders.starmless.stockpile.shields = 0;
+      const r = applyFinalRetaliation(s, ['carnage']);
+      const launchedAtChump = r.events.filter(
+        (e) => e.kind === 'MissileLaunched' && e.to === 'chump',
+      ).length;
+      expect(launchedAtChump).toBe(0);
+    }
+  });
+
   it('falls back to uniform random when grudge is empty (preserves P1 behaviour)', () => {
     const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'fr-uniform' });
     s.leaders.carnage.stockpile.missiles = 8;

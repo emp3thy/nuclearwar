@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { simulateOneRound, scoreState, bestTargetByLookahead } from '../../../src/engine/ai/lookahead';
+import { dispatch } from '../../../src/engine/ai/dispatch';
 import { initialState } from '../../../src/engine/state';
 import type { Order } from '../../../src/engine/types';
 
@@ -58,7 +59,7 @@ describe('bestTargetByLookahead', () => {
     const candidates: ['carnage', 'starmless'] = ['carnage', 'starmless'];
     const best = bestTargetByLookahead(s, 'chump', baseline, candidates, {
       delivery: 'missile', warhead: 'large', targetType: 'people',
-    });
+    }, dispatch);
     expect(best).toBe('carnage');
   });
 
@@ -66,7 +67,7 @@ describe('bestTargetByLookahead', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'hard', seed: 'lh6' });
     const best = bestTargetByLookahead(s, 'chump', [], [], {
       delivery: 'missile', warhead: 'small', targetType: 'people',
-    });
+    }, dispatch);
     expect(best).toBeNull();
   });
 });

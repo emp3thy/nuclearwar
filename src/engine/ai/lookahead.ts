@@ -1,6 +1,5 @@
 import type { DeliveryType, GameState, LeaderId, Order, TargetType, Yield } from '../types';
 import { reduce } from '../reducer';
-import { planAi } from './index';
 
 export interface LookaheadLaunchSpec {
   delivery: DeliveryType;
@@ -64,8 +63,11 @@ export function scoreState(state: GameState, viewer: LeaderId): number {
 
 /**
  * Pick the candidate launch target whose projected post-round state scores
- * highest from `viewer`'s perspective. Opponents are simulated at NORMAL
- * difficulty (no recursion into Hard).
+ * highest from `viewer`'s perspective.
+ *
+ * `opponentPlanner` is called for each living opponent to produce their orders
+ * for the simulated round. Callers should pass a planner that does NOT recurse
+ * into Hard mode (e.g. `dispatch` from dispatch.ts) to avoid Hard→Hard loops.
  *
  * `baseline` are non-launch orders (builds, propaganda, etc.) the viewer is
  * already committed to this round; `launch` describes the launch shape that
@@ -79,6 +81,7 @@ export function bestTargetByLookahead(
   baseline: Order[],
   candidates: readonly LeaderId[],
   launch: LookaheadLaunchSpec,
+  opponentPlanner: (state: GameState, leaderId: LeaderId) => Order[],
 ): LeaderId | null {
   if (candidates.length === 0) return null;
 
@@ -97,8 +100,7 @@ export function bestTargetByLookahead(
       if (id === viewer) continue;
       const opp = state.leaders[id];
       if (!opp || !opp.alive) continue;
-      // Force NORMAL difficulty for opponent simulation to avoid Hard→Hard recursion.
-      ordersByLeader[id] = planAi(state, id, 'normal');
+      ordersByLeader[id] = opponentPlanner(state, id);
     }
     const projected = simulateOneRound(state, ordersByLeader);
     const score = scoreState(projected, viewer);

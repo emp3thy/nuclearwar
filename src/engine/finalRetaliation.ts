@@ -74,7 +74,7 @@ export function applyFinalRetaliation(
           target = survivors[0];
           for (let i = 0; i < survivors.length; i++) {
             cumulative += weights[i];
-            if (cumulative >= threshold) {
+            if (cumulative > threshold) {
               target = survivors[i];
               break;
             }

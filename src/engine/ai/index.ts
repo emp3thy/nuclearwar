@@ -1,12 +1,8 @@
 import type { Difficulty, GameState, LeaderId, Order } from '../types';
 import { apCostOf, validateOrder } from '../orders';
 import { nextRandom } from '../rng';
-import { planChump } from './chump';
-import { planCarnage } from './carnage';
-import { planKhameneverhere } from './khameneverhere';
-import { planNetanyahoo } from './netanyahoo';
-import { planStarmless } from './starmless';
-import { planMileighHem } from './mileighhem';
+import { dispatch } from './dispatch';
+import { bestTargetByLookahead } from './lookahead';
 
 const DIFFICULTY_RANDOM_PCT: Record<Difficulty, number> = {
   easy: 0.3,
@@ -19,10 +15,38 @@ export function planAi(state: GameState, leaderId: LeaderId, difficulty?: Diffic
   const me = state.leaders[leaderId];
   if (!me || !me.alive) return [];
 
-  // Hard-mode lookahead is implemented inside per-leader files via
-  // bestTargetByLookahead (see Task 11). The dispatcher itself just routes by
-  // leaderId and applies the Easy/Normal randomization wrapper.
+  // Get the per-leader baseline orders (personality-specific, difficulty-agnostic).
   let orders = dispatch(state, leaderId);
+
+  // Hard mode: replace the target of any launch order with the lookahead-optimal target.
+  // dispatch is used as the opponent planner so opponents never recurse into Hard.
+  if (diff === 'hard') {
+    const launchIndex = orders.findIndex((o) => o.kind === 'launch');
+    if (launchIndex !== -1) {
+      const launch = orders[launchIndex];
+      if (launch.kind === 'launch') {
+        const others = state.cast.filter((id) => id !== leaderId && state.leaders[id]?.alive);
+        if (others.length > 0) {
+          const baseline = orders.filter((_, i) => i !== launchIndex);
+          const bestTarget = bestTargetByLookahead(
+            state,
+            leaderId,
+            baseline,
+            others,
+            { delivery: launch.delivery, warhead: launch.warhead, targetType: launch.targetType },
+            dispatch,
+          );
+          if (bestTarget !== null) {
+            orders = [
+              ...baseline.slice(0, launchIndex),
+              { ...launch, target: bestTarget },
+              ...baseline.slice(launchIndex),
+            ];
+          }
+        }
+      }
+    }
+  }
 
   // Easy / Normal randomization: replace each order with probability difficulty-pct.
   if (DIFFICULTY_RANDOM_PCT[diff] > 0) {
@@ -30,17 +54,6 @@ export function planAi(state: GameState, leaderId: LeaderId, difficulty?: Diffic
   }
 
   return orders;
-}
-
-function dispatch(state: GameState, leaderId: LeaderId): Order[] {
-  switch (leaderId) {
-    case 'chump': return planChump(state, leaderId);
-    case 'carnage': return planCarnage(state, leaderId);
-    case 'khameneverhere': return planKhameneverhere(state, leaderId);
-    case 'netanyahoo': return planNetanyahoo(state, leaderId);
-    case 'starmless': return planStarmless(state, leaderId);
-    case 'mileigh-hem': return planMileighHem(state, leaderId);
-  }
 }
 
 function applyRandomization(

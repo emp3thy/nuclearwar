@@ -66,6 +66,6 @@ describe('planAi dispatcher', () => {
       difficulty: 'normal',
       seed: 'planAi-human',
     });
-    expect(() => planAi(s, 'player1')).toThrow(/human/i);
+    expect(() => planAi(s, 'player1')).toThrow(/planAi.*human/i);
   });
 });

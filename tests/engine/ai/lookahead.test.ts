@@ -85,13 +85,12 @@ describe('bestTargetByLookahead', () => {
     s.leaders.player1.population = 8;
     s.leaders.player1.stockpile.shields = 0;
     // No lastOrders[player1] populated. Should not throw, should pick a target.
-    expect(() => planAi(s, 'chump')).not.toThrow();
     const orders = planAi(s, 'chump');
     expect(orders.find((o) => o.kind === 'launch')).toBeDefined();
   });
 
   it('mixed cast with history: lookahead simulates human as repeating their last orders', () => {
-    let s = initialState({
+    const s = initialState({
       cast: ['chump', 'carnage', 'player1'],
       difficulty: 'hard',
       seed: 'lookahead-human-with-history',

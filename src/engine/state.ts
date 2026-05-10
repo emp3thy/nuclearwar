@@ -19,10 +19,11 @@ export function initialState(opts: NewGameOpts): GameState {
   for (const id of opts.cast) {
     const profile = LEADER_PROFILES[id];
     const startPop = opts.config?.startPopOverride?.[id] ?? profile.startPop;
+    const playerOverride = opts.config?.playerProfiles?.[id];
     leaders[id] = {
       id,
-      name: profile.name,
-      country: profile.country,
+      name: playerOverride?.name ?? profile.name,
+      country: playerOverride?.country ?? profile.country,
       population: startPop,
       factories: profile.startFactories,
       stockpile: {

@@ -109,4 +109,36 @@ describe('initialState', () => {
     expect(isHuman('chump')).toBe(false);
     expect(isHuman('carnage')).toBe(false);
   });
+
+  it('honours playerProfiles override for name and country', () => {
+    const s = initialState({
+      cast: ['player1', 'chump'],
+      difficulty: 'normal',
+      seed: 'p25-override',
+      config: {
+        playerProfiles: {
+          player1: { name: 'Tony', country: '🇮🇹 Italy' },
+        },
+      },
+    });
+    expect(s.leaders.player1.name).toBe('Tony');
+    expect(s.leaders.player1.country).toBe('🇮🇹 Italy');
+    // AI leaders are unaffected by playerProfiles overrides.
+    expect(s.leaders.chump.name).toBe('Chump');
+  });
+
+  it('falls back to LEADER_PROFILES defaults when playerProfiles override is partial', () => {
+    const s = initialState({
+      cast: ['player1'],
+      difficulty: 'normal',
+      seed: 'p25-partial',
+      config: {
+        playerProfiles: {
+          player1: { name: 'Tony' }, // country omitted
+        },
+      },
+    });
+    expect(s.leaders.player1.name).toBe('Tony');
+    expect(s.leaders.player1.country).toBe('🦆 Freedonia');
+  });
 });

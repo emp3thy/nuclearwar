@@ -92,6 +92,8 @@ export interface SealedOrders {
 
 export interface GameConfig {
   startPopOverride?: Partial<Record<LeaderId, number>>;
+  /** Per-game name/country overrides for player slots. Keys should be 'player1'..'player5'; entries for AI leaders are ignored. Setup screen populates this from user input. */
+  playerProfiles?: Partial<Record<LeaderId, { name?: string; country?: string }>>;
   dominanceThreshold: number;
   fastPlay: boolean;
 }

@@ -53,4 +53,50 @@ describe('applyFinalRetaliation', () => {
     const r = applyFinalRetaliation(s, ['carnage']);
     expect(r.events.filter((e) => e.kind === 'MissileLaunched')).toHaveLength(0);
   });
+
+  it('picks FR targets weighted by the dying leader\'s grudge map (when non-empty)', () => {
+    // 3-leader setup: dying leader (carnage) has heavy grudge against starmless.
+    // FR should fire mostly at starmless, not chump.
+    const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'fr-grudge' });
+    s.leaders.carnage.stockpile.missiles = 8;
+    s.leaders.carnage.stockpile.warheadsSmall = 8;
+    s.leaders.carnage.alive = false;
+    s.leaders.carnage.population = 0;
+    s.leaders.carnage.grudge = { starmless: 100, chump: 0 };
+    // Both targets vulnerable, no defences.
+    s.leaders.chump.stockpile.shields = 0;
+    s.leaders.starmless.stockpile.shields = 0;
+    const r = applyFinalRetaliation(s, ['carnage']);
+    // All 8 launches should target starmless (weight 100 vs 0 → starmless every time).
+    const launchedAtStarmless = r.events.filter(
+      (e) => e.kind === 'MissileLaunched' && e.to === 'starmless',
+    ).length;
+    const launchedAtChump = r.events.filter(
+      (e) => e.kind === 'MissileLaunched' && e.to === 'chump',
+    ).length;
+    expect(launchedAtStarmless).toBe(8);
+    expect(launchedAtChump).toBe(0);
+  });
+
+  it('falls back to uniform random when grudge is empty (preserves P1 behaviour)', () => {
+    const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'fr-uniform' });
+    s.leaders.carnage.stockpile.missiles = 8;
+    s.leaders.carnage.stockpile.warheadsSmall = 8;
+    s.leaders.carnage.alive = false;
+    s.leaders.carnage.population = 0;
+    // grudge empty (default).
+    s.leaders.chump.stockpile.shields = 0;
+    s.leaders.starmless.stockpile.shields = 0;
+    const r = applyFinalRetaliation(s, ['carnage']);
+    const launchedAtStarmless = r.events.filter(
+      (e) => e.kind === 'MissileLaunched' && e.to === 'starmless',
+    ).length;
+    const launchedAtChump = r.events.filter(
+      (e) => e.kind === 'MissileLaunched' && e.to === 'chump',
+    ).length;
+    // Both targets should have at least one launch over 8 firings (RNG with seed 'fr-uniform').
+    expect(launchedAtStarmless + launchedAtChump).toBe(8);
+    expect(launchedAtStarmless).toBeGreaterThan(0);
+    expect(launchedAtChump).toBeGreaterThan(0);
+  });
 });

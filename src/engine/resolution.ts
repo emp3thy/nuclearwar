@@ -5,7 +5,7 @@ import { applyWooing, decayFavourability } from './diplomacy';
 import { applyLaunches, collectLaunches, consumeStockFor, makeIncomingCounter } from './launches';
 import { applyFinalRetaliation } from './finalRetaliation';
 import { checkOutcome } from './winConditions';
-import { AP_BANK_CAP, FACTORY_AP_RATE, LEADER_PROFILES } from './balance';
+import { AP_BANK_CAP, FACTORY_AP_RATE, LEADER_PROFILES, AI_SCORING_WEIGHTS } from './balance';
 
 export interface ResolveResult {
   state: GameState;
@@ -78,6 +78,18 @@ export function resolveRound(state: GameState): ResolveResult {
     s = r.state;
     events.push(...r.events);
     Object.assign(incomingCounter, r.incoming);
+  }
+
+  // Update grudge / recentAggressionFrom on receivers based on landed impacts.
+  // Walks the events emitted by applyLaunches and bumps the receiver's counters.
+  for (const e of events) {
+    if (e.kind === 'ImpactPeople' || e.kind === 'ImpactInfrastructure') {
+      const victim = s.leaders[e.target];
+      if (!victim) continue;
+      const grudgeBump = AI_SCORING_WEIGHTS.grudgePerImpact[e.warhead];
+      victim.grudge[e.from] = (victim.grudge[e.from] ?? 0) + grudgeBump;
+      victim.recentAggressionFrom[e.from] = (victim.recentAggressionFrom[e.from] ?? 0) + 1;
+    }
   }
 
   // Status: mark newly-eliminated leaders.

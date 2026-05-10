@@ -1,5 +1,6 @@
 import type { DeliveryType, GameState, LeaderId, Order, TargetType, Yield } from '../types';
 import { reduce } from '../reducer';
+import { isHuman } from '../state';
 
 export interface LookaheadLaunchSpec {
   delivery: DeliveryType;
@@ -100,6 +101,14 @@ export function bestTargetByLookahead(
       if (id === viewer) continue;
       const opp = state.leaders[id];
       if (!opp || !opp.alive) continue;
+      if (isHuman(id)) {
+        // Project the human as repeating last round's orders. Falls back to []
+        // for the first round (no history yet) or if they passed last round.
+        // simulateOneRound re-validates and gracefully drops invalid orders
+        // (e.g., a launch order from last round when their stockpile is now empty).
+        ordersByLeader[id] = state.lastOrders[id] ?? [];
+        continue;
+      }
       ordersByLeader[id] = opponentPlanner(state, id);
     }
     const projected = simulateOneRound(state, ordersByLeader);

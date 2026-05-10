@@ -464,11 +464,18 @@ Expected: FAIL — grudge / recentAggressionFrom not updated.
 
 - [ ] **Step 2.3: Modify `src/engine/resolution.ts`**
 
-After the launch phase block (after `events.push(...r.events);`), and BEFORE the status-update / FR cascade block, add:
+Place the grudge-update loop **AFTER the FR cascade block** (after `events.push(...r.events);` for `applyFinalRetaliation`) so that BOTH regular-launch impacts AND FR-cascade impacts are walked. The earlier draft of this plan placed the loop before the FR cascade — that was a bug; FR events would never be processed.
 
 ```ts
-// Update grudge / recentAggressionFrom on receivers based on landed impacts.
-// Walks the events emitted by applyLaunches and bumps the receiver's counters.
+// Place after the FR cascade block (line ~111 in resolution.ts):
+//
+//   if (newlyDead.length > 0) {
+//     const r = applyFinalRetaliation(s, newlyDead, incomingCounter);
+//     s = r.state;
+//     events.push(...r.events);
+//   }
+//
+// THEN add:
 for (const e of events) {
   if (e.kind === 'ImpactPeople' || e.kind === 'ImpactInfrastructure') {
     const victim = s.leaders[e.target];
@@ -486,7 +493,7 @@ Add the import at the top:
 import { AP_BANK_CAP, FACTORY_AP_RATE, LEADER_PROFILES, AI_SCORING_WEIGHTS } from './balance';
 ```
 
-**Note:** the loop scans `events`, not just the launch-phase events. That's fine — the grudge update is idempotent over event order since FR-cascade events also go through `applyLaunches` (which emits `ImpactPeople` / `ImpactInfrastructure`). So FR-driven impacts update grudge too. Verify with a third test:
+**Note:** the loop walks the full `events` array. Because the loop runs AFTER the FR cascade has pushed its events, FR-driven impacts (which carry the dying leader as `e.from`) attribute grudge to the dying leader correctly. Verify with a third test:
 
 ```ts
 it('FR cascade impacts also update grudge (cascade leader\'s impacts attributed to them)', () => {
@@ -517,7 +524,7 @@ it('FR cascade impacts also update grudge (cascade leader\'s impacts attributed 
 });
 ```
 
-The third test exists primarily to confirm no crash on the cascade path; the actual grudge update from FR depends on whether the FR launch lands, which is RNG-dependent.
+The third test uses pigeonhole + overwhelmed defences (8 FR launches + 2 vulnerable survivors with shields=0) to deterministically guarantee at least one FR impact lands. The assertion `chumpGrudge + starmlessGrudge > 0` verifies the FR-attribution path is wired correctly. (An earlier draft of this plan used a single-launch setup that was RNG-flaky; replaced with the overwhelmed-defences version.)
 
 - [ ] **Step 2.4: Run, expect PASS**
 

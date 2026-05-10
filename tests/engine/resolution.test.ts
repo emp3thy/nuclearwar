@@ -177,16 +177,17 @@ describe('resolveRound', () => {
     expect((r.state.leaders.carnage.grudge.chump ?? 0)).toBeGreaterThan(0);
   });
 
-  it('FR cascade impacts also update grudge (cascade leader\'s impacts attributed to them)', () => {
-    // Setup: carnage about to die from chump's launches; carnage has 1 missile + 1 small warhead.
-    // FR fires carnage → starmless or chump (uniform random in P1; grudge-weighted in Task 3).
-    // The FR impact's grudge update should attribute to carnage.
-    let s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'x' });
+  it('FR cascade impacts also update grudge (deterministic via overwhelmed-defences setup)', () => {
+    // Setup: carnage dies from chump's launches AND has a heavy stockpile that fires
+    // 8 FR launches at chump+starmless. With shields=0 on both, pigeonhole guarantees
+    // one target gets ≥4 incoming → 4th has 0% intercept → at least one FR hit lands.
+    // That landed FR impact must attribute grudge to carnage (the dying leader).
+    let s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'fr-grudge' });
     s.leaders.chump.stockpile.missiles = 4;
     s.leaders.chump.stockpile.warheadsLarge = 4;
     s.leaders.carnage.population = 5;
-    s.leaders.carnage.stockpile.missiles = 1;
-    s.leaders.carnage.stockpile.warheadsSmall = 1;
+    s.leaders.carnage.stockpile.missiles = 8;
+    s.leaders.carnage.stockpile.warheadsSmall = 8;
     s.leaders.chump.stockpile.shields = 0;
     s.leaders.starmless.stockpile.shields = 0;
     const launch = {
@@ -197,10 +198,8 @@ describe('resolveRound', () => {
     s = withOrders(s, 'carnage', []);
     s = withOrders(s, 'starmless', []);
     const r = resolveRound(s);
-    // Whoever carnage's FR hit should have grudge against carnage > 0 IF the FR launch landed.
     const chumpGrudge = r.state.leaders.chump.grudge.carnage ?? 0;
     const starmlessGrudge = r.state.leaders.starmless.grudge.carnage ?? 0;
-    expect(chumpGrudge + starmlessGrudge).toBeGreaterThanOrEqual(0);
-    // (May be 0 if FR was intercepted — the assertion is structural; the key check is no crash.)
+    expect(chumpGrudge + starmlessGrudge).toBeGreaterThan(0);
   });
 });

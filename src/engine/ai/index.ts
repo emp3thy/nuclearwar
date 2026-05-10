@@ -1,6 +1,7 @@
 import type { Difficulty, GameState, LeaderId, Order } from '../types';
 import { apCostOf, validateOrder } from '../orders';
 import { nextRandom } from '../rng';
+import { isHuman } from '../state';
 import { dispatch } from './dispatch';
 import { bestTargetByLookahead } from './lookahead';
 
@@ -11,9 +12,20 @@ const DIFFICULTY_RANDOM_PCT: Record<Difficulty, number> = {
 };
 
 export function planAi(state: GameState, leaderId: LeaderId, difficulty?: Difficulty): Order[] {
-  const diff = difficulty ?? state.difficulty;
   const me = state.leaders[leaderId];
+  // Alive-check first by design: dead leaders (AI or human) return [] — same shape,
+  // same caller contract. The human throw below catches misroutes for ALIVE humans
+  // (Phase 3 UI-orchestrator bug), not eliminated humans whose lifecycle handling
+  // should mirror eliminated AI. Reordering would create asymmetric semantics
+  // (dead AI = []; dead human = throw) for no benefit.
   if (!me || !me.alive) return [];
+  if (isHuman(leaderId)) {
+    throw new Error(
+      `planAi() called for human leader '${leaderId}'. ` +
+      `Human leaders submit orders via SUBMIT_ORDERS, not via the AI planner.`,
+    );
+  }
+  const diff = difficulty ?? state.difficulty;
 
   // Get the per-leader baseline orders (personality-specific, difficulty-agnostic).
   let orders = dispatch(state, leaderId);

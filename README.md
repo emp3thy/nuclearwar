@@ -79,3 +79,22 @@ Per the standing convention, AI scoring-weight tuning is deferred to a balance p
 - Production UI / Vite / React. Phase 3.
 - Flavour bank wiring / Disparage cameo / masthead rotation / audio / persistence / replay scrubber / PWA / animations. Phase 4.
 - Per-personality scoring weight tuning. Deferred to P4 balance pass.
+
+## Phase 2.5 status
+
+Phase 2.5 adds a separate human player slot. The human plays a configurable country (default: Rufus T. Firefly / 🦆 Freedonia from *Duck Soup*) rather than taking over an AI character.
+
+What's in `src/engine/`:
+
+- `LeaderId` extended with `'player1' | 'player2' | 'player3' | 'player4' | 'player5'`. Forward-compatible to ≤5-human hotseat games without further engine changes.
+- `isHuman(id)` derived helper in `state.ts` — one-line predicate, no stored field on `Leader`.
+- `GameConfig.playerProfiles` override lets the Setup screen replace the default name/country per player slot at game-start. Mirrors the existing `startPopOverride` pattern.
+- `GameState.lastOrders` persists each round's submitted orders. Hard-mode lookahead reads it for human opponents and projects them as repeating last round's orders (better than treating them as passive).
+- `planAi()` and `dispatch()` throw when called for human leaders; `bestTargetByLookahead()` substitutes the human's `lastOrders` into the simulated round.
+
+What's NOT in this phase:
+
+- Production SVG art for the Freedonia flag (Phase 3 art workstream — current implementation is the engine-level `🦆 Freedonia` glyph + name string).
+- Setup-screen UX for editing player name/country. Phase 3 wires the override through.
+- Multi-human hotseat coordination (passing-the-device curtain). Phase 3 / 4 UX work.
+- Approach B (sliding-window history) and Approach C (personality-fit modelling) for human prediction — deferred; can be added later without engine refactor.

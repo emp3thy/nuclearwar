@@ -4,7 +4,12 @@ export type LeaderId =
   | 'starmless'
   | 'carnage'
   | 'mileigh-hem'
-  | 'netanyahoo';
+  | 'netanyahoo'
+  | 'player1'
+  | 'player2'
+  | 'player3'
+  | 'player4'
+  | 'player5';
 
 export type Difficulty = 'easy' | 'normal' | 'hard';
 
@@ -87,6 +92,8 @@ export interface SealedOrders {
 
 export interface GameConfig {
   startPopOverride?: Partial<Record<LeaderId, number>>;
+  /** Per-game name/country overrides for player slots. Keys should be 'player1'..'player5'; entries for AI leaders are merged but the Setup UI does not surface them. Setup screen populates this from user input. */
+  playerProfiles?: Partial<Record<LeaderId, { name?: string; country?: string }>>;
   dominanceThreshold: number;
   fastPlay: boolean;
 }
@@ -103,6 +110,8 @@ export interface GameState {
   rngState: number;
   leaders: Record<LeaderId, Leader>;
   pendingOrders: Partial<Record<LeaderId, SealedOrders>>;
+  /** The most recent round's submitted orders for each leader. Populated by RESOLVE_ROUND before pendingOrders is cleared. Used by Hard-mode lookahead to project human opponents' likely behaviour. */
+  lastOrders: Partial<Record<LeaderId, Order[]>>;
   log: ResolutionEvent[];
   outcome: WinOutcome | null;
   config: GameConfig;

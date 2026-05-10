@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { reduce } from '../../src/engine/reducer';
 import { initialState } from '../../src/engine/state';
+import { planAi } from '../../src/engine/ai';
 import { scriptedOrders } from '../helpers/scripted-orders';
 
 describe('integration — three-leader scripted game', () => {
@@ -63,5 +64,45 @@ describe('integration — three-leader scripted game', () => {
       }
       expect(s.outcome).not.toBeNull();
     }
+  });
+
+  it('runs a mixed-cast round end-to-end (player1 + 2 AI), and persists lastOrders', () => {
+    let s = initialState({
+      cast: ['player1', 'chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'p25-integration',
+      config: {
+        playerProfiles: {
+          player1: { name: 'Tony', country: '🇮🇹 Italy' },
+        },
+      },
+    });
+    // Sanity: player overrides applied; lastOrders empty at game start.
+    expect(s.leaders.player1.name).toBe('Tony');
+    expect(s.lastOrders).toEqual({});
+
+    // Human submits orders directly.
+    const playerOrders = [{ kind: 'build-factory' as const }];
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'player1',
+      orders: playerOrders,
+    });
+    expect(s.pendingOrders.player1?.orders).toHaveLength(1);
+
+    // AI leaders use planAi.
+    for (const id of ['chump', 'carnage'] as const) {
+      const orders = planAi(s, id);
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: id, orders });
+    }
+
+    // Resolve the round; should not throw, should advance round counter,
+    // clear pendingOrders, and populate lastOrders.
+    s = reduce(s, { type: 'RESOLVE_ROUND' });
+    expect(s.round).toBe(2);
+    expect(s.pendingOrders).toEqual({});
+    expect(s.lastOrders.player1).toEqual(playerOrders);
+    expect(s.lastOrders.chump).toBeDefined();
+    expect(s.lastOrders.carnage).toBeDefined();
   });
 });

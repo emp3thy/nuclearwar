@@ -14,8 +14,19 @@ describe('LEADER_PROFILES', () => {
   it('defines a profile for every leader id', () => {
     const ids = Object.keys(LEADER_PROFILES).sort();
     expect(ids).toEqual(
-      ['carnage', 'chump', 'khameneverhere', 'mileigh-hem', 'netanyahoo', 'starmless'].sort(),
+      [
+        'carnage', 'chump', 'khameneverhere', 'mileigh-hem',
+        'netanyahoo', 'starmless',
+        'player1', 'player2', 'player3', 'player4', 'player5',
+      ].sort(),
     );
+  });
+
+  it('defaults player1 to Rufus T. Firefly / 🦆 Freedonia', () => {
+    expect(LEADER_PROFILES.player1.name).toBe('Rufus T. Firefly');
+    expect(LEADER_PROFILES.player1.country).toBe('🦆 Freedonia');
+    expect(LEADER_PROFILES.player1.startPop).toBe(25);
+    expect(LEADER_PROFILES.player1.bonusRule).toBeUndefined();
   });
 
   it('matches spec starting values', () => {

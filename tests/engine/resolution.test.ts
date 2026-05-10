@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { resolveRound } from '../../src/engine/resolution';
+import { reduce } from '../../src/engine/reducer';
 import { initialState } from '../../src/engine/state';
 import { totalApCost } from '../../src/engine/orders';
 import type { LeaderId, Order } from '../../src/engine/types';
@@ -201,5 +202,52 @@ describe('resolveRound', () => {
     const chumpGrudge = r.state.leaders.chump.grudge.carnage ?? 0;
     const starmlessGrudge = r.state.leaders.starmless.grudge.carnage ?? 0;
     expect(chumpGrudge + starmlessGrudge).toBeGreaterThan(0);
+  });
+});
+
+describe('lastOrders persistence', () => {
+  it('populates lastOrders after RESOLVE_ROUND for each leader who submitted', () => {
+    let s = initialState({
+      cast: ['chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'lastOrders-1',
+    });
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'chump',
+      orders: [{ kind: 'build-factory' }],
+    });
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'carnage',
+      orders: [{ kind: 'build-defence', type: 'shield' }],
+    });
+    s = reduce(s, { type: 'RESOLVE_ROUND' });
+    expect(s.lastOrders.chump).toEqual([{ kind: 'build-factory' }]);
+    expect(s.lastOrders.carnage).toEqual([{ kind: 'build-defence', type: 'shield' }]);
+  });
+
+  it('overwrites lastOrders on the second RESOLVE_ROUND', () => {
+    let s = initialState({
+      cast: ['chump'],
+      difficulty: 'normal',
+      seed: 'lastOrders-2',
+    });
+    // Round 1
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'chump',
+      orders: [{ kind: 'build-factory' }],
+    });
+    s = reduce(s, { type: 'RESOLVE_ROUND' });
+    expect(s.lastOrders.chump).toEqual([{ kind: 'build-factory' }]);
+    // Round 2 — different orders
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'chump',
+      orders: [{ kind: 'build-missile' }],
+    });
+    s = reduce(s, { type: 'RESOLVE_ROUND' });
+    expect(s.lastOrders.chump).toEqual([{ kind: 'build-missile' }]);
   });
 });

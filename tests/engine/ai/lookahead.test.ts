@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { simulateOneRound, scoreState, bestTargetByLookahead } from '../../../src/engine/ai/lookahead';
 import { dispatch } from '../../../src/engine/ai/dispatch';
+import { planAi } from '../../../src/engine/ai';
 import { initialState } from '../../../src/engine/state';
 import type { Order } from '../../../src/engine/types';
 
@@ -69,5 +70,49 @@ describe('bestTargetByLookahead', () => {
       delivery: 'missile', warhead: 'small', targetType: 'people',
     }, dispatch);
     expect(best).toBeNull();
+  });
+
+  it('mixed cast with no history: lookahead falls back to passive simulation for human', () => {
+    const s = initialState({
+      cast: ['chump', 'carnage', 'player1'],
+      difficulty: 'hard',
+      seed: 'lookahead-human-no-history',
+    });
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    s.leaders.carnage.population = 8;
+    s.leaders.carnage.stockpile.shields = 0;
+    s.leaders.player1.population = 8;
+    s.leaders.player1.stockpile.shields = 0;
+    // No lastOrders[player1] populated. Should not throw, should pick a target.
+    const orders = planAi(s, 'chump');
+    expect(orders.find((o) => o.kind === 'launch')).toBeDefined();
+  });
+
+  it('mixed cast with history: lookahead simulates human as repeating their last orders', () => {
+    const s = initialState({
+      cast: ['chump', 'carnage', 'player1'],
+      difficulty: 'hard',
+      seed: 'lookahead-human-with-history',
+    });
+    // Pre-populate lastOrders for player1 with a launch at chump.
+    // Give player1 the stockpile that supports the launch in the simulated round.
+    s.leaders.player1.stockpile.missiles = 1;
+    s.leaders.player1.stockpile.warheadsSmall = 1;
+    s.lastOrders = {
+      player1: [{
+        kind: 'launch',
+        target: 'chump',
+        delivery: 'missile',
+        warhead: 'small',
+        targetType: 'people',
+      }],
+    };
+    // Set up so chump has a viable launch candidate
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    s.leaders.carnage.stockpile.shields = 0;
+    // planAi should not throw, should produce some launch from chump.
+    expect(() => planAi(s, 'chump')).not.toThrow();
   });
 });

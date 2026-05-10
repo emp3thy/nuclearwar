@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { initialState } from '../../src/engine/state';
+import { initialState, isHuman } from '../../src/engine/state';
 
 describe('initialState', () => {
   it('seeds Chump and Carnage with their spec values', () => {
@@ -77,5 +77,68 @@ describe('initialState', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
     expect(s.config.dominanceThreshold).toBe(2);
     expect(s.config.fastPlay).toBe(false);
+  });
+
+  it('seeds player1 with default Firefly / Freedonia identity', () => {
+    const s = initialState({
+      cast: ['player1', 'chump'],
+      difficulty: 'normal',
+      seed: 'p25-default',
+    });
+    expect(s.leaders.player1.name).toBe('Rufus T. Firefly');
+    expect(s.leaders.player1.country).toBe('🦆 Freedonia');
+    expect(s.leaders.player1.population).toBe(25);
+    expect(s.leaders.player1.factories).toBe(6);
+    expect(s.leaders.player1.ap).toBe(3);
+    expect(s.leaders.player1.alive).toBe(true);
+    expect(s.leaders.player1.bonusRule).toBeUndefined();
+  });
+
+  it('seeds lastOrders as an empty object', () => {
+    const s = initialState({
+      cast: ['player1', 'chump'],
+      difficulty: 'normal',
+      seed: 'p25-lastOrders-init',
+    });
+    expect(s.lastOrders).toEqual({});
+  });
+
+  it('isHuman classifies player slots vs AI characters', () => {
+    expect(isHuman('player1')).toBe(true);
+    expect(isHuman('player5')).toBe(true);
+    expect(isHuman('chump')).toBe(false);
+    expect(isHuman('carnage')).toBe(false);
+  });
+
+  it('honours playerProfiles override for name and country', () => {
+    const s = initialState({
+      cast: ['player1', 'chump'],
+      difficulty: 'normal',
+      seed: 'p25-override',
+      config: {
+        playerProfiles: {
+          player1: { name: 'Tony', country: '🇮🇹 Italy' },
+        },
+      },
+    });
+    expect(s.leaders.player1.name).toBe('Tony');
+    expect(s.leaders.player1.country).toBe('🇮🇹 Italy');
+    // AI leaders are unaffected by playerProfiles overrides.
+    expect(s.leaders.chump.name).toBe('Chump');
+  });
+
+  it('falls back to LEADER_PROFILES defaults when playerProfiles override is partial', () => {
+    const s = initialState({
+      cast: ['player1'],
+      difficulty: 'normal',
+      seed: 'p25-partial',
+      config: {
+        playerProfiles: {
+          player1: { name: 'Tony' }, // country omitted
+        },
+      },
+    });
+    expect(s.leaders.player1.name).toBe('Tony');
+    expect(s.leaders.player1.country).toBe('🦆 Freedonia');
   });
 });

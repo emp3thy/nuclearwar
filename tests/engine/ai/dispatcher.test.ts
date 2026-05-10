@@ -32,6 +32,16 @@ describe('planAi dispatcher', () => {
     // (Implementation detail; can be skipped or replaced with a seed-dependent assertion.)
   });
 
+  it('Easy/Normal randomization never produces an over-budget order list', () => {
+    // Sweep seeds; assert every output stays within the leader's AP budget.
+    for (let i = 0; i < 50; i++) {
+      const seed = `randomize-budget-${i}`;
+      const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'easy', seed });
+      const orders = planAi(s, 'chump', 'easy');
+      expect(totalApCost(orders)).toBeLessThanOrEqual(s.leaders.chump.ap);
+    }
+  });
+
   it('Hard Chump picks the target whose projected outcome favours him', () => {
     const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'hard', seed: 'hard-chump' });
     s.leaders.chump.stockpile.missiles = 1;

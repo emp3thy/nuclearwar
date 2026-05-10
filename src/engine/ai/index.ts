@@ -98,8 +98,13 @@ function applyRandomization(
       out.push(replacement);
       remainingBudget -= apCostOf(replacement);
     } else {
-      out.push(o);
-      remainingBudget -= cost;
+      if (cost <= remainingBudget) {
+        out.push(o);
+        remainingBudget -= cost;
+      }
+      // else: drop — a more expensive replacement upstream consumed budget that
+      // this pass-through would have used. Better to drop this order than to
+      // silently lose the entire turn at the reducer.
     }
   }
 

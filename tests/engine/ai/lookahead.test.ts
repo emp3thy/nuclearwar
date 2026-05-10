@@ -34,6 +34,12 @@ describe('scoreState', () => {
     s.outcome = { type: 'survivor', winner: 'carnage' };
     expect(scoreState(s, 'chump')).toBe(-1000);
   });
+
+  it('returns −500 for apocalypse outcome (worse than draw, better than outright loss)', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'lh-apoc' });
+    s.outcome = { type: 'apocalypse' };
+    expect(scoreState(s, 'chump')).toBe(-500);
+  });
 });
 
 describe('bestTargetByLookahead', () => {

@@ -60,12 +60,26 @@ describe('planAi dispatcher', () => {
     }
   });
 
-  it('throws when called for a human player slot', () => {
+  it('throws when called for an alive human player slot', () => {
     const s = initialState({
       cast: ['player1', 'chump'],
       difficulty: 'normal',
       seed: 'planAi-human',
     });
     expect(() => planAi(s, 'player1')).toThrow(/planAi.*human/i);
+  });
+
+  it('returns [] (does not throw) when called for an eliminated human player slot', () => {
+    // Dead AI returns []; dead human must mirror that — Phase 3 callers iterate
+    // the cast and rely on planAi(state, deadId) === [] without special-casing.
+    // The "throw on human" guard is for ALIVE-human routing bugs only.
+    const s = initialState({
+      cast: ['player1', 'chump'],
+      difficulty: 'normal',
+      seed: 'planAi-dead-human',
+    });
+    s.leaders.player1.alive = false;
+    s.leaders.player1.population = 0;
+    expect(planAi(s, 'player1')).toEqual([]);
   });
 });

@@ -13,6 +13,11 @@ const DIFFICULTY_RANDOM_PCT: Record<Difficulty, number> = {
 
 export function planAi(state: GameState, leaderId: LeaderId, difficulty?: Difficulty): Order[] {
   const me = state.leaders[leaderId];
+  // Alive-check first by design: dead leaders (AI or human) return [] — same shape,
+  // same caller contract. The human throw below catches misroutes for ALIVE humans
+  // (Phase 3 UI-orchestrator bug), not eliminated humans whose lifecycle handling
+  // should mirror eliminated AI. Reordering would create asymmetric semantics
+  // (dead AI = []; dead human = throw) for no benefit.
   if (!me || !me.alive) return [];
   if (isHuman(leaderId)) {
     throw new Error(

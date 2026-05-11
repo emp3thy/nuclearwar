@@ -1,0 +1,127 @@
+.summary {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: Georgia, "Times New Roman", serif;
+  background: #efe5d2;
+  color: #1a1a1a;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.masthead {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #5a4a3a;
+  border-top: 2px solid #1a1a1a;
+  border-bottom: 2px solid #1a1a1a;
+  padding: 4px 0;
+  margin-bottom: 12px;
+  font-family: Georgia, serif;
+}
+
+.headline {
+  font-size: 32px;
+  font-weight: 900;
+  text-align: center;
+  margin: 16px 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.headline.theEnd {
+  font-size: 48px;
+  letter-spacing: 0;
+}
+
+.subhead {
+  font-size: 14px;
+  font-style: italic;
+  text-align: center;
+  color: #5a4a3a;
+  margin: 0 0 16px;
+}
+
+.casualtyStrip {
+  background: #fff8eb;
+  border: 1px solid #d0c8b8;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.casualtyPlaceholder {
+  text-align: center;
+  color: #8a7a6b;
+  font-style: italic;
+  font-size: 11px;
+  margin-bottom: 8px;
+  padding: 16px 8px;
+  background: #e8d8c0;
+  border-radius: 6px;
+}
+
+.casualtyRow {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  margin: 2px 0;
+}
+
+.sectionTitle {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #5a4a3a;
+  margin: 16px 0 8px;
+  font-weight: 700;
+  font-family: Georgia, serif;
+}
+
+.reactionsList {
+  background: #fff8eb;
+  border: 1px solid #d0c8b8;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.reactionRow {
+  display: grid;
+  grid-template-columns: 28px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #d0c8b8;
+  font-size: 13px;
+}
+
+.reactionRow:last-of-type { border-bottom: none; }
+
+.reactionRow.obituary {
+  color: #5a5a5a;
+  border: 1px solid #1a1a1a;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin: 4px 0;
+}
+
+.flag { font-size: 16px; }
+.name { font-weight: 600; }
+.delta { font-family: ui-monospace, monospace; font-size: 12px; color: #6b1d1d; }
+.state { font-size: 11px; color: #5a4a3a; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.continueBtn {
+  display: block;
+  width: 100%;
+  margin-top: 24px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: #8a1a1a;
+  color: #fff8eb;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}

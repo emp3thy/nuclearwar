@@ -77,6 +77,7 @@ export default function Setup({ dispatch }: ScreenProps) {
             <button
               key={id}
               type="button"
+              aria-pressed={selected}
               className={`${styles.castCard} ${selected ? styles.selected : ''}`}
               onClick={() => toggleAi(id)}
             >

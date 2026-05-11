@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback } from 'react';
 import type { ScreenProps } from '../App';
-import type { GameState, Order } from '../../engine/types';
+import type { GameState, LeaderId, Order } from '../../engine/types';
 import { isHuman } from '../../engine/state';
 import { totalApCost } from '../../engine/orders';
 import LeaderCard from '../components/LeaderCard';
@@ -76,7 +76,7 @@ export default function Planning({ state, dispatch }: ScreenProps) {
         ) : (
           lastRoundChips.map((c, i) => (
             <div key={i} className={`${styles.chip} ${styles.attack}`}>
-              {game.leaders[c.id as keyof typeof game.leaders]?.country.split(' ')[0]}{' '}
+              {game.leaders[c.id as LeaderId]?.country.split(' ')[0]}{' '}
               {c.o.kind === 'launch'
                 ? `→ ${game.leaders[c.o.target].country.split(' ')[0]}`
                 : c.o.kind === 'propaganda'

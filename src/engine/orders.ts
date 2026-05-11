@@ -1,5 +1,6 @@
 import type { GameState, LeaderId, Order, Stockpile, Yield } from './types';
 import { ACTION_COSTS } from './balance';
+import { warheadFieldFor } from './launches';
 
 export type ValidationResult = { ok: true } | { ok: false; reason: string };
 
@@ -98,4 +99,35 @@ function warheadStock(s: Stockpile, y: Yield): number {
     case 'large':
       return s.warheadsLarge;
   }
+}
+
+export type SequenceValidation =
+  | { ok: true }
+  | { ok: false; reason: string; orderIndex: number };
+
+/**
+ * Validate a SEQUENCE of orders against a leader's state, projecting stockpile
+ * consumption from prior launches in the same sequence. Mirrors the per-order
+ * loop in reducer.ts's SUBMIT_ORDERS case; extracted so UI can validate the
+ * full queue without duplicating the projection logic.
+ */
+export function validateOrderSequence(
+  state: GameState,
+  leaderId: LeaderId,
+  orders: Order[],
+): SequenceValidation {
+  let projected: GameState = state;
+  for (let i = 0; i < orders.length; i++) {
+    const o = orders[i];
+    const v = validateOrder(projected, leaderId, o);
+    if (!v.ok) return { ok: false, reason: v.reason, orderIndex: i };
+    if (o.kind === 'launch') {
+      projected = structuredClone(projected);
+      const pl = projected.leaders[leaderId];
+      if (o.delivery === 'missile') pl.stockpile.missiles -= 1;
+      else pl.stockpile.bombers -= 1;
+      pl.stockpile[warheadFieldFor(o.warhead)] -= 1;
+    }
+  }
+  return { ok: true };
 }

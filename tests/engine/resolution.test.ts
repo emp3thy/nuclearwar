@@ -205,12 +205,12 @@ describe('resolveRound', () => {
   });
 });
 
-describe('lastOrders persistence', () => {
-  it('populates lastOrders after RESOLVE_ROUND for each leader who submitted', () => {
+describe('orderHistory persistence', () => {
+  it('appends this round\'s orders to orderHistory after RESOLVE_ROUND', () => {
     let s = initialState({
       cast: ['chump', 'carnage'],
       difficulty: 'normal',
-      seed: 'lastOrders-1',
+      seed: 'orderHistory-1',
     });
     s = reduce(s, {
       type: 'SUBMIT_ORDERS',
@@ -223,31 +223,33 @@ describe('lastOrders persistence', () => {
       orders: [{ kind: 'build-defence', type: 'shield' }],
     });
     s = reduce(s, { type: 'RESOLVE_ROUND' });
-    expect(s.lastOrders.chump).toEqual([{ kind: 'build-factory' }]);
-    expect(s.lastOrders.carnage).toEqual([{ kind: 'build-defence', type: 'shield' }]);
+    expect(s.orderHistory).toHaveLength(1);
+    expect(s.orderHistory[0].chump).toEqual([{ kind: 'build-factory' }]);
+    expect(s.orderHistory[0].carnage).toEqual([{ kind: 'build-defence', type: 'shield' }]);
   });
 
-  it('overwrites lastOrders on the second RESOLVE_ROUND', () => {
+  it('appends a new entry per round (does not overwrite)', () => {
     let s = initialState({
       cast: ['chump'],
       difficulty: 'normal',
-      seed: 'lastOrders-2',
+      seed: 'orderHistory-2',
     });
-    // Round 1
     s = reduce(s, {
       type: 'SUBMIT_ORDERS',
       leaderId: 'chump',
       orders: [{ kind: 'build-factory' }],
     });
     s = reduce(s, { type: 'RESOLVE_ROUND' });
-    expect(s.lastOrders.chump).toEqual([{ kind: 'build-factory' }]);
-    // Round 2 — different orders
+    expect(s.orderHistory).toHaveLength(1);
+    expect(s.orderHistory[0].chump).toEqual([{ kind: 'build-factory' }]);
     s = reduce(s, {
       type: 'SUBMIT_ORDERS',
       leaderId: 'chump',
       orders: [{ kind: 'build-missile' }],
     });
     s = reduce(s, { type: 'RESOLVE_ROUND' });
-    expect(s.lastOrders.chump).toEqual([{ kind: 'build-missile' }]);
+    expect(s.orderHistory).toHaveLength(2);
+    expect(s.orderHistory[0].chump).toEqual([{ kind: 'build-factory' }]);
+    expect(s.orderHistory[1].chump).toEqual([{ kind: 'build-missile' }]);
   });
 });

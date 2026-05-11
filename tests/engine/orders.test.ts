@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { apCostOf, totalApCost, validateOrder } from '../../src/engine/orders';
+import {
+  apCostOf,
+  totalApCost,
+  validateOrder,
+  validateOrderSequence,
+} from '../../src/engine/orders';
 import { initialState } from '../../src/engine/state';
+import type { Order } from '../../src/engine/types';
 
 describe('apCostOf', () => {
   it('matches spec costs', () => {
@@ -128,5 +134,30 @@ describe('validateOrder', () => {
   it('accepts build orders unconditionally', () => {
     expect(validateOrder(baseState, 'chump', { kind: 'build-factory' }).ok).toBe(true);
     expect(validateOrder(baseState, 'chump', { kind: 'build-defence', type: 'shield' }).ok).toBe(true);
+  });
+});
+
+describe('validateOrderSequence', () => {
+  it('accepts a sequence of valid orders within AP budget', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'seq-1' });
+    const orders: Order[] = [{ kind: 'build-factory' }, { kind: 'build-missile' }];
+    const r = validateOrderSequence(s, 'chump', orders);
+    expect(r.ok).toBe(true);
+  });
+
+  it('rejects a second launch that would over-consume stockpile', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'seq-2' });
+    // Give chump just one missile + one warhead
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    const launch: Order = {
+      kind: 'launch', target: 'carnage', delivery: 'missile', warhead: 'small', targetType: 'people',
+    };
+    const r = validateOrderSequence(s, 'chump', [launch, launch]);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.orderIndex).toBe(1);
+      expect(r.reason).toMatch(/missile|warhead|stockpile/i);
+    }
   });
 });

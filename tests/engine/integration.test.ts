@@ -66,7 +66,7 @@ describe('integration — three-leader scripted game', () => {
     }
   });
 
-  it('runs a mixed-cast round end-to-end (player1 + 2 AI), and persists lastOrders', () => {
+  it('runs a mixed-cast round end-to-end (player1 + 2 AI), and persists orderHistory', () => {
     let s = initialState({
       cast: ['player1', 'chump', 'carnage'],
       difficulty: 'normal',
@@ -77,9 +77,9 @@ describe('integration — three-leader scripted game', () => {
         },
       },
     });
-    // Sanity: player overrides applied; lastOrders empty at game start.
+    // Sanity: player overrides applied; orderHistory empty at game start.
     expect(s.leaders.player1.name).toBe('Tony');
-    expect(s.lastOrders).toEqual({});
+    expect(s.orderHistory).toEqual([]);
 
     // Human submits orders directly.
     const playerOrders = [{ kind: 'build-factory' as const }];
@@ -97,12 +97,13 @@ describe('integration — three-leader scripted game', () => {
     }
 
     // Resolve the round; should not throw, should advance round counter,
-    // clear pendingOrders, and populate lastOrders.
+    // clear pendingOrders, and append to orderHistory.
     s = reduce(s, { type: 'RESOLVE_ROUND' });
     expect(s.round).toBe(2);
     expect(s.pendingOrders).toEqual({});
-    expect(s.lastOrders.player1).toEqual(playerOrders);
-    expect(s.lastOrders.chump).toBeDefined();
-    expect(s.lastOrders.carnage).toBeDefined();
+    expect(s.orderHistory).toHaveLength(1);
+    expect(s.orderHistory[0].player1).toEqual(playerOrders);
+    expect(s.orderHistory[0].chump).toBeDefined();
+    expect(s.orderHistory[0].carnage).toBeDefined();
   });
 });

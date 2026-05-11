@@ -52,7 +52,7 @@ export function initialState(opts: NewGameOpts): GameState {
     rngState: seedFromString(opts.seed),
     leaders,
     pendingOrders: {},
-    lastOrders: {},
+    orderHistory: [],
     log: [],
     outcome: null,
     config: {

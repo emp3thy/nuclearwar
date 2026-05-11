@@ -110,8 +110,8 @@ export interface GameState {
   rngState: number;
   leaders: Record<LeaderId, Leader>;
   pendingOrders: Partial<Record<LeaderId, SealedOrders>>;
-  /** The most recent round's submitted orders for each leader. Populated by RESOLVE_ROUND before pendingOrders is cleared. Used by Hard-mode lookahead to project human opponents' likely behaviour. */
-  lastOrders: Partial<Record<LeaderId, Order[]>>;
+  /** Per-round history of submitted orders. One entry per completed round (chronological), populated by RESOLVE_ROUND before pendingOrders is cleared. Used by Hard-mode lookahead to project human opponents' likely behaviour, and (in P4a) by the replay scrubber to reconstruct each round. */
+  orderHistory: Partial<Record<LeaderId, Order[]>>[];
   log: ResolutionEvent[];
   outcome: WinOutcome | null;
   config: GameConfig;

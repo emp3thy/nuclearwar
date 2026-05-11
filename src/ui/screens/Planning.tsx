@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import type { ScreenProps } from '../App';
 import type { GameState, LeaderId, Order } from '../../engine/types';
 import { isHuman } from '../../engine/state';
@@ -33,6 +33,13 @@ export default function Planning({ state, dispatch }: ScreenProps) {
 
   const cancelHold = useCallback(() => {
     setHolding(false);
+    if (holdTimer.current !== null) {
+      window.clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => {
     if (holdTimer.current !== null) {
       window.clearTimeout(holdTimer.current);
       holdTimer.current = null;

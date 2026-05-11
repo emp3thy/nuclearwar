@@ -43,9 +43,9 @@ export default function RoundSummary({ state, dispatch }: ScreenProps) {
   const headline = pickHeadline(state.events, game.leaders, state.prevPopulations, game.round, game.outcome);
   const subhead = pickSubhead(state.events, game.leaders);
 
-  const thisRoundLost = Object.values(state.prevPopulations).reduce<number>((acc, prev, idx) => {
-    const id = game.cast[idx];
-    if (!id || prev === undefined) return acc;
+  const thisRoundLost = Object.entries(state.prevPopulations).reduce<number>((acc, [idStr, prev]) => {
+    if (prev === undefined) return acc;
+    const id = idStr as LeaderId;
     return acc + Math.max(0, prev - game.leaders[id].population);
   }, 0);
   const warTotalLost = Object.entries(state.initialPopulations).reduce<number>((acc, [idStr, init]) => {

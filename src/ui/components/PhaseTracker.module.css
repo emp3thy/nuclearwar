@@ -1,0 +1,18 @@
+.tracker {
+  display: flex;
+  justify-content: space-between;
+  background: #e8d8c0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #5a4a3a;
+}
+
+.phase {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+}

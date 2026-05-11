@@ -15,6 +15,7 @@
 }
 
 .flag { font-size: 16px; }
+.name { font-weight: 600; font-size: 13px; }
 
 .stats {
   font-size: 11px;

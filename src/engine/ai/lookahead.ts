@@ -106,7 +106,8 @@ export function bestTargetByLookahead(
         // for the first round (no history yet) or if they passed last round.
         // simulateOneRound re-validates and gracefully drops invalid orders
         // (e.g., a launch order from last round when their stockpile is now empty).
-        ordersByLeader[id] = state.lastOrders[id] ?? [];
+        const lastRound = state.orderHistory[state.orderHistory.length - 1];
+        ordersByLeader[id] = lastRound?.[id] ?? [];
         continue;
       }
       ordersByLeader[id] = opponentPlanner(state, id);

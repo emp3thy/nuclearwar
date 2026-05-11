@@ -1,8 +1,7 @@
 import type { Action, GameState } from './types';
 import { initialState } from './state';
-import { totalApCost, validateOrder } from './orders';
+import { totalApCost, validateOrderSequence } from './orders';
 import { resolveRound } from './resolution';
-import { warheadFieldFor } from './launches';
 
 export function reduce(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -18,22 +17,8 @@ export function reduce(state: GameState, action: Action): GameState {
       const me = state.leaders[action.leaderId];
       if (!me || !me.alive) return state;
 
-      // Validate each order against a projected state so that successive launch
-      // orders see the running stockpile after prior orders' consumption.
-      // Non-launch orders don't consume launch stock; only launch orders need to
-      // decrement the projection.
-      let projected: GameState = state;
-      for (const o of action.orders) {
-        const v = validateOrder(projected, action.leaderId, o);
-        if (!v.ok) return state;
-        if (o.kind === 'launch') {
-          projected = structuredClone(projected);
-          const pl = projected.leaders[action.leaderId];
-          if (o.delivery === 'missile') pl.stockpile.missiles -= 1;
-          else pl.stockpile.bombers -= 1;
-          pl.stockpile[warheadFieldFor(o.warhead)] -= 1;
-        }
-      }
+      const v = validateOrderSequence(state, action.leaderId, action.orders);
+      if (!v.ok) return state;
 
       const cost = totalApCost(action.orders);
       if (cost > me.ap) return state;

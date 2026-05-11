@@ -98,3 +98,35 @@ What's NOT in this phase:
 - Setup-screen UX for editing player name/country. Phase 3 wires the override through.
 - Multi-human hotseat coordination (passing-the-device curtain). Phase 3 / 4 UX work.
 - Approach B (sliding-window history) and Approach C (personality-fit modelling) for human prediction — deferred; can be added later without engine refactor.
+
+## Phase 3 status
+
+Phase 3 ships the thin React UI shell — the first playable build in a browser. Six functional screens (Setup, Planning, AI Conferring, Action, Round Summary, Winners) navigable via a screen state machine, mockup-matched CSS via CSS Modules, end-to-end round loop.
+
+What's in:
+
+- `src/ui/` — React 18 + Vite 5 + TypeScript scaffold with CSS Modules per screen
+- Setup screen with player profile inputs (default Rufus T. Firefly / 🦆 Freedonia, editable), AI cast picker (2-4 of 6), difficulty radio, optional seed
+- Planning screen with own country panel, history strip, leaders table, order form (validated via engine `validateOrder`), order queue, tap-and-hold (600ms) Seal Orders
+- AI Conferring beat (1.5s cosmetic delay + pulsing dots)
+- Action screen with phase-grouped event cards (no animations, no world map)
+- Round Summary with rule-based headline picker, casualty strip, world-reactions list (OBITUARY rows for eliminated leaders)
+- Winners with headline by outcome type, sub-line, death-toll table sorted by % lost, New Game / Same Cast Again
+- Minimum UI tests (Vitest + jsdom + React Testing Library): OrderForm validation, ApBudget computation
+- Engine refactor: `GameState.lastOrders` (P2.5) → per-round `GameState.orderHistory` (positions P4a's replay scrubber + advanced AI lookahead as logic-only changes)
+
+What's NOT in this phase (deferred to P4a / P4b):
+
+- Hotseat Handoff screen (multi-human game flow) — P4a
+- Persistence (localStorage save/load + Resume entry point + action log) — P4a
+- Replay timeline scrubber UI on Winners screen — P4a (engine data already supports it via orderHistory)
+- Animations (Framer Motion, 1.8s/event Action pacing, Fast Resolve toggle, missile arcs, damage badges) — P4a
+- Flavor banks (per-leader speech-bubble lines, mood lines on leader cards, tabloid quotes, OBITUARY last-words) — P4a
+- Disparage cameo mechanic — P4a
+- Masthead rotation pool — P4a
+- Audio (`play(name)` wrapper, sfx + ambient music) — P4a
+- SVG art (leader portraits, world map, Freedonia flag, mushroom-cloud illustration, ruined-iconography) — P4a
+- PWA manifest + service worker — P4a
+- Soft-warn validation in Planning — P4a
+- AI scoring-weight balance pass + AI-duel balance assertions — P4b
+- Approach B / C upgrades to Hard-mode lookahead — P4b

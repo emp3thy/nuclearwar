@@ -94,13 +94,13 @@ describe('initialState', () => {
     expect(s.leaders.player1.bonusRule).toBeUndefined();
   });
 
-  it('seeds lastOrders as an empty object', () => {
+  it('seeds orderHistory as an empty array', () => {
     const s = initialState({
       cast: ['player1', 'chump'],
       difficulty: 'normal',
-      seed: 'p25-lastOrders-init',
+      seed: 'p3-orderHistory-init',
     });
-    expect(s.lastOrders).toEqual({});
+    expect(s.orderHistory).toEqual([]);
   });
 
   it('isHuman classifies player slots vs AI characters', () => {

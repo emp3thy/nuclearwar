@@ -130,14 +130,15 @@ export function resolveRound(state: GameState): ResolveResult {
   }
 
   // Persist this round's orders for next round's planAi (Hard-mode lookahead
-  // reads lastOrders[humanId] for human opponents; AI opponents are still
-  // re-planned via dispatch). Read from the original `state` parameter to
-  // match the existing pattern in this function (see line 119-121).
-  s.lastOrders = {};
+  // reads orderHistory[length-1][humanId] for human opponents; AI opponents
+  // are still re-planned via dispatch). Read from the original `state` parameter
+  // to match the existing pattern in this function (see line 119-121).
+  const thisRound: Partial<Record<LeaderId, Order[]>> = {};
   for (const id of s.cast) {
     const sealed = state.pendingOrders[id];
-    if (sealed) s.lastOrders[id] = sealed.orders;
+    if (sealed) thisRound[id] = sealed.orders;
   }
+  s.orderHistory = [...state.orderHistory, thisRound];
   // Clear pending, advance round.
   s.pendingOrders = {};
   s.round += 1;

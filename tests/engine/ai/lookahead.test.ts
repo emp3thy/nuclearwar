@@ -84,7 +84,7 @@ describe('bestTargetByLookahead', () => {
     s.leaders.carnage.stockpile.shields = 0;
     s.leaders.player1.population = 8;
     s.leaders.player1.stockpile.shields = 0;
-    // No lastOrders[player1] populated. Should not throw, should pick a target.
+    // No orderHistory entry for player1 populated. Should not throw, should pick a target.
     const orders = planAi(s, 'chump');
     expect(orders.find((o) => o.kind === 'launch')).toBeDefined();
   });
@@ -95,11 +95,11 @@ describe('bestTargetByLookahead', () => {
       difficulty: 'hard',
       seed: 'lookahead-human-with-history',
     });
-    // Pre-populate lastOrders for player1 with a launch at chump.
+    // Pre-populate orderHistory for player1 with a launch at chump.
     // Give player1 the stockpile that supports the launch in the simulated round.
     s.leaders.player1.stockpile.missiles = 1;
     s.leaders.player1.stockpile.warheadsSmall = 1;
-    s.lastOrders = {
+    s.orderHistory = [{
       player1: [{
         kind: 'launch',
         target: 'chump',
@@ -107,7 +107,7 @@ describe('bestTargetByLookahead', () => {
         warhead: 'small',
         targetType: 'people',
       }],
-    };
+    }];
     // Set up so chump has a viable launch candidate
     s.leaders.chump.stockpile.missiles = 1;
     s.leaders.chump.stockpile.warheadsSmall = 1;

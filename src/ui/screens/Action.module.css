@@ -1,0 +1,47 @@
+.action {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f4ede2;
+  color: #1a1a1a;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.header {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #6b1d1d;
+  margin-bottom: 12px;
+}
+
+.phaseSection {
+  margin: 12px 0;
+}
+
+.phaseHeader {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #8a7a6b;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.continueBtn {
+  display: block;
+  width: 100%;
+  margin-top: 24px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: #6b1d1d;
+  color: #fff8eb;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}

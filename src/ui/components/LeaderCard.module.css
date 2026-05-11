@@ -1,0 +1,50 @@
+.card {
+  background: #fff8eb;
+  border: 1px solid #d0c8b8;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: default;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.flag { font-size: 16px; }
+.name { font-weight: 600; font-size: 13px; }
+
+.stats {
+  font-size: 11px;
+  color: #5a4a3a;
+  margin-top: 3px;
+}
+
+.badges {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.badge {
+  font-size: 9px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: white;
+}
+
+.hitYou { background: #8a1a1a; }
+.wooingYou { background: #6b8a2b; }
+.youWooed { background: #2b6b2b; }
+.grudge { background: #5a3a1a; }
+
+.moodSlot {
+  min-height: 14px;  /* reserved space for P4a mood lines */
+}

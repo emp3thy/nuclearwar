@@ -1,0 +1,25 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff8eb;
+  border: 1px solid #d0c8b8;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.icon {
+  font-size: 18px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.body { flex: 1; }
+
+.obituary {
+  background: #2a2a2a;
+  color: #d8d0c0;
+  border-color: #000;
+}

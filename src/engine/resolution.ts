@@ -6,6 +6,9 @@ import { applyLaunches, collectLaunches, consumeStockFor, makeIncomingCounter } 
 import { applyFinalRetaliation } from './finalRetaliation';
 import { checkOutcome } from './winConditions';
 import { AP_BANK_CAP, FACTORY_AP_RATE, LEADER_PROFILES, AI_SCORING_WEIGHTS } from './balance';
+import { getBank } from './flavor/index';
+import { pickLine } from './flavor/pick';
+import { isHuman } from './state';
 
 export interface ResolveResult {
   state: GameState;
@@ -18,6 +21,21 @@ export function resolveRound(state: GameState): ResolveResult {
 
   const startOfRoundPop: Partial<Record<LeaderId, number>> = {};
   for (const id of s.cast) startOfRoundPop[id] = s.leaders[id].population;
+
+  // P4a: emit PreRoundMood per living non-human leader. Snap-back if Disparage's
+  // column named this leader last round (and they're still alive).
+  for (const id of [...s.cast].sort()) {
+    if (isHuman(id)) continue;
+    if (!s.leaders[id].alive) continue;
+    const bank = getBank(id);
+    if (!bank) continue;
+    const snapBack = s.lastColumnNamedLeader === id;
+    const r = pickLine(bank, 'preRoundMood', s.rngState, { snapBack });
+    s.rngState = r.rngState;
+    events.push({ kind: 'PreRoundMood', leaderId: id, quote: r.quote, snapBack });
+  }
+  // Clear snap-back flag after emission.
+  s.lastColumnNamedLeader = undefined;
 
   // OrdersSealed events first (cast id-ASC).
   for (const id of [...s.cast].sort()) {

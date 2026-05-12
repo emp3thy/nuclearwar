@@ -205,6 +205,31 @@ describe('resolveRound', () => {
   });
 });
 
+describe('resolveRound — P4a flavor events', () => {
+  it('emits PreRoundMood per living non-human leader at round start', () => {
+    let s = initialState({
+      cast: ['player1', 'chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'mood-test',
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'player1', orders: [] });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'chump', orders: [] });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+    const r = resolveRound(s);
+
+    const moodEvents = r.events.filter((e) => e.kind === 'PreRoundMood');
+    expect(moodEvents).toHaveLength(2); // chump + carnage; player1 excluded
+    expect(moodEvents.map((e) => e.kind === 'PreRoundMood' ? e.leaderId : '').sort())
+      .toEqual(['carnage', 'chump']);
+    for (const e of moodEvents) {
+      if (e.kind === 'PreRoundMood') {
+        expect(e.quote.length).toBeGreaterThan(0);
+        expect(e.snapBack).toBe(false);
+      }
+    }
+  });
+});
+
 describe('orderHistory persistence', () => {
   it('appends this round\'s orders to orderHistory after RESOLVE_ROUND', () => {
     let s = initialState({

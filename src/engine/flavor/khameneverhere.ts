@@ -42,6 +42,7 @@ export const khameneverhereBank: FlavorBank = {
   ],
   buildDefence: [
     'Production figures are released. The figures are unsigned.',
+    'His office has authorised additional capacity. He could not be reached for confirmation.',
   ],
   reaction: [
     'Death to America, and to whoever reorganises kitchen drawers.',

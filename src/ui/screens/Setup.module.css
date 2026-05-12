@@ -110,3 +110,59 @@
   background: #c9b89a;
   cursor: not-allowed;
 }
+
+.humanRoster { margin-bottom: 20px; }
+
+.humanCard {
+  position: relative;
+  background: #fff8e1;
+  border-left: 3px solid #f59f00;
+  padding: 8px 12px 8px 36px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.humanLabel {
+  position: absolute;
+  left: 10px;
+  top: 12px;
+  font-weight: 700;
+  color: #856404;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.humanCard input[type='text'] {
+  display: block;
+  width: 100%;
+  padding: 4px 6px;
+  margin-bottom: 4px;
+  border: 1px solid #d0c8b8;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.removeBtn {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: transparent;
+  border: none;
+  color: #b02a37;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.addBtn {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: #198754;
+  border: 1px dashed #198754;
+  padding: 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.addBtn:disabled { color: #adb5bd; border-color: #dee2e6; cursor: not-allowed; }

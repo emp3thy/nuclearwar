@@ -1,0 +1,46 @@
+.curtain {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.passLabel {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  opacity: 0.5;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.flag { font-size: 96px; line-height: 1; margin-bottom: 16px; }
+.country { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.leaderName { font-size: 18px; opacity: 0.8; margin-bottom: 32px; }
+
+.divider {
+  width: 50%;
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+  margin: 0 auto 32px;
+}
+
+.sealed { font-size: 12px; opacity: 0.5; margin-bottom: 24px; }
+
+.tapBtn {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 32px;
+  padding: 14px 28px;
+  font-size: 14px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+}
+.tapBtn:hover { background: rgba(255,255,255,0.05); }

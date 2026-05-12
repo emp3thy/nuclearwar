@@ -3,7 +3,6 @@ import {
   CAMEO_PROB,
   COLUMN_PROB,
   shouldRollCameo,
-  shouldRollColumn,
   pickColumnNamedLeader,
 } from '../../src/engine/cameo';
 import { seedFromString } from '../../src/engine/rng';

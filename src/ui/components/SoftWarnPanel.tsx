@@ -1,13 +1,12 @@
-import type { GameState, Order, SoftWarning } from '../../engine/types';
+import type { GameState, SoftWarning } from '../../engine/types';
 import styles from './SoftWarnPanel.module.css';
 
 interface Props {
   warnings: SoftWarning[];
-  orders: Order[];
   game: GameState;
 }
 
-export default function SoftWarnPanel({ warnings, orders: _orders, game }: Props) {
+export default function SoftWarnPanel({ warnings, game }: Props) {
   if (warnings.length === 0) return null;
   return (
     <div className={styles.panel}>

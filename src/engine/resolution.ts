@@ -33,7 +33,7 @@ export function resolveRound(state: GameState): ResolveResult {
     const bank = getBank(id);
     if (!bank) continue;
     const snapBack = s.lastColumnNamedLeader === id;
-    const r = pickLine(bank, 'preRoundMood', s.rngState, { snapBack });
+    const r = pickLine(bank, 'preRoundMood', s.rngState, { snapBack, substitutions: { leader: s.leaders[id].name } });
     s.rngState = r.rngState;
     events.push({ kind: 'PreRoundMood', leaderId: id, quote: r.quote, snapBack });
   }
@@ -178,7 +178,7 @@ export function resolveRound(state: GameState): ResolveResult {
           senderQuote = p.quote;
         }
         if (receiverBank) {
-          const p = pickLine(receiverBank, 'propagandaReceive', s.rngState);
+          const p = pickLine(receiverBank, 'propagandaReceive', s.rngState, { substitutions: { leader: s.leaders[e.to].name } });
           s.rngState = p.rngState;
           receiverQuote = p.quote;
         }
@@ -196,7 +196,7 @@ export function resolveRound(state: GameState): ResolveResult {
           senderQuote = p.quote;
         }
         if (receiverBank) {
-          const p = pickLine(receiverBank, 'beingWooed', s.rngState);
+          const p = pickLine(receiverBank, 'beingWooed', s.rngState, { substitutions: { leader: s.leaders[e.to].name } });
           s.rngState = p.rngState;
           receiverQuote = p.quote;
         }
@@ -206,7 +206,7 @@ export function resolveRound(state: GameState): ResolveResult {
       case 'FactoryBuilt': {
         const bank = isHuman(e.by) ? undefined : getBank(e.by);
         if (!bank) break;
-        const p = pickLine(bank, 'buildFactory', s.rngState);
+        const p = pickLine(bank, 'buildFactory', s.rngState, { substitutions: { leader: s.leaders[e.by].name } });
         s.rngState = p.rngState;
         events[i] = { ...e, quote: p.quote };
         break;
@@ -214,7 +214,7 @@ export function resolveRound(state: GameState): ResolveResult {
       case 'DefenceBuilt': {
         const bank = isHuman(e.by) ? undefined : getBank(e.by);
         if (!bank) break;
-        const p = pickLine(bank, 'buildDefence', s.rngState);
+        const p = pickLine(bank, 'buildDefence', s.rngState, { substitutions: { leader: s.leaders[e.by].name } });
         s.rngState = p.rngState;
         events[i] = { ...e, quote: p.quote };
         break;
@@ -222,7 +222,7 @@ export function resolveRound(state: GameState): ResolveResult {
       case 'LeaderEliminated': {
         const bank = isHuman(e.id) ? undefined : getBank(e.id);
         if (!bank) break;
-        const p = pickLine(bank, 'death', s.rngState);
+        const p = pickLine(bank, 'death', s.rngState, { substitutions: { leader: s.leaders[e.id].name } });
         s.rngState = p.rngState;
         events[i] = { ...e, quote: p.quote };
         break;
@@ -230,7 +230,7 @@ export function resolveRound(state: GameState): ResolveResult {
       case 'FinalRetaliationTriggered': {
         const bank = isHuman(e.by) ? undefined : getBank(e.by);
         if (!bank) break;
-        const p = pickLine(bank, 'finalRetaliation', s.rngState);
+        const p = pickLine(bank, 'finalRetaliation', s.rngState, { substitutions: { leader: s.leaders[e.by].name } });
         s.rngState = p.rngState;
         events[i] = { ...e, quote: p.quote };
         break;
@@ -262,7 +262,7 @@ export function resolveRound(state: GameState): ResolveResult {
     if (!s.leaders[id].alive) continue;
     const bank = getBank(id);
     if (!bank) continue;
-    const r = pickLine(bank, 'reaction', s.rngState);
+    const r = pickLine(bank, 'reaction', s.rngState, { substitutions: { leader: s.leaders[id].name } });
     s.rngState = r.rngState;
     events.push({ kind: 'PostRoundReaction', leaderId: id, quote: r.quote });
   }

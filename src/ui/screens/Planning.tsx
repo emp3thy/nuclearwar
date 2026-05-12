@@ -136,7 +136,7 @@ export default function Planning({ state, dispatch }: ScreenProps) {
         <div className={`${styles.apSummary} ${overBudget ? styles.over : ''}`}>
           AP used: {apUsed} / {apTotal}
         </div>
-        <SoftWarnPanel warnings={softWarnings} orders={orders} game={game} />
+        <SoftWarnPanel warnings={softWarnings} game={game} />
       </section>
 
       <OrderForm state={game} playerId={activeId} committedOrders={orders} onAdd={addOrder} />

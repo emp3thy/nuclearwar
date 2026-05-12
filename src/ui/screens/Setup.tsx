@@ -28,7 +28,8 @@ export default function Setup({ dispatch }: ScreenProps) {
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [seedInput, setSeedInput] = useState('');
 
-  const canStart = selectedAi.length >= 2 && selectedAi.length <= 4;
+  const allHumansComplete = humans.every((h) => h.name.trim() !== '' && h.country.trim() !== '');
+  const canStart = selectedAi.length >= 2 && selectedAi.length <= 4 && allHumansComplete;
 
   function addHuman() {
     if (humans.length >= 5) return;

@@ -8,6 +8,7 @@ import { resolveRound } from '../engine/resolution';
 export type ScreenName =
   | 'setup'
   | 'planning'
+  | 'hotseat'
   | 'aiConferring'
   | 'action'
   | 'roundSummary'
@@ -20,11 +21,16 @@ export interface UiState {
   prevPopulations: Partial<Record<LeaderId, number>>;
   initialPopulations: Partial<Record<LeaderId, number>>;
   lastNewGameOpts: NewGameOpts | null;
+  /** Multi-human hotseat: which human is currently planning. Undefined in solo, between rounds, or once all humans have sealed. */
+  activeHumanTurn?: LeaderId;
+  /** Buffered orders from each human this round, drained into engine SUBMIT_ORDERS once the last human seals. */
+  pendingHumanOrders: Partial<Record<LeaderId, Order[]>>;
 }
 
 export type UiAction =
   | { type: 'START_GAME'; opts: NewGameOpts }
-  | { type: 'PLAYER_SUBMIT'; orders: Order[] }
+  | { type: 'PLAYER_SUBMIT'; leaderId: LeaderId; orders: Order[] }
+  | { type: 'BEGIN_PLANNING'; leaderId: LeaderId }
   | { type: 'AI_RESOLVE' }
   | { type: 'ACTION_DONE' }
   | { type: 'NEXT_ROUND' }
@@ -37,7 +43,15 @@ export const initialUiState: UiState = {
   prevPopulations: {},
   initialPopulations: {},
   lastNewGameOpts: null,
+  pendingHumanOrders: {},
 };
+
+function nextHumanAfter(cast: LeaderId[], current: LeaderId): LeaderId | undefined {
+  const humans = cast.filter(isHuman);
+  const idx = humans.indexOf(current);
+  if (idx === -1) return undefined;
+  return humans[idx + 1];
+}
 
 export function uiReducer(state: UiState, action: UiAction): UiState {
   switch (action.type) {
@@ -45,6 +59,7 @@ export function uiReducer(state: UiState, action: UiAction): UiState {
       const game = initialState(action.opts);
       const initialPopulations: Partial<Record<LeaderId, number>> = {};
       for (const id of game.cast) initialPopulations[id] = game.leaders[id].population;
+      const firstHuman = game.cast.find(isHuman);
       return {
         screen: 'planning',
         game,
@@ -52,16 +67,32 @@ export function uiReducer(state: UiState, action: UiAction): UiState {
         prevPopulations: {},
         initialPopulations,
         lastNewGameOpts: action.opts,
+        activeHumanTurn: firstHuman,
+        pendingHumanOrders: {},
       };
     }
     case 'PLAYER_SUBMIT': {
       if (!state.game) return state;
-      const game = reduce(state.game, {
-        type: 'SUBMIT_ORDERS',
-        leaderId: 'player1',
-        orders: action.orders,
-      });
-      return { ...state, screen: 'aiConferring', game };
+      const pendingHumanOrders = { ...state.pendingHumanOrders, [action.leaderId]: action.orders };
+      const next = nextHumanAfter(state.game.cast, action.leaderId);
+      if (next) {
+        return { ...state, screen: 'hotseat', activeHumanTurn: next, pendingHumanOrders };
+      }
+      // All humans done — drain buffer into engine SUBMIT_ORDERS per human, then advance.
+      let game = state.game;
+      for (const [leaderId, orders] of Object.entries(pendingHumanOrders) as [LeaderId, Order[]][]) {
+        game = reduce(game, { type: 'SUBMIT_ORDERS', leaderId, orders });
+      }
+      return {
+        ...state,
+        screen: 'aiConferring',
+        game,
+        activeHumanTurn: undefined,
+        pendingHumanOrders: {},
+      };
+    }
+    case 'BEGIN_PLANNING': {
+      return { ...state, screen: 'planning', activeHumanTurn: action.leaderId };
     }
     case 'AI_RESOLVE': {
       if (!state.game) return state;
@@ -90,8 +121,9 @@ export function uiReducer(state: UiState, action: UiAction): UiState {
     }
     case 'NEXT_ROUND': {
       if (!state.game) return state;
-      const next: ScreenName = state.game.outcome ? 'winners' : 'planning';
-      return { ...state, screen: next };
+      if (state.game.outcome) return { ...state, screen: 'winners' };
+      const firstHuman = state.game.cast.find(isHuman);
+      return { ...state, screen: 'planning', activeHumanTurn: firstHuman };
     }
     case 'BACK_TO_SETUP':
       return initialUiState;

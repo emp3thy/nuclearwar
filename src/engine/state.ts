@@ -1,6 +1,7 @@
 import type { Difficulty, GameConfig, GameState, Leader, LeaderId } from './types';
 import { DOMINANCE_THRESHOLD_DEFAULT, LEADER_PROFILES } from './balance';
 import { seedFromString } from './rng';
+import { shuffleMastheads } from './masthead';
 
 export interface NewGameOpts {
   cast: LeaderId[];
@@ -44,15 +45,19 @@ export function initialState(opts: NewGameOpts): GameState {
       bonusRule: profile.bonusRule,
     };
   }
+  const seedState = seedFromString(opts.seed);
+  const mh = shuffleMastheads(seedState);
+
   return {
     round: 1,
     cast: [...opts.cast],
     difficulty: opts.difficulty,
     seed: opts.seed,
-    rngState: seedFromString(opts.seed),
+    rngState: mh.rngState,
     leaders,
     pendingOrders: {},
     orderHistory: [],
+    mastheadOrder: mh.order,
     log: [],
     outcome: null,
     config: {

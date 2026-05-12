@@ -18,6 +18,19 @@
 
 .body { flex: 1; }
 
+.bodyColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.quote {
+  font-size: 11px;
+  font-style: italic;
+  color: #5a4a3a;
+  margin-top: 4px;
+}
+
 .obituary {
   background: #2a2a2a;
   color: #d8d0c0;

@@ -123,7 +123,9 @@ describe('resolveRound', () => {
     s = withOrders(s, 'carnage', []);
     const r = resolveRound(s);
     expect(r.state.outcome).toEqual({ type: 'survivor', winner: 'chump' });
-    expect(r.events[r.events.length - 1]).toEqual({
+    // DisparageColumn may trail OutcomeReached, so search rather than asserting last.
+    const outcomeEvent = r.events.find((e) => e.kind === 'OutcomeReached');
+    expect(outcomeEvent).toEqual({
       kind: 'OutcomeReached',
       outcome: { type: 'survivor', winner: 'chump' },
     });
@@ -202,6 +204,154 @@ describe('resolveRound', () => {
     const chumpGrudge = r.state.leaders.chump.grudge.carnage ?? 0;
     const starmlessGrudge = r.state.leaders.starmless.grudge.carnage ?? 0;
     expect(chumpGrudge + starmlessGrudge).toBeGreaterThan(0);
+  });
+});
+
+describe('resolveRound — P4a flavor events', () => {
+  it('populates attackerQuote on MissileLaunched + targetQuote on ImpactPeople', () => {
+    let s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'quote-test' });
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    s.leaders.chump.ap = 5;
+    s.leaders.carnage.stockpile.shields = 0;
+    s.leaders.carnage.stockpile.aa = 0;
+
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'chump',
+      orders: [{ kind: 'launch', target: 'carnage', delivery: 'missile', warhead: 'small', targetType: 'people' }],
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+    const r = resolveRound(s);
+
+    const launch = r.events.find((e) => e.kind === 'MissileLaunched');
+    expect(launch).toBeDefined();
+    if (launch && launch.kind === 'MissileLaunched') {
+      expect(launch.attackerQuote).toBeDefined();
+      expect(launch.attackerQuote!.length).toBeGreaterThan(0);
+    }
+
+    const impact = r.events.find(
+      (e) => e.kind === 'ImpactPeople' || e.kind === 'ImpactInfrastructure',
+    );
+    if (impact && (impact.kind === 'ImpactPeople' || impact.kind === 'ImpactInfrastructure')) {
+      expect(impact.targetQuote).toBeDefined();
+    }
+  });
+
+  it('emits PostRoundReaction per living non-human leader at round end', () => {
+    let s = initialState({
+      cast: ['player1', 'chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'reaction-test',
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'player1', orders: [] });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'chump', orders: [] });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+    const r = resolveRound(s);
+
+    const reactions = r.events.filter((e) => e.kind === 'PostRoundReaction');
+    expect(reactions).toHaveLength(2);
+    expect(reactions.map((e) => e.kind === 'PostRoundReaction' ? e.leaderId : '').sort())
+      .toEqual(['carnage', 'chump']);
+  });
+
+  it('emits DisparageCameo after some ImpactPeople/ImpactInfrastructure events', () => {
+    // Use 4 missiles + shields=0 + aa=0 to guarantee impacts land every seed.
+    // Iterate up to 50 seeds to find a cameo roll (~17.5% per impact → near-certain within 50).
+    let fired = false;
+    const launchOrder = {
+      kind: 'launch' as const,
+      target: 'carnage' as const,
+      delivery: 'missile' as const,
+      warhead: 'small' as const,
+      targetType: 'people' as const,
+    };
+    for (let n = 0; n < 50 && !fired; n++) {
+      let s = initialState({
+        cast: ['chump', 'carnage'],
+        difficulty: 'normal',
+        seed: `cam-${n}`,
+      });
+      s.leaders.chump.stockpile.missiles = 4;
+      s.leaders.chump.stockpile.warheadsSmall = 4;
+      s.leaders.chump.ap = 20;
+      s.leaders.carnage.stockpile.shields = 0;
+      s.leaders.carnage.stockpile.aa = 0;
+      s.leaders.carnage.population = 1000;
+
+      s = reduce(s, {
+        type: 'SUBMIT_ORDERS',
+        leaderId: 'chump',
+        orders: [launchOrder, launchOrder, launchOrder, launchOrder],
+      });
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+      const r = resolveRound(s);
+      const cameos = r.events.filter((e) => e.kind === 'DisparageCameo');
+      if (cameos.length > 0) {
+        fired = true;
+        const impactIdx = r.events.findIndex(
+          (e) => e.kind === 'ImpactPeople' || e.kind === 'ImpactInfrastructure',
+        );
+        const cameoIdx = r.events.findIndex((e) => e.kind === 'DisparageCameo');
+        if (impactIdx !== -1 && cameoIdx !== -1) {
+          expect(cameoIdx).toBeGreaterThan(impactIdx);
+        }
+      }
+    }
+    expect(fired).toBe(true);
+  });
+
+  it('emits DisparageColumn for at least some seeds; sets lastColumnNamedLeader', () => {
+    let fired = false;
+    for (const seedStr of ['seed-a', 'seed-b', 'seed-c', 'seed-d', 'seed-e', 'seed-f']) {
+      let s = initialState({
+        cast: ['player1', 'chump', 'carnage'],
+        difficulty: 'normal',
+        seed: seedStr,
+      });
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'player1', orders: [] });
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'chump', orders: [] });
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+      const r = resolveRound(s);
+      const columns = r.events.filter((e) => e.kind === 'DisparageColumn');
+      if (columns.length > 0) {
+        fired = true;
+        const col = columns[0];
+        if (col.kind === 'DisparageColumn') {
+          expect(col.quote.length).toBeGreaterThan(0);
+          expect(col.footer.length).toBeGreaterThan(0);
+        }
+        if (col.kind === 'DisparageColumn' && col.namedLeader) {
+          expect(r.state.lastColumnNamedLeader).toBe(col.namedLeader);
+        }
+        break;
+      }
+    }
+    expect(fired).toBe(true);
+  });
+
+  it('emits PreRoundMood per living non-human leader at round start', () => {
+    let s = initialState({
+      cast: ['player1', 'chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'mood-test',
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'player1', orders: [] });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'chump', orders: [] });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+    const r = resolveRound(s);
+
+    const moodEvents = r.events.filter((e) => e.kind === 'PreRoundMood');
+    expect(moodEvents).toHaveLength(2); // chump + carnage; player1 excluded
+    expect(moodEvents.map((e) => e.kind === 'PreRoundMood' ? e.leaderId : '').sort())
+      .toEqual(['carnage', 'chump']);
+    for (const e of moodEvents) {
+      if (e.kind === 'PreRoundMood') {
+        expect(e.quote.length).toBeGreaterThan(0);
+        expect(e.snapBack).toBe(false);
+      }
+    }
   });
 });
 

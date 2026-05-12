@@ -6,6 +6,12 @@ import { applyLaunches, collectLaunches, consumeStockFor, makeIncomingCounter } 
 import { applyFinalRetaliation } from './finalRetaliation';
 import { checkOutcome } from './winConditions';
 import { AP_BANK_CAP, FACTORY_AP_RATE, LEADER_PROFILES, AI_SCORING_WEIGHTS } from './balance';
+import { getBank } from './flavor/index';
+import { pickLine } from './flavor/pick';
+import { isHuman } from './state';
+import { shouldRollCameo, shouldRollColumn, pickColumnNamedLeader } from './cameo';
+import { disparageBank } from './flavor/disparage';
+import { nextInt } from './rng';
 
 export interface ResolveResult {
   state: GameState;
@@ -18,6 +24,21 @@ export function resolveRound(state: GameState): ResolveResult {
 
   const startOfRoundPop: Partial<Record<LeaderId, number>> = {};
   for (const id of s.cast) startOfRoundPop[id] = s.leaders[id].population;
+
+  // P4a: emit PreRoundMood per living non-human leader. Snap-back if Disparage's
+  // column named this leader last round (and they're still alive).
+  for (const id of [...s.cast].sort()) {
+    if (isHuman(id)) continue;
+    if (!s.leaders[id].alive) continue;
+    const bank = getBank(id);
+    if (!bank) continue;
+    const snapBack = s.lastColumnNamedLeader === id;
+    const r = pickLine(bank, 'preRoundMood', s.rngState, { snapBack, substitutions: { leader: s.leaders[id].name } });
+    s.rngState = r.rngState;
+    events.push({ kind: 'PreRoundMood', leaderId: id, quote: r.quote, snapBack });
+  }
+  // Clear snap-back flag after emission.
+  s.lastColumnNamedLeader = undefined;
 
   // OrdersSealed events first (cast id-ASC).
   for (const id of [...s.cast].sort()) {
@@ -99,6 +120,126 @@ export function resolveRound(state: GameState): ResolveResult {
     events.push(...r.events);
   }
 
+  // P4a: Disparage cameo. For each ImpactPeople/ImpactInfrastructure event,
+  // probabilistically inject a DisparageCameo event immediately after it.
+  {
+    const expanded: ResolutionEvent[] = [];
+    for (const e of events) {
+      expanded.push(e);
+      if (e.kind === 'ImpactPeople' || e.kind === 'ImpactInfrastructure') {
+        const roll = shouldRollCameo(s.rngState);
+        s.rngState = roll.rngState;
+        if (roll.fire) {
+          const linePick = nextRoundLine(disparageBank.cameo, s.rngState);
+          s.rngState = linePick.rngState;
+          expanded.push({
+            kind: 'DisparageCameo',
+            afterImpact: { from: e.from, to: e.target },
+            quote: linePick.line,
+          });
+        }
+      }
+    }
+    events.length = 0;
+    events.push(...expanded);
+  }
+
+  // P4a: populate quote fields on existing events. Single pass; uses the
+  // seeded RNG threaded through s.rngState. Quotes are optional, so callers
+  // can skip them without breaking the type system.
+  for (let i = 0; i < events.length; i++) {
+    const e = events[i];
+    switch (e.kind) {
+      case 'MissileLaunched': {
+        const bank = isHuman(e.from) ? undefined : getBank(e.from);
+        if (!bank) break;
+        const p = pickLine(bank, 'launch', s.rngState, { substitutions: { target: s.leaders[e.to].name } });
+        s.rngState = p.rngState;
+        events[i] = { ...e, attackerQuote: p.quote };
+        break;
+      }
+      case 'ImpactPeople':
+      case 'ImpactInfrastructure': {
+        const bank = isHuman(e.target) ? undefined : getBank(e.target);
+        if (!bank) break;
+        const p = pickLine(bank, 'hit', s.rngState, { substitutions: { leader: s.leaders[e.target].name } });
+        s.rngState = p.rngState;
+        events[i] = { ...e, targetQuote: p.quote };
+        break;
+      }
+      case 'PropagandaTransfer': {
+        const senderBank = isHuman(e.from) ? undefined : getBank(e.from);
+        const receiverBank = isHuman(e.to) ? undefined : getBank(e.to);
+        let senderQuote: string | undefined;
+        let receiverQuote: string | undefined;
+        if (senderBank) {
+          const p = pickLine(senderBank, 'propagandaSend', s.rngState, { substitutions: { target: s.leaders[e.to].name } });
+          s.rngState = p.rngState;
+          senderQuote = p.quote;
+        }
+        if (receiverBank) {
+          const p = pickLine(receiverBank, 'propagandaReceive', s.rngState, { substitutions: { leader: s.leaders[e.to].name } });
+          s.rngState = p.rngState;
+          receiverQuote = p.quote;
+        }
+        events[i] = { ...e, senderQuote, receiverQuote };
+        break;
+      }
+      case 'WooApplied': {
+        const senderBank = isHuman(e.from) ? undefined : getBank(e.from);
+        const receiverBank = isHuman(e.to) ? undefined : getBank(e.to);
+        let senderQuote: string | undefined;
+        let receiverQuote: string | undefined;
+        if (senderBank) {
+          const p = pickLine(senderBank, 'woo', s.rngState);
+          s.rngState = p.rngState;
+          senderQuote = p.quote;
+        }
+        if (receiverBank) {
+          const p = pickLine(receiverBank, 'beingWooed', s.rngState, { substitutions: { leader: s.leaders[e.to].name } });
+          s.rngState = p.rngState;
+          receiverQuote = p.quote;
+        }
+        events[i] = { ...e, senderQuote, receiverQuote };
+        break;
+      }
+      case 'FactoryBuilt': {
+        const bank = isHuman(e.by) ? undefined : getBank(e.by);
+        if (!bank) break;
+        const p = pickLine(bank, 'buildFactory', s.rngState, { substitutions: { leader: s.leaders[e.by].name } });
+        s.rngState = p.rngState;
+        events[i] = { ...e, quote: p.quote };
+        break;
+      }
+      case 'DefenceBuilt': {
+        const bank = isHuman(e.by) ? undefined : getBank(e.by);
+        if (!bank) break;
+        const p = pickLine(bank, 'buildDefence', s.rngState, { substitutions: { leader: s.leaders[e.by].name } });
+        s.rngState = p.rngState;
+        events[i] = { ...e, quote: p.quote };
+        break;
+      }
+      case 'LeaderEliminated': {
+        const bank = isHuman(e.id) ? undefined : getBank(e.id);
+        if (!bank) break;
+        const p = pickLine(bank, 'death', s.rngState, { substitutions: { leader: s.leaders[e.id].name } });
+        s.rngState = p.rngState;
+        events[i] = { ...e, quote: p.quote };
+        break;
+      }
+      case 'FinalRetaliationTriggered': {
+        const bank = isHuman(e.by) ? undefined : getBank(e.by);
+        if (!bank) break;
+        const p = pickLine(bank, 'finalRetaliation', s.rngState, { substitutions: { leader: s.leaders[e.by].name } });
+        s.rngState = p.rngState;
+        events[i] = { ...e, quote: p.quote };
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
   // Update grudge / recentAggressionFrom on receivers based on landed impacts.
   // Walks the events emitted by both applyLaunches AND applyFinalRetaliation,
   // so FR cascade impacts also attribute grudge to the dying leader.
@@ -114,6 +255,17 @@ export function resolveRound(state: GameState): ResolveResult {
 
   // Decay relationships.
   s = decayFavourability(s);
+
+  // P4a: emit PostRoundReaction per living non-human leader.
+  for (const id of [...s.cast].sort()) {
+    if (isHuman(id)) continue;
+    if (!s.leaders[id].alive) continue;
+    const bank = getBank(id);
+    if (!bank) continue;
+    const r = pickLine(bank, 'reaction', s.rngState, { substitutions: { leader: s.leaders[id].name } });
+    s.rngState = r.rngState;
+    events.push({ kind: 'PostRoundReaction', leaderId: id, quote: r.quote });
+  }
 
   // AP refresh + banking + bonuses (survivors only).
   // IMPORTANT: bonus rule reads from the ORIGINAL `state` parameter (not `s`),
@@ -150,10 +302,45 @@ export function resolveRound(state: GameState): ResolveResult {
     events.push({ kind: 'OutcomeReached', outcome });
   }
 
+  // P4a: Disparage column roll. Fires probabilistically; if it does, pick a
+  // named leader (preferring attackers), draw a column line + footer, set
+  // lastColumnNamedLeader so the next round's PreRoundMood can snap back.
+  {
+    const roll = shouldRollColumn(s.rngState);
+    s.rngState = roll.rngState;
+    if (roll.fire) {
+      const livingLeaders = s.cast.filter((id) => s.leaders[id].alive);
+      const picked = pickColumnNamedLeader(events, livingLeaders, s.rngState);
+      s.rngState = picked.rngState;
+
+      const linePick = nextRoundLine(disparageBank.columnLines, s.rngState);
+      s.rngState = linePick.rngState;
+
+      const footerIndex = (s.round - 1) % disparageBank.footerNotes.length;
+      const footer = disparageBank.footerNotes[footerIndex];
+
+      events.push({
+        kind: 'DisparageColumn',
+        namedLeader: picked.namedLeader,
+        quote: linePick.line,
+        footer,
+      });
+
+      if (picked.namedLeader) {
+        s.lastColumnNamedLeader = picked.namedLeader;
+      }
+    }
+  }
+
   // Append to persistent log.
   s.log = [...s.log, ...events];
 
   return { state: s, events };
+}
+
+function nextRoundLine(pool: string[], rngState: number): { line: string; rngState: number } {
+  const step = nextInt(rngState, pool.length);
+  return { line: pool[step.value], rngState: step.state };
 }
 
 function leaderBonusAp(id: LeaderId, thisRoundsOrders: Order[]): number {

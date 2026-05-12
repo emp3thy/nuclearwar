@@ -8,6 +8,7 @@ import AiConferring from './screens/AiConferring';
 import Action from './screens/Action';
 import RoundSummary from './screens/RoundSummary';
 import Winners from './screens/Winners';
+import HotseatHandoff from './screens/HotseatHandoff';
 
 export default function App() {
   const [state, dispatch] = useReducer(uiReducer, initialUiState);
@@ -15,6 +16,7 @@ export default function App() {
   switch (state.screen) {
     case 'setup':         return <Setup state={state} dispatch={dispatch} />;
     case 'planning':      return <Planning state={state} dispatch={dispatch} />;
+    case 'hotseat':       return <HotseatHandoff state={state} dispatch={dispatch} />;
     case 'aiConferring':  return <AiConferring state={state} dispatch={dispatch} />;
     case 'action':        return <Action state={state} dispatch={dispatch} />;
     case 'roundSummary':  return <RoundSummary state={state} dispatch={dispatch} />;

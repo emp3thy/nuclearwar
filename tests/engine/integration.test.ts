@@ -36,6 +36,11 @@ describe('integration — three-leader scripted game', () => {
       'LeaderEliminated',
       'FinalRetaliationTriggered',
       'OutcomeReached',
+      // P4a flavor events
+      'PreRoundMood',
+      'PostRoundReaction',
+      'DisparageCameo',
+      'DisparageColumn',
     ]);
     for (const e of s.log) {
       expect(known.has(e.kind)).toBe(true);

@@ -130,3 +130,27 @@ What's NOT in this phase (deferred to P4a / P4b):
 - Soft-warn validation in Planning — P4a
 - AI scoring-weight balance pass + AI-duel balance assertions — P4b
 - Approach B / C upgrades to Hard-mode lookahead — P4b
+
+## Phase 4a status
+
+Phase 4a (Satire + Hotseat) ships multi-human hotseat support plus the full satirical voice — flavor banks wired into events, Disparage cameo on Action and Round Summary, masthead rotation, and 3 soft-warns on Planning. Verification: `npm run test:run` (217 tests, 35 files).
+
+What's in this phase:
+
+- **Hotseat Handoff** — 2–5 humans on one device, country-forward curtain between turns, cast-index turn order. Solo (1 human) skips the curtain.
+- **Flavor banks** — six leader banks + Disparage bank under `src/engine/flavor/`. Engine picks lines deterministically (seeded RNG) at resolution time, bakes them into existing event variants (`attackerQuote`, `targetQuote`, etc.) and emits new flavor events (`PreRoundMood`, `PostRoundReaction`).
+- **Disparage cameo** — `cameo.ts` rolls Action overlays (~17.5 % per impact) and the Round Summary column (~33 % per round). Column-named leader's next-round Planning mood line snap-backs; skipped silently if eliminated.
+- **Masthead rotation** — 15-name pool Fisher-Yates shuffled at game start; one per round; apocalypse override.
+- **Soft-warn validation** — Planning aside panel with 3 warnings (warhead-no-delivery, delivery-no-warhead, woo-non-attacker). Hidden when no warnings.
+
+What's NOT in this phase (deferred to P4b / P5):
+
+- AI scoring-weight balance pass + AI-duel balance assertions — P4b
+- Approach B / C upgrades to Hard-mode lookahead — P4b
+- Persistence (localStorage save/load + Resume + action log) — P5
+- Replay timeline scrubber UI on Winners — P5
+- Animations (Framer Motion, missile arcs, damage badges, Fast Resolve toggle) — P5
+- Flavor presentation: speech-bubble animations, mood-line treatment — engine carries the data; P5 prettifies
+- Audio (`play(name)` wrapper, sfx + ambient music) — P5
+- SVG art (leader portraits, world map, Freedonia flag, mushroom-cloud illustration, ruined-iconography) — P5
+- PWA manifest + service worker — P5

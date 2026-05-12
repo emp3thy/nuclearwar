@@ -92,6 +92,8 @@
 
 .orderRow:last-of-type { border-bottom: none; }
 
+.orderRow.warned { background: #fff8e1; border-color: #f59f00; }
+
 .orderLabel { color: #2a2a2a; }
 
 .removeBtn {

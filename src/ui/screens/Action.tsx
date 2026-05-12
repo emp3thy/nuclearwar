@@ -35,12 +35,22 @@ function phaseAdvanceFor(kind: ResolutionEvent['kind']): Phase | null {
     // Non-phase-advancing kinds:
     case 'LeaderEliminated':
     case 'OrdersSealed':
-    case 'OutcomeReached': return null;
+    case 'OutcomeReached':
+    case 'PreRoundMood':
+    case 'PostRoundReaction':
+    case 'DisparageCameo':
+    case 'DisparageColumn': return null;
   }
 }
 
 function isRenderable(kind: ResolutionEvent['kind']): boolean {
-  return kind !== 'OrdersSealed' && kind !== 'OutcomeReached';
+  return (
+    kind !== 'OrdersSealed' &&
+    kind !== 'OutcomeReached' &&
+    kind !== 'PreRoundMood' &&
+    kind !== 'PostRoundReaction' &&
+    kind !== 'DisparageColumn'
+  );
 }
 
 export default function Action({ state, dispatch }: ScreenProps) {

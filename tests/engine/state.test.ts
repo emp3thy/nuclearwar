@@ -142,3 +142,30 @@ describe('initialState', () => {
     expect(s.leaders.player1.country).toBe('🦆 Freedonia');
   });
 });
+
+describe('initialState (P4a additions)', () => {
+  it('seeds mastheadOrder with 15 unique names', () => {
+    const s = initialState({
+      cast: ['player1', 'chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'p4a-schema-test',
+    });
+    expect(s.mastheadOrder).toHaveLength(15);
+    expect(new Set(s.mastheadOrder).size).toBe(15);
+  });
+
+  it('starts with no lastColumnNamedLeader', () => {
+    const s = initialState({
+      cast: ['player1', 'chump'],
+      difficulty: 'normal',
+      seed: 'p4a-schema-test',
+    });
+    expect(s.lastColumnNamedLeader).toBeUndefined();
+  });
+
+  it('shuffles mastheadOrder per seed (not the pool order)', () => {
+    const a = initialState({ cast: ['player1', 'chump'], difficulty: 'normal', seed: 'seed-a' });
+    const b = initialState({ cast: ['player1', 'chump'], difficulty: 'normal', seed: 'seed-b' });
+    expect(a.mastheadOrder).not.toEqual(b.mastheadOrder);
+  });
+});

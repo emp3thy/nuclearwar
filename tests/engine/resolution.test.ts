@@ -208,6 +208,37 @@ describe('resolveRound', () => {
 });
 
 describe('resolveRound — P4a flavor events', () => {
+  it('populates attackerQuote on MissileLaunched + targetQuote on ImpactPeople', () => {
+    let s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'quote-test' });
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    s.leaders.chump.ap = 5;
+    s.leaders.carnage.stockpile.shields = 0;
+    s.leaders.carnage.stockpile.aa = 0;
+
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'chump',
+      orders: [{ kind: 'launch', target: 'carnage', delivery: 'missile', warhead: 'small', targetType: 'people' }],
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+    const r = resolveRound(s);
+
+    const launch = r.events.find((e) => e.kind === 'MissileLaunched');
+    expect(launch).toBeDefined();
+    if (launch && launch.kind === 'MissileLaunched') {
+      expect(launch.attackerQuote).toBeDefined();
+      expect(launch.attackerQuote!.length).toBeGreaterThan(0);
+    }
+
+    const impact = r.events.find(
+      (e) => e.kind === 'ImpactPeople' || e.kind === 'ImpactInfrastructure',
+    );
+    if (impact && (impact.kind === 'ImpactPeople' || impact.kind === 'ImpactInfrastructure')) {
+      expect(impact.targetQuote).toBeDefined();
+    }
+  });
+
   it('emits PostRoundReaction per living non-human leader at round end', () => {
     let s = initialState({
       cast: ['player1', 'chump', 'carnage'],

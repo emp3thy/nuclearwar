@@ -144,6 +144,102 @@ export function resolveRound(state: GameState): ResolveResult {
     events.push(...expanded);
   }
 
+  // P4a: populate quote fields on existing events. Single pass; uses the
+  // seeded RNG threaded through s.rngState. Quotes are optional, so callers
+  // can skip them without breaking the type system.
+  for (let i = 0; i < events.length; i++) {
+    const e = events[i];
+    switch (e.kind) {
+      case 'MissileLaunched': {
+        const bank = isHuman(e.from) ? undefined : getBank(e.from);
+        if (!bank) break;
+        const p = pickLine(bank, 'launch', s.rngState, { substitutions: { target: s.leaders[e.to].name } });
+        s.rngState = p.rngState;
+        events[i] = { ...e, attackerQuote: p.quote };
+        break;
+      }
+      case 'ImpactPeople':
+      case 'ImpactInfrastructure': {
+        const bank = isHuman(e.target) ? undefined : getBank(e.target);
+        if (!bank) break;
+        const p = pickLine(bank, 'hit', s.rngState, { substitutions: { leader: s.leaders[e.target].name } });
+        s.rngState = p.rngState;
+        events[i] = { ...e, targetQuote: p.quote };
+        break;
+      }
+      case 'PropagandaTransfer': {
+        const senderBank = isHuman(e.from) ? undefined : getBank(e.from);
+        const receiverBank = isHuman(e.to) ? undefined : getBank(e.to);
+        let senderQuote: string | undefined;
+        let receiverQuote: string | undefined;
+        if (senderBank) {
+          const p = pickLine(senderBank, 'propagandaSend', s.rngState, { substitutions: { target: s.leaders[e.to].name } });
+          s.rngState = p.rngState;
+          senderQuote = p.quote;
+        }
+        if (receiverBank) {
+          const p = pickLine(receiverBank, 'propagandaReceive', s.rngState);
+          s.rngState = p.rngState;
+          receiverQuote = p.quote;
+        }
+        events[i] = { ...e, senderQuote, receiverQuote };
+        break;
+      }
+      case 'WooApplied': {
+        const senderBank = isHuman(e.from) ? undefined : getBank(e.from);
+        const receiverBank = isHuman(e.to) ? undefined : getBank(e.to);
+        let senderQuote: string | undefined;
+        let receiverQuote: string | undefined;
+        if (senderBank) {
+          const p = pickLine(senderBank, 'woo', s.rngState);
+          s.rngState = p.rngState;
+          senderQuote = p.quote;
+        }
+        if (receiverBank) {
+          const p = pickLine(receiverBank, 'beingWooed', s.rngState);
+          s.rngState = p.rngState;
+          receiverQuote = p.quote;
+        }
+        events[i] = { ...e, senderQuote, receiverQuote };
+        break;
+      }
+      case 'FactoryBuilt': {
+        const bank = isHuman(e.by) ? undefined : getBank(e.by);
+        if (!bank) break;
+        const p = pickLine(bank, 'buildFactory', s.rngState);
+        s.rngState = p.rngState;
+        events[i] = { ...e, quote: p.quote };
+        break;
+      }
+      case 'DefenceBuilt': {
+        const bank = isHuman(e.by) ? undefined : getBank(e.by);
+        if (!bank) break;
+        const p = pickLine(bank, 'buildDefence', s.rngState);
+        s.rngState = p.rngState;
+        events[i] = { ...e, quote: p.quote };
+        break;
+      }
+      case 'LeaderEliminated': {
+        const bank = isHuman(e.id) ? undefined : getBank(e.id);
+        if (!bank) break;
+        const p = pickLine(bank, 'death', s.rngState);
+        s.rngState = p.rngState;
+        events[i] = { ...e, quote: p.quote };
+        break;
+      }
+      case 'FinalRetaliationTriggered': {
+        const bank = isHuman(e.by) ? undefined : getBank(e.by);
+        if (!bank) break;
+        const p = pickLine(bank, 'finalRetaliation', s.rngState);
+        s.rngState = p.rngState;
+        events[i] = { ...e, quote: p.quote };
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
   // Update grudge / recentAggressionFrom on receivers based on landed impacts.
   // Walks the events emitted by both applyLaunches AND applyFinalRetaliation,
   // so FR cascade impacts also attribute grudge to the dying leader.

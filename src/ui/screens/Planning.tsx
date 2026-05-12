@@ -2,10 +2,11 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import type { ScreenProps } from '../App';
 import type { GameState, LeaderId, Order } from '../../engine/types';
 import { isHuman } from '../../engine/state';
-import { totalApCost } from '../../engine/orders';
+import { totalApCost, analyseOrderSequence } from '../../engine/orders';
 import LeaderCard from '../components/LeaderCard';
 import ApBudget from '../components/ApBudget';
 import OrderForm from '../components/OrderForm';
+import SoftWarnPanel from '../components/SoftWarnPanel';
 import styles from './Planning.module.css';
 
 const HOLD_MS = 600;
@@ -51,6 +52,14 @@ export default function Planning({ state, dispatch }: ScreenProps) {
   const apTotal = player.ap; // engine's ap already factors banked + bonus per resolution
   const overBudget = apUsed > apTotal;
 
+  const softWarnings = analyseOrderSequence(game, activeId, orders);
+  const warnedIndices = new Set(softWarnings.map((w) => w.orderIndex));
+
+  const moodByLeader: Partial<Record<string, string>> = {};
+  for (const e of state.events) {
+    if (e.kind === 'PreRoundMood') moodByLeader[e.leaderId] = e.quote;
+  }
+
   const lastRoundChips = game.orderHistory.length > 0
     ? Object.entries(game.orderHistory[game.orderHistory.length - 1])
         .flatMap(([id, os]) =>
@@ -60,7 +69,7 @@ export default function Planning({ state, dispatch }: ScreenProps) {
 
   return (
     <div className={styles.planning}>
-      <header className={styles.header}>Round {game.round}</header>
+      <header className={styles.header}>Round {game.round}{state.activeHumanTurn ? ` · ${player.name}` : ''}</header>
 
       <section className={styles.ownPanel}>
         <h2 className={styles.sectionTitle}>{player.country} {player.name} (you)</h2>
@@ -102,10 +111,11 @@ export default function Planning({ state, dispatch }: ScreenProps) {
             <LeaderCard
               key={id}
               leader={leader}
-              playerHits={leader.recentAggressionFrom.player1 ?? 0}
-              playerFav={leader.favourability.player1 ?? 0}
+              playerHits={leader.recentAggressionFrom[activeId] ?? 0}
+              playerFav={leader.favourability[activeId] ?? 0}
               myFav={player.favourability[id] ?? 0}
-              playerGrudge={leader.grudge.player1 ?? 0}
+              playerGrudge={leader.grudge[activeId] ?? 0}
+              mood={moodByLeader[id]}
             />
           );
         })}
@@ -117,7 +127,7 @@ export default function Planning({ state, dispatch }: ScreenProps) {
           <div className={styles.empty}>No orders yet.</div>
         ) : (
           orders.map((o, i) => (
-            <div key={i} className={styles.orderRow}>
+            <div key={i} className={`${styles.orderRow} ${warnedIndices.has(i) ? styles.warned : ''}`}>
               <span className={styles.orderLabel}>{formatOrder(o, game)}</span>
               <button type="button" className={styles.removeBtn} onClick={() => removeOrder(i)}>×</button>
             </div>
@@ -126,9 +136,10 @@ export default function Planning({ state, dispatch }: ScreenProps) {
         <div className={`${styles.apSummary} ${overBudget ? styles.over : ''}`}>
           AP used: {apUsed} / {apTotal}
         </div>
+        <SoftWarnPanel warnings={softWarnings} orders={orders} game={game} />
       </section>
 
-      <OrderForm state={game} playerId="player1" committedOrders={orders} onAdd={addOrder} />
+      <OrderForm state={game} playerId={activeId} committedOrders={orders} onAdd={addOrder} />
 
       <div className={styles.sealWrap}>
         <button

@@ -7,6 +7,7 @@ export interface LeaderCardProps {
   playerFav: number;      // favourability *they* have toward me (player wooing them)
   myFav: number;          // favourability *I* have toward them (they wooed me)
   playerGrudge: number;   // their grudge against player
+  mood?: string;
 }
 
 export default function LeaderCard({
@@ -15,6 +16,7 @@ export default function LeaderCard({
   playerFav,
   myFav,
   playerGrudge,
+  mood,
 }: LeaderCardProps) {
   const arsenalCount =
     leader.stockpile.missiles +
@@ -39,7 +41,9 @@ export default function LeaderCard({
         {playerGrudge > 0 && <span className={`${styles.badge} ${styles.grudge}`}>grudge ({playerGrudge})</span>}
       </div>
       {/* mood-line slot — empty in thin P3, P4a fills with flavor */}
-      <div className={styles.moodSlot} />
+      <div className={styles.moodSlot}>
+        {mood && <span className={styles.moodLine}>{mood}</span>}
+      </div>
     </div>
   );
 }

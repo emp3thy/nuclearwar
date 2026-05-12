@@ -48,3 +48,9 @@
 .moodSlot {
   min-height: 14px;  /* reserved space for P4a mood lines */
 }
+
+.moodLine {
+  font-size: 10px;
+  color: #5a4a3a;
+  font-style: italic;
+}

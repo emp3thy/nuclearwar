@@ -1,5 +1,7 @@
 import type { ScreenProps } from '../App';
 import type { GameState, LeaderId, ResolutionEvent } from '../../engine/types';
+import { pickMasthead } from '../../engine/masthead';
+import DisparageColumn from '../components/DisparageColumn';
 import styles from './RoundSummary.module.css';
 
 function pickHeadline(
@@ -59,7 +61,9 @@ export default function RoundSummary({ state, dispatch }: ScreenProps) {
 
   return (
     <div className={styles.summary}>
-      <div className={styles.masthead}>─── THE NUKE TIMES ───  R {game.round - 1}</div>
+      <header className={styles.masthead}>
+        {pickMasthead(game.mastheadOrder, game.round - 1, game.outcome)}
+      </header>
       <h1 className={`${styles.headline} ${game.outcome?.type === 'apocalypse' ? styles.theEnd : ''}`}>
         {headline}
       </h1>
@@ -72,26 +76,52 @@ export default function RoundSummary({ state, dispatch }: ScreenProps) {
         <div className={styles.casualtyRow}>Survivors: {survivors} of {game.cast.length}</div>
       </div>
 
-      <h2 className={styles.sectionTitle}>World Reactions</h2>
-      <div className={styles.reactionsList}>
+      <section className={styles.worldReactions}>
+        <h2 className={styles.sectionTitle}>World Reactions</h2>
         {game.cast.map((id) => {
           const leader = game.leaders[id];
+          if (!leader.alive) return null;
           const prev = state.prevPopulations[id] ?? leader.population;
           const delta = leader.population - prev;
-          const sign = delta > 0 ? '△' : delta < 0 ? '▽' : '─';
-          const eliminated = !leader.alive;
+          const reaction = state.events.find(
+            (e) => e.kind === 'PostRoundReaction' && e.leaderId === id,
+          );
+          const quote = reaction?.kind === 'PostRoundReaction' ? reaction.quote : undefined;
           return (
-            <div key={id} className={`${styles.reactionRow} ${eliminated ? styles.obituary : ''}`}>
-              <span className={styles.flag}>{leader.country.split(' ')[0]}</span>
-              <span className={styles.name}>
-                {eliminated && 'OBITUARY: '}{leader.name}
-              </span>
-              <span className={styles.delta}>{sign} {Math.abs(delta)}</span>
-              <span className={styles.state}>{eliminated ? 'eliminated' : 'alive'}</span>
+            <div key={id} className={styles.reactionRow}>
+              <span className={styles.reactionFlag}>{leader.country.split(' ')[0]}</span>
+              <span className={styles.reactionName}>{leader.name}</span>
+              <span className={styles.reactionDelta}>{delta >= 0 ? `+${delta}` : delta}M</span>
+              {quote && <span className={styles.reactionQuote}>"{quote}"</span>}
             </div>
           );
         })}
-      </div>
+      </section>
+
+      <section className={styles.obituaries}>
+        {game.cast.map((id) => {
+          const leader = game.leaders[id];
+          const prev = state.prevPopulations[id];
+          // Eliminated this round = alive=false AND prev > 0
+          if (leader.alive || prev === undefined || prev <= 0) return null;
+          const death = state.events.find(
+            (e) => e.kind === 'LeaderEliminated' && e.id === id,
+          );
+          const quote = death?.kind === 'LeaderEliminated' ? death.quote : undefined;
+          return (
+            <div key={`obit-${id}`} className={styles.obit}>
+              <div className={styles.obitHeader}>OBITUARY: {leader.name}</div>
+              {quote && <div className={styles.obitQuote}>"{quote}"</div>}
+            </div>
+          );
+        })}
+      </section>
+
+      {(() => {
+        const col = state.events.find((e) => e.kind === 'DisparageColumn');
+        if (col?.kind === 'DisparageColumn') return <DisparageColumn event={col} />;
+        return null;
+      })()}
 
       <button
         type="button"

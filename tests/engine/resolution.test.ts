@@ -206,6 +206,23 @@ describe('resolveRound', () => {
 });
 
 describe('resolveRound — P4a flavor events', () => {
+  it('emits PostRoundReaction per living non-human leader at round end', () => {
+    let s = initialState({
+      cast: ['player1', 'chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'reaction-test',
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'player1', orders: [] });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'chump', orders: [] });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+    const r = resolveRound(s);
+
+    const reactions = r.events.filter((e) => e.kind === 'PostRoundReaction');
+    expect(reactions).toHaveLength(2);
+    expect(reactions.map((e) => e.kind === 'PostRoundReaction' ? e.leaderId : '').sort())
+      .toEqual(['carnage', 'chump']);
+  });
+
   it('emits PreRoundMood per living non-human leader at round start', () => {
     let s = initialState({
       cast: ['player1', 'chump', 'carnage'],

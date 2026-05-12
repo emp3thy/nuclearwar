@@ -133,6 +133,17 @@ export function resolveRound(state: GameState): ResolveResult {
   // Decay relationships.
   s = decayFavourability(s);
 
+  // P4a: emit PostRoundReaction per living non-human leader.
+  for (const id of [...s.cast].sort()) {
+    if (isHuman(id)) continue;
+    if (!s.leaders[id].alive) continue;
+    const bank = getBank(id);
+    if (!bank) continue;
+    const r = pickLine(bank, 'reaction', s.rngState);
+    s.rngState = r.rngState;
+    events.push({ kind: 'PostRoundReaction', leaderId: id, quote: r.quote });
+  }
+
   // AP refresh + banking + bonuses (survivors only).
   // IMPORTANT: bonus rule reads from the ORIGINAL `state` parameter (not `s`),
   // because s.pendingOrders has already been cleared mid-function via allOrders snapshot.

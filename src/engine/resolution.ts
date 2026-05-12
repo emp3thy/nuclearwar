@@ -9,7 +9,7 @@ import { AP_BANK_CAP, FACTORY_AP_RATE, LEADER_PROFILES, AI_SCORING_WEIGHTS } fro
 import { getBank } from './flavor/index';
 import { pickLine } from './flavor/pick';
 import { isHuman } from './state';
-import { shouldRollColumn, pickColumnNamedLeader } from './cameo';
+import { shouldRollCameo, shouldRollColumn, pickColumnNamedLeader } from './cameo';
 import { disparageBank } from './flavor/disparage';
 import { nextInt } from './rng';
 
@@ -118,6 +118,30 @@ export function resolveRound(state: GameState): ResolveResult {
     const r = applyFinalRetaliation(s, newlyDead, incomingCounter);
     s = r.state;
     events.push(...r.events);
+  }
+
+  // P4a: Disparage cameo. For each ImpactPeople/ImpactInfrastructure event,
+  // probabilistically inject a DisparageCameo event immediately after it.
+  {
+    const expanded: ResolutionEvent[] = [];
+    for (const e of events) {
+      expanded.push(e);
+      if (e.kind === 'ImpactPeople' || e.kind === 'ImpactInfrastructure') {
+        const roll = shouldRollCameo(s.rngState);
+        s.rngState = roll.rngState;
+        if (roll.fire) {
+          const linePick = nextRoundLine(disparageBank.cameo, s.rngState);
+          s.rngState = linePick.rngState;
+          expanded.push({
+            kind: 'DisparageCameo',
+            afterImpact: { from: e.from, to: e.target },
+            quote: linePick.line,
+          });
+        }
+      }
+    }
+    events.length = 0;
+    events.push(...expanded);
   }
 
   // Update grudge / recentAggressionFrom on receivers based on landed impacts.

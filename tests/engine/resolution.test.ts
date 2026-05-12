@@ -225,6 +225,52 @@ describe('resolveRound — P4a flavor events', () => {
       .toEqual(['carnage', 'chump']);
   });
 
+  it('emits DisparageCameo after some ImpactPeople/ImpactInfrastructure events', () => {
+    // Use 4 missiles + shields=0 + aa=0 to guarantee impacts land every seed.
+    // Iterate up to 50 seeds to find a cameo roll (~17.5% per impact → near-certain within 50).
+    let fired = false;
+    const launchOrder = {
+      kind: 'launch' as const,
+      target: 'carnage' as const,
+      delivery: 'missile' as const,
+      warhead: 'small' as const,
+      targetType: 'people' as const,
+    };
+    for (let n = 0; n < 50 && !fired; n++) {
+      let s = initialState({
+        cast: ['chump', 'carnage'],
+        difficulty: 'normal',
+        seed: `cam-${n}`,
+      });
+      s.leaders.chump.stockpile.missiles = 4;
+      s.leaders.chump.stockpile.warheadsSmall = 4;
+      s.leaders.chump.ap = 20;
+      s.leaders.carnage.stockpile.shields = 0;
+      s.leaders.carnage.stockpile.aa = 0;
+      s.leaders.carnage.population = 1000;
+
+      s = reduce(s, {
+        type: 'SUBMIT_ORDERS',
+        leaderId: 'chump',
+        orders: [launchOrder, launchOrder, launchOrder, launchOrder],
+      });
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+      const r = resolveRound(s);
+      const cameos = r.events.filter((e) => e.kind === 'DisparageCameo');
+      if (cameos.length > 0) {
+        fired = true;
+        const impactIdx = r.events.findIndex(
+          (e) => e.kind === 'ImpactPeople' || e.kind === 'ImpactInfrastructure',
+        );
+        const cameoIdx = r.events.findIndex((e) => e.kind === 'DisparageCameo');
+        if (impactIdx !== -1 && cameoIdx !== -1) {
+          expect(cameoIdx).toBeGreaterThan(impactIdx);
+        }
+      }
+    }
+    expect(fired).toBe(true);
+  });
+
   it('emits DisparageColumn for at least some seeds; sets lastColumnNamedLeader', () => {
     let fired = false;
     for (const seedStr of ['seed-a', 'seed-b', 'seed-c', 'seed-d', 'seed-e', 'seed-f']) {

@@ -102,6 +102,11 @@ export type WinOutcome =
   | { type: 'apocalypse' }
   | { type: 'survivor' | 'pyrrhic' | 'dominance'; winner: LeaderId };
 
+export type SoftWarning =
+  | { kind: 'warhead-no-delivery'; orderIndex: number }
+  | { kind: 'delivery-no-warhead'; orderIndex: number }
+  | { kind: 'woo-non-attacker'; orderIndex: number; target: LeaderId };
+
 export interface GameState {
   round: number;
   cast: LeaderId[];
@@ -112,6 +117,10 @@ export interface GameState {
   pendingOrders: Partial<Record<LeaderId, SealedOrders>>;
   /** Per-round history of submitted orders. One entry per completed round (chronological), populated by RESOLVE_ROUND before pendingOrders is cleared. Used by Hard-mode lookahead to project human opponents' likely behaviour, and (in P4a) by the replay scrubber to reconstruct each round. */
   orderHistory: Partial<Record<LeaderId, Order[]>>[];
+  /** 15-name masthead pool, shuffled at NEW_GAME via Fisher-Yates. Indexed by `(round - 1) % 15` on RoundSummary. */
+  mastheadOrder: string[];
+  /** Set by cameo.ts when a DisparageColumn event names a leader; read by the next round's PreRoundMood emission to fire snap-back. Cleared after the snap-back round. */
+  lastColumnNamedLeader?: LeaderId;
   log: ResolutionEvent[];
   outcome: WinOutcome | null;
   config: GameConfig;
@@ -131,10 +140,10 @@ export type Action =
 
 export type ResolutionEvent =
   | { kind: 'OrdersSealed'; leaderId: LeaderId; orderCount: number }
-  | { kind: 'FactoryBuilt'; by: LeaderId }
+  | { kind: 'FactoryBuilt'; by: LeaderId; quote?: string }
   | { kind: 'DeliveryBuilt'; by: LeaderId; type: DeliveryType }
   | { kind: 'WarheadBuilt'; by: LeaderId; yield: Yield }
-  | { kind: 'DefenceBuilt'; by: LeaderId; type: DefenceType }
+  | { kind: 'DefenceBuilt'; by: LeaderId; type: DefenceType; quote?: string }
   | {
       kind: 'MissileLaunched';
       from: LeaderId;
@@ -142,6 +151,7 @@ export type ResolutionEvent =
       delivery: DeliveryType;
       warhead: Yield;
       targetType: TargetType;
+      attackerQuote?: string;
     }
   | {
       kind: 'MissileIntercepted';
@@ -156,6 +166,7 @@ export type ResolutionEvent =
       target: LeaderId;
       warhead: Yield;
       deaths: number;
+      targetQuote?: string;
     }
   | {
       kind: 'ImpactInfrastructure';
@@ -163,9 +174,28 @@ export type ResolutionEvent =
       target: LeaderId;
       warhead: Yield;
       factoriesDestroyed: number;
+      targetQuote?: string;
     }
-  | { kind: 'PropagandaTransfer'; from: LeaderId; to: LeaderId; amount: number }
-  | { kind: 'WooApplied'; from: LeaderId; to: LeaderId; points: number }
-  | { kind: 'LeaderEliminated'; id: LeaderId }
-  | { kind: 'FinalRetaliationTriggered'; by: LeaderId; targets: LeaderId[] }
-  | { kind: 'OutcomeReached'; outcome: WinOutcome };
+  | {
+      kind: 'PropagandaTransfer';
+      from: LeaderId;
+      to: LeaderId;
+      amount: number;
+      senderQuote?: string;
+      receiverQuote?: string;
+    }
+  | {
+      kind: 'WooApplied';
+      from: LeaderId;
+      to: LeaderId;
+      points: number;
+      senderQuote?: string;
+      receiverQuote?: string;
+    }
+  | { kind: 'LeaderEliminated'; id: LeaderId; quote?: string }
+  | { kind: 'FinalRetaliationTriggered'; by: LeaderId; targets: LeaderId[]; quote?: string }
+  | { kind: 'OutcomeReached'; outcome: WinOutcome }
+  | { kind: 'PreRoundMood'; leaderId: LeaderId; quote: string; snapBack: boolean }
+  | { kind: 'PostRoundReaction'; leaderId: LeaderId; quote: string }
+  | { kind: 'DisparageCameo'; afterImpact: { from: LeaderId; to: LeaderId }; quote: string }
+  | { kind: 'DisparageColumn'; namedLeader?: LeaderId; quote: string; footer: string };

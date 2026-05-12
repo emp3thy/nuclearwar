@@ -44,6 +44,14 @@ export function initialState(opts: NewGameOpts): GameState {
       bonusRule: profile.bonusRule,
     };
   }
+  // Temporary stub — Task 4 replaces with shuffleMastheads(rngState).
+  const mastheadOrder: string[] = [
+    'The Grauniad', 'The Torygraph', 'The Daily Wail', 'The Mop and Pail',
+    'The Old Gray Lady', 'The Failing New York Times', 'The LA Slimes',
+    'McPaper', 'The Granny Herald', 'Pravda',
+    'The End Times', 'The Daily Detonator', 'The Doomscroll Daily',
+    'The Mushroom Cloud Times', 'The Fallout Express',
+  ];
   return {
     round: 1,
     cast: [...opts.cast],
@@ -53,6 +61,7 @@ export function initialState(opts: NewGameOpts): GameState {
     leaders,
     pendingOrders: {},
     orderHistory: [],
+    mastheadOrder,
     log: [],
     outcome: null,
     config: {

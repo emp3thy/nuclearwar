@@ -87,5 +87,13 @@ export function formatEventCard(
       };
     case 'OutcomeReached':
       return { icon: '', body: '' };  // not rendered
+    case 'PreRoundMood':
+      return { icon: '💬', body: `${name(game, event.leaderId)}: "${event.quote}"` };
+    case 'PostRoundReaction':
+      return { icon: '💬', body: `${name(game, event.leaderId)}: "${event.quote}"` };
+    case 'DisparageCameo':
+      return { icon: '📰', body: event.quote };
+    case 'DisparageColumn':
+      return { icon: '📰', body: event.quote };
   }
 }

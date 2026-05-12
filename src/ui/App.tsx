@@ -15,6 +15,7 @@ export default function App() {
   switch (state.screen) {
     case 'setup':         return <Setup state={state} dispatch={dispatch} />;
     case 'planning':      return <Planning state={state} dispatch={dispatch} />;
+    case 'hotseat':       return null; // HotseatHandoff component added in T9
     case 'aiConferring':  return <AiConferring state={state} dispatch={dispatch} />;
     case 'action':        return <Action state={state} dispatch={dispatch} />;
     case 'roundSummary':  return <RoundSummary state={state} dispatch={dispatch} />;

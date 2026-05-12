@@ -12,7 +12,8 @@ const HOLD_MS = 600;
 
 export default function Planning({ state, dispatch }: ScreenProps) {
   const game = state.game!;
-  const player = game.leaders.player1;
+  const activeId = state.activeHumanTurn ?? 'player1';
+  const player = game.leaders[activeId];
   const aiLeaders = game.cast.filter((id) => !isHuman(id) && game.leaders[id].alive);
 
   const [orders, setOrders] = useState<Order[]>([]);
@@ -27,7 +28,7 @@ export default function Planning({ state, dispatch }: ScreenProps) {
     holdTimer.current = window.setTimeout(() => {
       setHolding(false);
       holdTimer.current = null;
-      dispatch({ type: 'PLAYER_SUBMIT', orders });
+      dispatch({ type: 'PLAYER_SUBMIT', leaderId: state.activeHumanTurn ?? 'player1', orders });
     }, HOLD_MS);
   }, [orders, dispatch]);
 

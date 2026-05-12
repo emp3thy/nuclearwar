@@ -232,7 +232,7 @@ on BEGIN_PLANNING { leaderId }:
 
 ### 5.4 Hotseat Handoff
 
-- **Layout** (Q4 Variant B, mobile-first 320px-wide phone canvas):
+- **Layout** (Q4 Variant B, 480px centred column to match the rest of P3's screens; browser is the primary target through P4a — mobile responsive lives with PWA in P5):
   - Background: `linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)`
   - Centered column, vertically centered
   - 11px uppercase "PASS THE DEVICE" pre-banner
@@ -298,7 +298,7 @@ Same as P3: no React imports anywhere under `src/engine/**`. Enforced by CI type
 
 ### 7.3 Minor / accepted
 
-1. **Setup with 5 humans + AI cast + difficulty + seed will scroll on a 320px phone.** Acceptable — variant B from Q8 already lets the form grow vertically.
+1. **Setup with 5 humans + AI cast + difficulty + seed will scroll vertically within the 480px column.** Acceptable — variant B from Q8 already lets the form grow vertically.
 2. **Disparage column footer notes** are pulled from a small bank (~5 entries) by round-index modulo. They will repeat within a 15-round game. Accepted; the bank is easy to grow later.
 3. **Snap-back fires at most once per "named" event** (the immediate next round). No multi-round grudge tracking through Disparage. Accepted per spec.
 4. **Mid-round persistence** (save mid-Planning when some humans have submitted but not all) is out of scope. P5 problem.

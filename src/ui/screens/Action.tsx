@@ -44,7 +44,13 @@ function phaseAdvanceFor(kind: ResolutionEvent['kind']): Phase | null {
 }
 
 function isRenderable(kind: ResolutionEvent['kind']): boolean {
-  return kind !== 'OrdersSealed' && kind !== 'OutcomeReached';
+  return (
+    kind !== 'OrdersSealed' &&
+    kind !== 'OutcomeReached' &&
+    kind !== 'PreRoundMood' &&
+    kind !== 'PostRoundReaction' &&
+    kind !== 'DisparageColumn'
+  );
 }
 
 export default function Action({ state, dispatch }: ScreenProps) {

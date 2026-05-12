@@ -1,4 +1,5 @@
 import type { GameState, ResolutionEvent } from '../../engine/types';
+import DisparageCard from './DisparageCard';
 import styles from './EventCard.module.css';
 
 export interface EventCardProps {
@@ -7,11 +8,17 @@ export interface EventCardProps {
 }
 
 export default function EventCard({ event, game }: EventCardProps) {
-  const { icon, body, className } = formatEventCard(event, game);
+  if (event.kind === 'DisparageCameo') return <DisparageCard event={event} />;
+  const result = formatEventCard(event, game);
+  if (!result) return null;
+  const { icon, body, className, quote } = result;
   return (
     <div className={`${styles.card} ${className ?? ''}`}>
       <span className={styles.icon}>{icon}</span>
-      <span className={styles.body}>{body}</span>
+      <div className={styles.bodyColumn}>
+        <span className={styles.body}>{body}</span>
+        {quote && <span className={styles.quote}>{quote}</span>}
+      </div>
     </div>
   );
 }
@@ -26,12 +33,12 @@ function name(game: GameState, id: keyof GameState['leaders']): string {
 export function formatEventCard(
   event: ResolutionEvent,
   game: GameState,
-): { icon: string; body: string; className?: string } {
+): { icon: string; body: string; className?: string; quote?: string } | null {
   switch (event.kind) {
     case 'OrdersSealed':
-      return { icon: '', body: '' };  // not rendered
+      return null;  // not rendered
     case 'FactoryBuilt':
-      return { icon: '⚙', body: `${flag(game, event.by)} ${name(game, event.by)} builds 1 factory` };
+      return { icon: '⚙', body: `${flag(game, event.by)} ${name(game, event.by)} builds 1 factory`, quote: event.quote };
     case 'DeliveryBuilt':
       return {
         icon: event.type === 'missile' ? '🚀' : '🛩',
@@ -43,21 +50,25 @@ export function formatEventCard(
       return {
         icon: '🛡',
         body: `${flag(game, event.by)} ${name(game, event.by)} builds 1 ${event.type === 'shield' ? 'shield' : 'AA'}`,
+        quote: event.quote,
       };
     case 'PropagandaTransfer':
       return {
         icon: '📰',
         body: `${flag(game, event.from)} → ${flag(game, event.to)} · ${event.amount}M transferred`,
+        quote: event.senderQuote ?? event.receiverQuote,
       };
     case 'WooApplied':
       return {
         icon: '🤝',
         body: `${flag(game, event.from)} woos ${flag(game, event.to)} · ${event.points} points`,
+        quote: event.senderQuote ?? event.receiverQuote,
       };
     case 'MissileLaunched':
       return {
         icon: event.delivery === 'missile' ? '🚀' : '🛩',
         body: `${flag(game, event.from)} → ${flag(game, event.to)} (${event.warhead} · ${event.targetType})`,
+        quote: event.attackerQuote,
       };
     case 'MissileIntercepted':
       return {
@@ -68,32 +79,39 @@ export function formatEventCard(
       return {
         icon: '☠️',
         body: `${flag(game, event.target)} ${name(game, event.target)} ─ ${event.deaths}M deaths (from ${flag(game, event.from)})`,
+        quote: event.targetQuote,
       };
     case 'ImpactInfrastructure':
       return {
         icon: '🏭✗',
         body: `${flag(game, event.target)} ${name(game, event.target)} ─ ${event.factoriesDestroyed} factories destroyed`,
+        quote: event.targetQuote,
       };
     case 'LeaderEliminated':
       return {
         icon: '⬛',
         body: `${name(game, event.id)} eliminated`,
         className: styles.obituary,
+        quote: event.quote,
       };
     case 'FinalRetaliationTriggered':
       return {
         icon: '💥',
         body: `${flag(game, event.by)} launches Final Retaliation at ${event.targets.map((t) => flag(game, t)).join(', ')}`,
+        quote: event.quote,
       };
     case 'OutcomeReached':
-      return { icon: '', body: '' };  // not rendered
+      return null;  // not rendered
+    // Not rendered on Action screen (only on Planning / RoundSummary):
     case 'PreRoundMood':
-      return { icon: '💬', body: `${name(game, event.leaderId)}: "${event.quote}"` };
+      return null;
     case 'PostRoundReaction':
-      return { icon: '💬', body: `${name(game, event.leaderId)}: "${event.quote}"` };
+      return null;
+    // DisparageCameo is handled before formatEventCard is called (routes to DisparageCard).
+    // DisparageColumn is not rendered on Action.
     case 'DisparageCameo':
-      return { icon: '📰', body: event.quote };
+      return null;
     case 'DisparageColumn':
-      return { icon: '📰', body: event.quote };
+      return null;
   }
 }

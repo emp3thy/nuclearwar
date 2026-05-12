@@ -1,4 +1,4 @@
-import type { GameState, LeaderId, Order, Stockpile, Yield } from './types';
+import type { GameState, LeaderId, Order, SoftWarning, Stockpile, Yield } from './types';
 import { ACTION_COSTS } from './balance';
 import { warheadFieldFor } from './launches';
 
@@ -130,4 +130,69 @@ export function validateOrderSequence(
     }
   }
   return { ok: true };
+}
+
+/**
+ * Emit non-blocking advisory warnings for an order sequence. Same per-order
+ * projection logic as validateOrderSequence; returns empty array for a clean plan.
+ */
+export function analyseOrderSequence(
+  state: GameState,
+  leaderId: LeaderId,
+  orders: Order[],
+): SoftWarning[] {
+  const warnings: SoftWarning[] = [];
+  const me = state.leaders[leaderId];
+  if (!me || !me.alive) return warnings;
+
+  // Project stockpile + queued builds across the sequence.
+  let missiles = me.stockpile.missiles;
+  let bombers = me.stockpile.bombers;
+  let warheads = me.stockpile.warheadsSmall + me.stockpile.warheadsMedium + me.stockpile.warheadsLarge;
+
+  // Pre-scan: count delivery+warhead builds in the queue so each order can
+  // ask "is there any delivery/warhead in this sequence (already owned + queued)?"
+  let queuedDeliveries = 0;
+  let queuedWarheads = 0;
+  for (const o of orders) {
+    if (o.kind === 'build-missile' || o.kind === 'build-bomber') queuedDeliveries++;
+    if (o.kind === 'build-warhead') queuedWarheads++;
+  }
+  const ownedOrQueuedDeliveries = missiles + bombers + queuedDeliveries;
+  const ownedOrQueuedWarheads = warheads + queuedWarheads;
+
+  for (let i = 0; i < orders.length; i++) {
+    const o = orders[i];
+
+    if (o.kind === 'build-warhead') {
+      if (ownedOrQueuedDeliveries === 0) {
+        warnings.push({ kind: 'warhead-no-delivery', orderIndex: i });
+      }
+    }
+
+    if (o.kind === 'build-missile' || o.kind === 'build-bomber') {
+      if (ownedOrQueuedWarheads === 0) {
+        warnings.push({ kind: 'delivery-no-warhead', orderIndex: i });
+      }
+    }
+
+    if (o.kind === 'woo') {
+      const target = state.leaders[o.target];
+      if (!target) continue;
+      const aggression = target.recentAggressionFrom[leaderId] ?? 0;
+      const fav = target.favourability[leaderId] ?? 0;
+      if (aggression === 0 && fav >= 0) {
+        warnings.push({ kind: 'woo-non-attacker', orderIndex: i, target: o.target });
+      }
+    }
+
+    // Project launch consumption (mirrors validateOrderSequence; cheap copy).
+    if (o.kind === 'launch') {
+      if (o.delivery === 'missile' && missiles > 0) missiles -= 1;
+      else if (o.delivery === 'bomber' && bombers > 0) bombers -= 1;
+      if (warheads > 0) warheads -= 1;
+    }
+  }
+
+  return warnings;
 }

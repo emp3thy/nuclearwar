@@ -56,13 +56,13 @@ export function formatEventCard(
       return {
         icon: '📰',
         body: `${flag(game, event.from)} → ${flag(game, event.to)} · ${event.amount}M transferred`,
-        quote: event.senderQuote ?? event.receiverQuote,
+        quote: [event.senderQuote, event.receiverQuote].filter(Boolean).join(' — ') || undefined,
       };
     case 'WooApplied':
       return {
         icon: '🤝',
         body: `${flag(game, event.from)} woos ${flag(game, event.to)} · ${event.points} points`,
-        quote: event.senderQuote ?? event.receiverQuote,
+        quote: [event.senderQuote, event.receiverQuote].filter(Boolean).join(' — ') || undefined,
       };
     case 'MissileLaunched':
       return {

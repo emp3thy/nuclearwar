@@ -9,6 +9,9 @@ import { AP_BANK_CAP, FACTORY_AP_RATE, LEADER_PROFILES, AI_SCORING_WEIGHTS } fro
 import { getBank } from './flavor/index';
 import { pickLine } from './flavor/pick';
 import { isHuman } from './state';
+import { shouldRollColumn, pickColumnNamedLeader } from './cameo';
+import { disparageBank } from './flavor/disparage';
+import { nextInt } from './rng';
 
 export interface ResolveResult {
   state: GameState;
@@ -179,10 +182,45 @@ export function resolveRound(state: GameState): ResolveResult {
     events.push({ kind: 'OutcomeReached', outcome });
   }
 
+  // P4a: Disparage column roll. Fires probabilistically; if it does, pick a
+  // named leader (preferring attackers), draw a column line + footer, set
+  // lastColumnNamedLeader so the next round's PreRoundMood can snap back.
+  {
+    const roll = shouldRollColumn(s.rngState);
+    s.rngState = roll.rngState;
+    if (roll.fire) {
+      const livingLeaders = s.cast.filter((id) => s.leaders[id].alive);
+      const picked = pickColumnNamedLeader(events, livingLeaders, s.rngState);
+      s.rngState = picked.rngState;
+
+      const linePick = nextRoundLine(disparageBank.columnLines, s.rngState);
+      s.rngState = linePick.rngState;
+
+      const footerIndex = (s.round - 1) % disparageBank.footerNotes.length;
+      const footer = disparageBank.footerNotes[footerIndex];
+
+      events.push({
+        kind: 'DisparageColumn',
+        namedLeader: picked.namedLeader,
+        quote: linePick.line,
+        footer,
+      });
+
+      if (picked.namedLeader) {
+        s.lastColumnNamedLeader = picked.namedLeader;
+      }
+    }
+  }
+
   // Append to persistent log.
   s.log = [...s.log, ...events];
 
   return { state: s, events };
+}
+
+function nextRoundLine(pool: string[], rngState: number): { line: string; rngState: number } {
+  const step = nextInt(rngState, pool.length);
+  return { line: pool[step.value], rngState: step.state };
 }
 
 function leaderBonusAp(id: LeaderId, thisRoundsOrders: Order[]): number {

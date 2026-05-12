@@ -123,7 +123,9 @@ describe('resolveRound', () => {
     s = withOrders(s, 'carnage', []);
     const r = resolveRound(s);
     expect(r.state.outcome).toEqual({ type: 'survivor', winner: 'chump' });
-    expect(r.events[r.events.length - 1]).toEqual({
+    // DisparageColumn may trail OutcomeReached, so search rather than asserting last.
+    const outcomeEvent = r.events.find((e) => e.kind === 'OutcomeReached');
+    expect(outcomeEvent).toEqual({
       kind: 'OutcomeReached',
       outcome: { type: 'survivor', winner: 'chump' },
     });
@@ -221,6 +223,35 @@ describe('resolveRound — P4a flavor events', () => {
     expect(reactions).toHaveLength(2);
     expect(reactions.map((e) => e.kind === 'PostRoundReaction' ? e.leaderId : '').sort())
       .toEqual(['carnage', 'chump']);
+  });
+
+  it('emits DisparageColumn for at least some seeds; sets lastColumnNamedLeader', () => {
+    let fired = false;
+    for (const seedStr of ['seed-a', 'seed-b', 'seed-c', 'seed-d', 'seed-e', 'seed-f']) {
+      let s = initialState({
+        cast: ['player1', 'chump', 'carnage'],
+        difficulty: 'normal',
+        seed: seedStr,
+      });
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'player1', orders: [] });
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'chump', orders: [] });
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+      const r = resolveRound(s);
+      const columns = r.events.filter((e) => e.kind === 'DisparageColumn');
+      if (columns.length > 0) {
+        fired = true;
+        const col = columns[0];
+        if (col.kind === 'DisparageColumn') {
+          expect(col.quote.length).toBeGreaterThan(0);
+          expect(col.footer.length).toBeGreaterThan(0);
+        }
+        if (col.kind === 'DisparageColumn' && col.namedLeader) {
+          expect(r.state.lastColumnNamedLeader).toBe(col.namedLeader);
+        }
+        break;
+      }
+    }
+    expect(fired).toBe(true);
   });
 
   it('emits PreRoundMood per living non-human leader at round start', () => {

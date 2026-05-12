@@ -162,4 +162,10 @@ describe('initialState (P4a additions)', () => {
     });
     expect(s.lastColumnNamedLeader).toBeUndefined();
   });
+
+  it('shuffles mastheadOrder per seed (not the pool order)', () => {
+    const a = initialState({ cast: ['player1', 'chump'], difficulty: 'normal', seed: 'seed-a' });
+    const b = initialState({ cast: ['player1', 'chump'], difficulty: 'normal', seed: 'seed-b' });
+    expect(a.mastheadOrder).not.toEqual(b.mastheadOrder);
+  });
 });

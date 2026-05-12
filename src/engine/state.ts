@@ -1,6 +1,7 @@
 import type { Difficulty, GameConfig, GameState, Leader, LeaderId } from './types';
 import { DOMINANCE_THRESHOLD_DEFAULT, LEADER_PROFILES } from './balance';
 import { seedFromString } from './rng';
+import { shuffleMastheads } from './masthead';
 
 export interface NewGameOpts {
   cast: LeaderId[];
@@ -44,24 +45,19 @@ export function initialState(opts: NewGameOpts): GameState {
       bonusRule: profile.bonusRule,
     };
   }
-  // Temporary stub — Task 4 replaces with shuffleMastheads(rngState).
-  const mastheadOrder: string[] = [
-    'The Grauniad', 'The Torygraph', 'The Daily Wail', 'The Mop and Pail',
-    'The Old Gray Lady', 'The Failing New York Times', 'The LA Slimes',
-    'McPaper', 'The Granny Herald', 'Pravda',
-    'The End Times', 'The Daily Detonator', 'The Doomscroll Daily',
-    'The Mushroom Cloud Times', 'The Fallout Express',
-  ];
+  const seedState = seedFromString(opts.seed);
+  const mh = shuffleMastheads(seedState);
+
   return {
     round: 1,
     cast: [...opts.cast],
     difficulty: opts.difficulty,
     seed: opts.seed,
-    rngState: seedFromString(opts.seed),
+    rngState: mh.rngState,
     leaders,
     pendingOrders: {},
     orderHistory: [],
-    mastheadOrder,
+    mastheadOrder: mh.order,
     log: [],
     outcome: null,
     config: {

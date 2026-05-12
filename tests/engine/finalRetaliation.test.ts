@@ -27,7 +27,7 @@ describe('applyFinalRetaliation', () => {
     // Pigeonhole guarantee: 8 launches uniformly distributed over 2 survivors
     // means one gets ≥4 → 4th has 0% intercept (overflow=4) → guaranteed land.
     // With Large=15M deaths and pop=5, that target dies and fires its own FR.
-    const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'fr-cascade' });
+    const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'fr-cascade-5' });
     s.leaders.carnage.stockpile.missiles = 8;
     s.leaders.carnage.stockpile.warheadsLarge = 8;
     s.leaders.carnage.alive = false;

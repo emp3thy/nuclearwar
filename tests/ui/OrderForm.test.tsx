@@ -33,8 +33,12 @@ describe('<OrderForm>', () => {
 
   it('surfaces engine validateOrder reason on AP overrun', () => {
     const state = gameWithCast();
-    // player starts with ap=3; queue a build-warhead-large (cost 3); a second cost-3 order overruns
-    const prior: Order[] = [{ kind: 'build-warhead', yield: 'large' }];
+    // P4b: player1 startAp=6. Queue build-factory (3) + build-warhead-large (3) = 6 AP spent.
+    // A further build-factory (3 AP) must then be rejected as over-budget.
+    const prior: Order[] = [
+      { kind: 'build-factory' },
+      { kind: 'build-warhead', yield: 'large' },
+    ];
     let added: Order | null = null;
     render(
       <OrderForm

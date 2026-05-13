@@ -52,14 +52,16 @@ describe('resolveRound', () => {
     expect(idxProp).toBeLessThan(idxLaunch);
   });
 
-  it('applies AP refresh: floor(factories * 0.5) + banked + bonus', () => {
+  it('applies AP refresh: floor(factories * FACTORY_AP_RATE) + banked', () => {
     let s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
-    // Chump submits no orders → 5 AP unspent → bank capped at 2.
+    // P4b: Chump startAp=10, startFactories=10, AP_BANK_CAP=4, FACTORY_AP_RATE=1.0.
+    // Chump submits no orders → 10 AP unspent → bank = min(4, floor(10)) = 4.
+    // Next AP = floor(10 * 1.0) + 4 = 14.
     s = withOrders(s, 'chump', []);
     s = withOrders(s, 'carnage', []);
     const r = resolveRound(s);
-    expect(r.state.leaders.chump.apBanked).toBe(2);
-    expect(r.state.leaders.chump.ap).toBe(5 + 2);
+    expect(r.state.leaders.chump.apBanked).toBe(4);
+    expect(r.state.leaders.chump.ap).toBe(10 + 4);
   });
 
   it('grants Netanyahoo +1 AP when their orders include a launch', () => {
@@ -75,8 +77,9 @@ describe('resolveRound', () => {
     ]);
     s = withOrders(s, 'carnage', []);
     const r = resolveRound(s);
-    // After resolution, factories=6 → floor(6*0.5)=3, banked=min(2, 3-2=1)=1, bonus=1.
-    expect(r.state.leaders.netanyahoo.ap).toBe(3 + 1 + 1);
+    // P4b: factories=6, FACTORY_AP_RATE=1.0 → floor(6*1.0)=6.
+    // Netanyahoo spent 2 AP on launch → 4 AP unspent → banked=min(4, 4)=4. bonus=1.
+    expect(r.state.leaders.netanyahoo.ap).toBe(6 + 4 + 1);
   });
 
   it('eliminates a leader and triggers Final Retaliation cascade', () => {

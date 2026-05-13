@@ -34,10 +34,16 @@ describe('reduce — SUBMIT_ORDERS', () => {
 
   it('rejects orders that exceed AP budget (state unchanged)', () => {
     const s0 = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
+    // P4b: Chump startAp=10. Use 4 × build-factory (12 AP) to exceed budget.
     const s1 = reduce(s0, {
       type: 'SUBMIT_ORDERS',
       leaderId: 'chump',
-      orders: [{ kind: 'build-factory' }, { kind: 'build-factory' }], // 6 AP, only 5 available
+      orders: [
+        { kind: 'build-factory' },
+        { kind: 'build-factory' },
+        { kind: 'build-factory' },
+        { kind: 'build-factory' },
+      ], // 12 AP, only 10 available
     });
     expect(s1).toBe(s0);
   });

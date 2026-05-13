@@ -97,14 +97,11 @@ export function formatEventCard(
     case 'DefenceDeployed':
       return {
         icon: '🛡',
-        body: `${flag(game, event.by)} ${name(game, event.by)} deploys ${event.type === 'shield' ? 'shield' : 'AA'}`,
+        body: `${flag(game, event.by)} ${name(game, event.by)} deploys ${event.type === 'shield' ? 'a shield' : 'AA'}`,
         quote: event.quote,
       };
     case 'DefenceConsumed':
-      return {
-        icon: '🛡✓',
-        body: `${flag(game, event.by)} ${name(game, event.by)}'s ${event.type === 'shield' ? 'shield' : 'AA'} consumed`,
-      };
+      return null;  // round-end housekeeping, not rendered on Action
     case 'FinalRetaliationTriggered':
       return {
         icon: '💥',

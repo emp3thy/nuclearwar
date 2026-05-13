@@ -22,8 +22,7 @@ const PHASE_LABELS: Record<Phase, string> = {
 function phaseAdvanceFor(kind: ResolutionEvent['kind']): Phase | null {
   switch (kind) {
     case 'DefenceBuilt':
-    case 'DefenceDeployed':
-    case 'DefenceConsumed': return 'DEFENCES';
+    case 'DefenceDeployed': return 'DEFENCES';
     case 'FactoryBuilt':
     case 'DeliveryBuilt':
     case 'WarheadBuilt': return 'BUILDS';
@@ -38,6 +37,7 @@ function phaseAdvanceFor(kind: ResolutionEvent['kind']): Phase | null {
     case 'LeaderEliminated':
     case 'OrdersSealed':
     case 'OutcomeReached':
+    case 'DefenceConsumed':
     case 'PreRoundMood':
     case 'PostRoundReaction':
     case 'DisparageCameo':
@@ -49,6 +49,7 @@ function isRenderable(kind: ResolutionEvent['kind']): boolean {
   return (
     kind !== 'OrdersSealed' &&
     kind !== 'OutcomeReached' &&
+    kind !== 'DefenceConsumed' &&
     kind !== 'PreRoundMood' &&
     kind !== 'PostRoundReaction' &&
     kind !== 'DisparageColumn'

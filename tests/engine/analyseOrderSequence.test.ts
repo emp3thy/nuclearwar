@@ -64,4 +64,17 @@ describe('analyseOrderSequence', () => {
     ]);
     expect(warnings).toEqual([]);
   });
+
+  it('warhead-no-delivery suppressed when missile is queued in same round', () => {
+    const s = initialState({
+      cast: ['player1', 'chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'softwarn-build-projection',
+    });
+    const warnings = analyseOrderSequence(s, 'player1', [
+      { kind: 'build-missile' },
+      { kind: 'build-warhead', yield: 'small' },
+    ]);
+    expect(warnings.filter((w) => w.kind === 'warhead-no-delivery')).toHaveLength(0);
+  });
 });

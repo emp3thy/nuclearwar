@@ -21,7 +21,9 @@ export function apCostOf(o: Order): number {
     case 'propaganda':
       return ACTION_COSTS.propaganda;
     case 'woo':
-      return ACTION_COSTS.wooPerPoint * o.points;
+      return ACTION_COSTS.woo;
+    case 'deploy-defence':
+      return ACTION_COSTS.deployDefence;
   }
 }
 
@@ -82,9 +84,18 @@ export function validateOrder(
 
     case 'woo': {
       if (o.target === leaderId) return { ok: false, reason: 'self-target' };
-      if (o.points < 1) return { ok: false, reason: 'non-positive-points' };
       const t = state.leaders[o.target];
       if (!t || !t.alive) return { ok: false, reason: 'invalid-target' };
+      return { ok: true };
+    }
+
+    case 'deploy-defence': {
+      if (o.type === 'shield' && me.stockpile.shields < 1) {
+        return { ok: false, reason: 'no-shield-to-deploy' };
+      }
+      if (o.type === 'aa' && me.stockpile.aa < 1) {
+        return { ok: false, reason: 'no-aa-to-deploy' };
+      }
       return { ok: true };
     }
   }
@@ -107,9 +118,10 @@ export type SequenceValidation =
 
 /**
  * Validate a SEQUENCE of orders against a leader's state, projecting stockpile
- * consumption from prior launches in the same sequence. Mirrors the per-order
- * loop in reducer.ts's SUBMIT_ORDERS case; extracted so UI can validate the
- * full queue without duplicating the projection logic.
+ * mutations from builds, deploys, and launches in the same sequence. Also
+ * enforces one-woo-per-target and one-propaganda-per-target rules.
+ * Mirrors the per-order loop in reducer.ts's SUBMIT_ORDERS case; extracted so
+ * UI can validate the full queue without duplicating the projection logic.
  */
 export function validateOrderSequence(
   state: GameState,
@@ -117,16 +129,59 @@ export function validateOrderSequence(
   orders: Order[],
 ): SequenceValidation {
   let projected: GameState = state;
+  const wooed = new Set<LeaderId>();
+  const propagandised = new Set<LeaderId>();
+
   for (let i = 0; i < orders.length; i++) {
     const o = orders[i];
+
+    // One-woo-per-target rule
+    if (o.kind === 'woo') {
+      if (wooed.has(o.target)) {
+        return { ok: false, reason: 'woo-already-targeted', orderIndex: i };
+      }
+      wooed.add(o.target);
+    }
+    // One-propaganda-per-target rule
+    if (o.kind === 'propaganda') {
+      if (propagandised.has(o.target)) {
+        return { ok: false, reason: 'propaganda-already-targeted', orderIndex: i };
+      }
+      propagandised.add(o.target);
+    }
+
     const v = validateOrder(projected, leaderId, o);
     if (!v.ok) return { ok: false, reason: v.reason, orderIndex: i };
-    if (o.kind === 'launch') {
-      projected = structuredClone(projected);
-      const pl = projected.leaders[leaderId];
-      if (o.delivery === 'missile') pl.stockpile.missiles -= 1;
-      else pl.stockpile.bombers -= 1;
-      pl.stockpile[warheadFieldFor(o.warhead)] -= 1;
+
+    // Project mutation per order kind
+    projected = structuredClone(projected);
+    const pl = projected.leaders[leaderId];
+    switch (o.kind) {
+      case 'build-missile':
+        pl.stockpile.missiles += 1;
+        break;
+      case 'build-bomber':
+        pl.stockpile.bombers += 1;
+        break;
+      case 'build-warhead':
+        pl.stockpile[warheadFieldFor(o.yield)] += 1;
+        break;
+      case 'build-defence':
+        if (o.type === 'shield') pl.stockpile.shields += 1;
+        else pl.stockpile.aa += 1;
+        break;
+      case 'deploy-defence':
+        if (o.type === 'shield') pl.stockpile.shields -= 1;
+        else pl.stockpile.aa -= 1;
+        break;
+      case 'launch':
+        if (o.delivery === 'missile') pl.stockpile.missiles -= 1;
+        else pl.stockpile.bombers -= 1;
+        pl.stockpile[warheadFieldFor(o.warhead)] -= 1;
+        break;
+      // build-factory / propaganda / woo: no stockpile mutation
+      default:
+        break;
     }
   }
   return { ok: true };

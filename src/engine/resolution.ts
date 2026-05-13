@@ -256,6 +256,20 @@ export function resolveRound(state: GameState): ResolveResult {
   // Decay relationships.
   s = decayFavourability(s);
 
+  // P4b: clear deployed pool. Deployed defences are consumed at round end
+  // regardless of whether they intercepted (deploy = commit).
+  for (const id of s.cast) {
+    const l = s.leaders[id];
+    if (l.deployedShields > 0) {
+      events.push({ kind: 'DefenceConsumed', by: id, type: 'shield' });
+    }
+    if (l.deployedAA > 0) {
+      events.push({ kind: 'DefenceConsumed', by: id, type: 'aa' });
+    }
+    l.deployedShields = 0;
+    l.deployedAA = 0;
+  }
+
   // P4a: emit PostRoundReaction per living non-human leader.
   for (const id of [...s.cast].sort()) {
     if (isHuman(id)) continue;

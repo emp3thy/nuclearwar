@@ -355,6 +355,55 @@ describe('resolveRound — P4a flavor events', () => {
   });
 });
 
+describe('resolveRound — P4b deployed pool', () => {
+  it('clears deployedShields and deployedAA to 0 at end of round', () => {
+    let s = initialState({
+      cast: ['player1', 'chump'],
+      difficulty: 'normal',
+      seed: 'deployed-clear',
+    });
+    s.leaders.player1.deployedShields = 2;
+    s.leaders.player1.deployedAA = 1;
+
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'player1', orders: [] });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'chump', orders: [] });
+    const r = resolveRound(s);
+
+    expect(r.state.leaders.player1.deployedShields).toBe(0);
+    expect(r.state.leaders.player1.deployedAA).toBe(0);
+    const consumed = r.events.filter((e) => e.kind === 'DefenceConsumed');
+    expect(consumed.length).toBeGreaterThanOrEqual(2); // shield + aa
+  });
+
+  it('mileigh-hem aggression bonus breaks when deploy-defence is queued', () => {
+    let s = initialState({
+      cast: ['mileigh-hem', 'chump'],
+      difficulty: 'normal',
+      seed: 'mileigh-deploy',
+    });
+    s.leaders['mileigh-hem'].stockpile.shields = 1;
+    s.leaders['mileigh-hem'].stockpile.missiles = 1;
+    s.leaders['mileigh-hem'].stockpile.warheadsSmall = 1;
+    s.leaders['mileigh-hem'].ap = 10;
+
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'mileigh-hem',
+      orders: [
+        { kind: 'launch', target: 'chump', delivery: 'missile', warhead: 'small', targetType: 'people' },
+        { kind: 'deploy-defence', type: 'shield' },
+      ],
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'chump', orders: [] });
+    const r = resolveRound(s);
+
+    // Bonus should NOT have applied — next round AP should be factoryAp + banked + 0 bonus.
+    // mileigh-hem: factories=4 * FACTORY_AP_RATE(1.0) = 4 + banked (clamped 0..4) + 0 bonus.
+    const expectedAp = 4 + Math.min(4, Math.max(0, r.state.leaders['mileigh-hem'].apBanked));
+    expect(r.state.leaders['mileigh-hem'].ap).toBe(expectedAp);
+  });
+});
+
 describe('orderHistory persistence', () => {
   it('appends this round\'s orders to orderHistory after RESOLVE_ROUND', () => {
     let s = initialState({

@@ -115,11 +115,13 @@ export function applyLaunches(
 
     counter[l.to][l.delivery] += 1;
     const nth = counter[l.to][l.delivery];
-    const defenders = l.delivery === 'missile' ? receiver.stockpile.shields : receiver.stockpile.aa;
+    const defenders = l.delivery === 'missile' ? receiver.deployedShields : receiver.deployedAA;
     const p = interceptProbability(nth, defenders);
     const roll = nextRandom(next.rngState);
     next.rngState = roll.state;
     if (roll.value < p) {
+      if (l.delivery === 'missile') receiver.deployedShields = Math.max(0, receiver.deployedShields - 1);
+      else receiver.deployedAA = Math.max(0, receiver.deployedAA - 1);
       events.push({
         kind: 'MissileIntercepted',
         from: l.from,

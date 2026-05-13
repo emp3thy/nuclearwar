@@ -15,10 +15,10 @@ describe('interceptProbability', () => {
     expect(interceptProbability(99, 3)).toBe(0);
   });
 
-  it('handles zero defenders (overflow=N)', () => {
-    expect(interceptProbability(1, 0)).toBe(0.75);
-    expect(interceptProbability(2, 0)).toBe(0.5);
-    expect(interceptProbability(3, 0)).toBe(0.25);
+  it('handles zero defenders — no intercept chance (deployed pool empty)', () => {
+    // With no deployed defenders, any incoming missile lands (0% intercept).
+    expect(interceptProbability(1, 0)).toBe(0);
+    expect(interceptProbability(2, 0)).toBe(0);
     expect(interceptProbability(4, 0)).toBe(0);
   });
 });

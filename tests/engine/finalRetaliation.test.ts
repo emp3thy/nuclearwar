@@ -23,24 +23,22 @@ describe('applyFinalRetaliation', () => {
     expect(r.events.some((e) => e.kind === 'FinalRetaliationTriggered')).toBe(true);
   });
 
-  it('cascades — when warhead-rich death overwhelms vulnerable survivors, ≥2 FR triggers fire', () => {
-    // Pigeonhole guarantee: 8 launches uniformly distributed over 2 survivors
-    // means one gets ≥4 → 4th has 0% intercept (overflow=4) → guaranteed land.
-    // With Large=15M deaths and pop=5, that target dies and fires its own FR.
+  it('cascades — when death kills a survivor who also has stock, that survivor fires FR too', () => {
+    // Use grudge=100 vs chump so all missiles land on chump only (deterministic target).
+    // deployedShields=0 → 0% intercept, so 1 large missile kills chump (pop=5).
+    // Chump then fires its own FR at starmless → 2 FinalRetaliationTriggered events.
     const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'fr-cascade-5' });
-    s.leaders.carnage.stockpile.missiles = 8;
-    s.leaders.carnage.stockpile.warheadsLarge = 8;
+    s.leaders.carnage.stockpile.missiles = 2;
+    s.leaders.carnage.stockpile.warheadsLarge = 2;
     s.leaders.carnage.alive = false;
     s.leaders.carnage.population = 0;
-    // Both surviving leaders are vulnerable AND have stock so their FR will fire.
+    s.leaders.carnage.grudge = { chump: 100, starmless: 0 }; // all missiles → chump
     s.leaders.chump.population = 5;
-    s.leaders.chump.stockpile.shields = 0;
+    s.leaders.chump.deployedShields = 0;
     s.leaders.chump.stockpile.missiles = 1;
     s.leaders.chump.stockpile.warheadsSmall = 1;
-    s.leaders.starmless.population = 5;
-    s.leaders.starmless.stockpile.shields = 0;
-    s.leaders.starmless.stockpile.missiles = 1;
-    s.leaders.starmless.stockpile.warheadsSmall = 1;
+    s.leaders.starmless.population = 100; // survives chump's FR
+    s.leaders.starmless.deployedShields = 0;
     const r = applyFinalRetaliation(s, ['carnage']);
     const triggers = r.events.filter((e) => e.kind === 'FinalRetaliationTriggered');
     expect(triggers.length).toBeGreaterThanOrEqual(2);

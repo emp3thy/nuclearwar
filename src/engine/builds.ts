@@ -13,12 +13,30 @@ export function applyDefenceBuilds(
   const next: GameState = structuredClone(state);
   const leader = next.leaders[leaderId];
   const events: ResolutionEvent[] = [];
+
+  // Stage 1: all build-defence orders first (stockpile += 1)
   for (const o of orders) {
     if (o.kind !== 'build-defence') continue;
     if (o.type === 'shield') leader.stockpile.shields += 1;
     else leader.stockpile.aa += 1;
     events.push({ kind: 'DefenceBuilt', by: leaderId, type: o.type });
   }
+
+  // Stage 2: all deploy-defence orders second (stockpile -= 1, deployed += 1)
+  for (const o of orders) {
+    if (o.kind !== 'deploy-defence') continue;
+    if (o.type === 'shield') {
+      if (leader.stockpile.shields < 1) continue; // defensive — validateOrder should have caught
+      leader.stockpile.shields -= 1;
+      leader.deployedShields += 1;
+    } else {
+      if (leader.stockpile.aa < 1) continue;
+      leader.stockpile.aa -= 1;
+      leader.deployedAA += 1;
+    }
+    events.push({ kind: 'DefenceDeployed', by: leaderId, type: o.type });
+  }
+
   return { state: next, events };
 }
 

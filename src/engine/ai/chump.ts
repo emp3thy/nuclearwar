@@ -58,15 +58,26 @@ export function planChump(state: GameState, leaderId: LeaderId): Order[] {
   // --- 1. Build orders: defence first, then warheads ---
   let remaining = buildBudget;
 
-  // Build shields as long as budget allows (bias toward defence).
-  const defenceCost = 2;
+  // Defence: prefer deploying if we own a shield, otherwise build one.
+  const defenceCost = 4;     // P4b: was 2
+  const deployCost = 4;      // P4b: new
   while (remaining >= defenceCost) {
-    const o: Order = { kind: 'build-defence', type: 'shield' };
-    if (validateOrder(state, leaderId, o).ok) {
-      orders.push(o);
-      remaining -= defenceCost;
+    if (me.stockpile.shields >= 1 && remaining >= deployCost) {
+      const o: Order = { kind: 'deploy-defence', type: 'shield' };
+      if (validateOrder(state, leaderId, o).ok) {
+        orders.push(o);
+        remaining -= deployCost;
+      } else {
+        break;
+      }
     } else {
-      break;
+      const o: Order = { kind: 'build-defence', type: 'shield' };
+      if (validateOrder(state, leaderId, o).ok) {
+        orders.push(o);
+        remaining -= defenceCost;
+      } else {
+        break;
+      }
     }
   }
 

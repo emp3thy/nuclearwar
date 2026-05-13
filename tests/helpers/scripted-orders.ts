@@ -27,7 +27,7 @@ export function scriptedOrders(state: GameState, leaderId: LeaderId): Order[] {
       ? [{ kind: 'propaganda', target }]
       : [],
     target
-      ? [{ kind: 'woo', target, points: 1 }]
+      ? [{ kind: 'woo', target }]
       : [],
   ];
 

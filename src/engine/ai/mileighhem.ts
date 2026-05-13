@@ -106,7 +106,7 @@ export function planMileighHem(state: GameState, leaderId: LeaderId): Order[] {
     // --- Diplomatic mode ---
     let budget = me.ap;
 
-    const WOO_COST = 1; // 1 AP per point; emit 1-point woo orders
+    const WOO_COST = 1; // flat woo costs 1 AP (P4b)
     const PROPAGANDA_COST = 1;
 
     // Woo up to 2 leaders (targeting attackers first, then others if budget allows).
@@ -116,7 +116,7 @@ export function planMileighHem(state: GameState, leaderId: LeaderId): Order[] {
     for (const t of wooPool) {
       if (wooCount >= 2) break;
       if (budget < WOO_COST) break;
-      const woo: Order = { kind: 'woo', target: t, points: 1 };
+      const woo: Order = { kind: 'woo', target: t };
       if (validateOrder(state, leaderId, woo).ok) {
         orders.push(woo);
         budget -= apCostOf(woo);

@@ -113,16 +113,16 @@ export default function TargetRow({
           type="button"
           className={`${styles.diploBtn} ${wooed ? styles.diploOn : ''}`}
           onClick={toggleWoo}
-        >Woo<br/><span className={styles.cost}>1 AP</span></button>
+        >💌 Woo<br/><span className={styles.cost}>1 AP</span></button>
         <button
           type="button"
           className={`${styles.diploBtn} ${propd ? styles.diploOn : ''}`}
           onClick={togglePropaganda}
-        >Propaganda<br/><span className={styles.cost}>1 AP</span></button>
+        >📰 Propaganda<br/><span className={styles.cost}>1 AP</span></button>
       </div>
 
       <div className={styles.rowLabel}>
-        missiles <span className={styles.inv}>· {projection.missiles} left</span>
+        🚀 missiles <span className={styles.inv}>· {projection.missiles} left</span>
       </div>
       <div className={styles.lcGrid}>
         {YIELDS.map((Y) => (
@@ -139,7 +139,7 @@ export default function TargetRow({
       </div>
 
       <div className={styles.rowLabel}>
-        bombers <span className={`${styles.inv} ${projection.bombers === 0 ? styles.invEmpty : ''}`}>· {projection.bombers} left</span>
+        ✈️ bombers <span className={`${styles.inv} ${projection.bombers === 0 ? styles.invEmpty : ''}`}>· {projection.bombers} left</span>
       </div>
       <div className={styles.lcGrid}>
         {YIELDS.map((Y) => (

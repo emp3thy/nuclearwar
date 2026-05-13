@@ -21,7 +21,9 @@ const PHASE_LABELS: Record<Phase, string> = {
  *  OutcomeReached — those inherit the current phase or aren't rendered). */
 function phaseAdvanceFor(kind: ResolutionEvent['kind']): Phase | null {
   switch (kind) {
-    case 'DefenceBuilt': return 'DEFENCES';
+    case 'DefenceBuilt':
+    case 'DefenceDeployed':
+    case 'DefenceConsumed': return 'DEFENCES';
     case 'FactoryBuilt':
     case 'DeliveryBuilt':
     case 'WarheadBuilt': return 'BUILDS';

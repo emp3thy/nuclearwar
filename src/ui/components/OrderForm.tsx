@@ -50,6 +50,8 @@ export default function OrderForm({ state, playerId, committedOrders, onAdd }: O
         return { order: { kind, yield: warheadBuild } };
       case 'build-defence':
         return { order: { kind, type: defenceType } };
+      case 'deploy-defence':
+        return { order: { kind, type: defenceType } };
       case 'launch':
         if (!target) return { missing: 'target' };
         if (!delivery) return { missing: 'delivery' };
@@ -60,7 +62,7 @@ export default function OrderForm({ state, playerId, committedOrders, onAdd }: O
         return { order: { kind, target } };
       case 'woo':
         if (!target) return { missing: 'target' };
-        return { order: { kind, target, points } };
+        return { order: { kind, target } };
     }
   }
 

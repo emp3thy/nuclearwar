@@ -165,9 +165,10 @@ function formatOrder(o: Order, game: GameState): string {
     case 'build-missile': return 'Build missile (1 AP)';
     case 'build-bomber': return 'Build bomber (1 AP)';
     case 'build-warhead': return `Build ${o.yield} warhead (${o.yield === 'small' ? 1 : o.yield === 'medium' ? 2 : 3} AP)`;
-    case 'build-defence': return `Build ${o.type === 'shield' ? 'shield' : 'AA'} (2 AP)`;
+    case 'build-defence': return `Build ${o.type === 'shield' ? 'shield' : 'AA'} (4 AP)`;
+    case 'deploy-defence': return `Deploy ${o.type === 'shield' ? 'shield' : 'AA'} (4 AP)`;
     case 'launch': return `Launch ${o.warhead} at ${game.leaders[o.target].name} (${o.targetType}, 2 AP)`;
     case 'propaganda': return `Propaganda → ${game.leaders[o.target].name} (1 AP)`;
-    case 'woo': return `Woo ${game.leaders[o.target].name} × ${o.points} (${o.points} AP)`;
+    case 'woo': return `Woo ${game.leaders[o.target].name} (1 AP)`;
   }
 }

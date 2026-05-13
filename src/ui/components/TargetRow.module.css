@@ -1,0 +1,36 @@
+.row {
+  background: white;
+  border: 1px solid #d0c8b8;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+}
+
+.head { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-bottom: 6px; }
+.flag { font-size: 18px; }
+.name { flex: 1; font-weight: 700; }
+.tt { font-size: 10px; background: #f0f0f0; padding: 2px; border-radius: 12px; display: flex; gap: 0; }
+.ttSeg { padding: 2px 8px; cursor: pointer; border-radius: 10px; font-weight: 500; }
+.ttOn { background: #b02a37; color: white; }
+
+.mood { font-size: 11px; font-style: italic; color: #5a4a3a; margin-bottom: 6px; }
+
+.diplo { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; }
+.diploBtn {
+  background: white; border: 1px solid #d0c8b8; border-radius: 4px;
+  padding: 6px 8px; font-size: 11px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px; justify-content: center;
+}
+.diploOn { background: #d4edda; border-color: #198754; }
+.cost { font-size: 9px; color: #6c757d; }
+.diploOn .cost { color: #155724; }
+
+.rowLabel {
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #6c757d; margin: 4px 0 2px;
+  display: flex; align-items: baseline; gap: 6px;
+}
+.inv { letter-spacing: 0; text-transform: none; font-weight: 600; color: #495057; }
+.invEmpty { color: #adb5bd; font-style: italic; font-weight: 400; }
+
+.lcGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }

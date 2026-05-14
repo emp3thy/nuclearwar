@@ -193,7 +193,7 @@ describe('bombers are reusable (P4c slice 1)', () => {
     s.leaders.chump.stockpile.bombers = 1;
     s.leaders.chump.stockpile.warheadsSmall = 1;
     s.leaders.chump.ap = 5;
-    s.leaders.carnage.deployedShields = 0;
+    s.leaders.carnage.deployedAA = 0; // bombers are intercepted by AA, not shields
 
     s = reduce(s, {
       type: 'SUBMIT_ORDERS',
@@ -218,7 +218,7 @@ describe('bombers are reusable (P4c slice 1)', () => {
     s.leaders.chump.stockpile.bombers = 1;
     s.leaders.chump.stockpile.warheadsSmall = 1;
     s.leaders.chump.ap = 5;
-    s.leaders.carnage.deployedShields = 0;
+    s.leaders.carnage.deployedAA = 0; // bombers are intercepted by AA, not shields
 
     s = reduce(s, {
       type: 'SUBMIT_ORDERS',

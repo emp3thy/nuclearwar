@@ -32,13 +32,13 @@ describe('LEADER_PROFILES', () => {
   it('matches spec starting values', () => {
     expect(LEADER_PROFILES.chump.startPop).toBe(33);
     expect(LEADER_PROFILES.chump.startFactories).toBe(10);
-    expect(LEADER_PROFILES.chump.startAp).toBe(5);
+    expect(LEADER_PROFILES.chump.startAp).toBe(10);
     expect(LEADER_PROFILES.khameneverhere.startPop).toBe(28);
     expect(LEADER_PROFILES.starmless.startPop).toBe(25);
     expect(LEADER_PROFILES.carnage.startPop).toBe(25);
     expect(LEADER_PROFILES['mileigh-hem'].startPop).toBe(22);
     expect(LEADER_PROFILES['mileigh-hem'].startFactories).toBe(4);
-    expect(LEADER_PROFILES['mileigh-hem'].startAp).toBe(2);
+    expect(LEADER_PROFILES['mileigh-hem'].startAp).toBe(4);
     expect(LEADER_PROFILES.netanyahoo.startPop).toBe(18);
   });
 
@@ -58,10 +58,11 @@ describe('ACTION_COSTS', () => {
     expect(ACTION_COSTS.buildWarheadSmall).toBe(1);
     expect(ACTION_COSTS.buildWarheadMedium).toBe(2);
     expect(ACTION_COSTS.buildWarheadLarge).toBe(3);
-    expect(ACTION_COSTS.buildDefence).toBe(2);
+    expect(ACTION_COSTS.buildDefence).toBe(4);
+    expect(ACTION_COSTS.deployDefence).toBe(4);
     expect(ACTION_COSTS.launch).toBe(2);
     expect(ACTION_COSTS.propaganda).toBe(1);
-    expect(ACTION_COSTS.wooPerPoint).toBe(1);
+    expect((ACTION_COSTS as Record<string, number>).woo).toBe(1);
   });
 });
 
@@ -75,10 +76,24 @@ describe('YIELD_DAMAGE', () => {
 
 describe('economy constants', () => {
   it('matches spec values', () => {
-    expect(FACTORY_AP_RATE).toBe(0.5);
-    expect(AP_BANK_CAP).toBe(2);
+    expect(FACTORY_AP_RATE).toBe(1.0);
+    expect(AP_BANK_CAP).toBe(4);
     expect(PROPAGANDA_TRANSFER_M).toBeGreaterThan(0);
     expect(WOO_FAVOURABILITY_DECAY).toBeGreaterThan(0);
     expect(DOMINANCE_THRESHOLD_DEFAULT).toBe(2);
+  });
+});
+
+describe('balance constants (P4b)', () => {
+  it('FACTORY_AP_RATE is 1.0', () => {
+    expect(FACTORY_AP_RATE).toBe(1.0);
+  });
+  it('AP_BANK_CAP is 4', () => {
+    expect(AP_BANK_CAP).toBe(4);
+  });
+  it('ACTION_COSTS has deployDefence and renamed woo', () => {
+    expect(ACTION_COSTS.deployDefence).toBe(4);
+    expect(ACTION_COSTS.buildDefence).toBe(4);
+    expect((ACTION_COSTS as Record<string, number>).woo).toBe(1);
   });
 });

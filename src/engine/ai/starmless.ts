@@ -107,6 +107,29 @@ export function planStarmless(state: GameState, leaderId: LeaderId): Order[] {
     }
   }
 
+  // Defence: prefer deploying if we own a shield, otherwise build one.
+  const defenceCost = 4;     // P4b: was 2
+  const deployCost = 4;      // P4b: new
+  while (remaining >= defenceCost) {
+    if (me.stockpile.shields >= 1 && remaining >= deployCost) {
+      const o: Order = { kind: 'deploy-defence', type: 'shield' };
+      if (validateOrder(state, leaderId, o).ok) {
+        orders.push(o);
+        remaining -= deployCost;
+      } else {
+        break;
+      }
+    } else {
+      const o: Order = { kind: 'build-defence', type: 'shield' };
+      if (validateOrder(state, leaderId, o).ok) {
+        orders.push(o);
+        remaining -= defenceCost;
+      } else {
+        break;
+      }
+    }
+  }
+
   // Fill remaining build budget with small warheads.
   while (remaining >= 1) {
     const o: Order = { kind: 'build-warhead', yield: 'small' };

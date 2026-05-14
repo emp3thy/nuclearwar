@@ -47,6 +47,11 @@ describe('AI-duel headless', () => {
   // only "infrastructure works" (engine runs 100 games without crashing,
   // counts add up). It prints the win distribution so the P4 balance pass has
   // a reproducible baseline to tune against.
+  //
+  // P2 baseline distribution shown above is now stale. P4b doubled the AP pool
+  // and changed defences to consumable; the AI duel will produce a different
+  // distribution. P4c uses the new distribution as the tuning baseline. This
+  // test continues to assert only "no crash" — it has no balance assertions.
   it('runs 100 all-AI games over full cast without crashing (balance assertions deferred to P4)', () => {
     // Player1..player5 are zero-initialised because the duel is AI-only and
     // never includes player slots — kept to satisfy Record<LeaderId | 'NOBODY'>.

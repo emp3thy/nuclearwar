@@ -51,6 +51,10 @@ export interface Leader {
   grudge: Partial<Record<LeaderId, number>>;
   /** Carnage threat-doubling input; rounds since *they* hit me */
   recentAggressionFrom: Partial<Record<LeaderId, number>>;
+  /** Round-scoped: shields deployed for this round's intercepts. Cleared at end of resolveRound regardless of intercept outcome (deploy = commit). */
+  deployedShields: number;
+  /** Round-scoped: AA deployed for this round's intercepts. Cleared at end of resolveRound. */
+  deployedAA: number;
   bonusRule?: BonusRule;
 }
 
@@ -68,7 +72,8 @@ export type Order =
       targetType: TargetType;
     }
   | { kind: 'propaganda'; target: LeaderId }
-  | { kind: 'woo'; target: LeaderId; points: number };
+  | { kind: 'woo'; target: LeaderId }
+  | { kind: 'deploy-defence'; type: DefenceType };
 
 /**
  * A resolved launch passed to `applyLaunches`. Stripped-down variant of the
@@ -194,6 +199,8 @@ export type ResolutionEvent =
     }
   | { kind: 'LeaderEliminated'; id: LeaderId; quote?: string }
   | { kind: 'FinalRetaliationTriggered'; by: LeaderId; targets: LeaderId[]; quote?: string }
+  | { kind: 'DefenceDeployed'; by: LeaderId; type: DefenceType; quote?: string }
+  | { kind: 'DefenceConsumed'; by: LeaderId; type: DefenceType }
   | { kind: 'OutcomeReached'; outcome: WinOutcome }
   | { kind: 'PreRoundMood'; leaderId: LeaderId; quote: string; snapBack: boolean }
   | { kind: 'PostRoundReaction'; leaderId: LeaderId; quote: string }

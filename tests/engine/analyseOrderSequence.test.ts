@@ -41,7 +41,7 @@ describe('analyseOrderSequence', () => {
   it('flags woo-non-attacker when target has no aggression and non-negative favourability', () => {
     const s = state();
     const warnings = analyseOrderSequence(s, 'player1', [
-      { kind: 'woo', target: 'chump', points: 1 },
+      { kind: 'woo', target: 'chump' },
     ]);
     expect(warnings.filter((w) => w.kind === 'woo-non-attacker')).toHaveLength(1);
   });
@@ -50,7 +50,7 @@ describe('analyseOrderSequence', () => {
     const s = state();
     s.leaders.chump.recentAggressionFrom.player1 = 1;
     const warnings = analyseOrderSequence(s, 'player1', [
-      { kind: 'woo', target: 'chump', points: 1 },
+      { kind: 'woo', target: 'chump' },
     ]);
     expect(warnings.filter((w) => w.kind === 'woo-non-attacker')).toHaveLength(0);
   });
@@ -63,5 +63,18 @@ describe('analyseOrderSequence', () => {
       { kind: 'build-factory' },
     ]);
     expect(warnings).toEqual([]);
+  });
+
+  it('warhead-no-delivery suppressed when missile is queued in same round', () => {
+    const s = initialState({
+      cast: ['player1', 'chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'softwarn-build-projection',
+    });
+    const warnings = analyseOrderSequence(s, 'player1', [
+      { kind: 'build-missile' },
+      { kind: 'build-warhead', yield: 'small' },
+    ]);
+    expect(warnings.filter((w) => w.kind === 'warhead-no-delivery')).toHaveLength(0);
   });
 });

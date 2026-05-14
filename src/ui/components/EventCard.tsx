@@ -94,6 +94,14 @@ export function formatEventCard(
         className: styles.obituary,
         quote: event.quote,
       };
+    case 'DefenceDeployed':
+      return {
+        icon: '🛡',
+        body: `${flag(game, event.by)} ${name(game, event.by)} deploys ${event.type === 'shield' ? 'a shield' : 'AA'}`,
+        quote: event.quote,
+      };
+    case 'DefenceConsumed':
+      return null;  // round-end housekeeping, not rendered on Action
     case 'FinalRetaliationTriggered':
       return {
         icon: '💥',

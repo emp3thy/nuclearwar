@@ -16,7 +16,7 @@ export const LEADER_PROFILES: Record<
     country: '🇺🇸 US',
     startPop: 33,
     startFactories: 10,
-    startAp: 5,
+    startAp: 10,
     bonusRule: 'chump-defence-waste',
   },
   khameneverhere: {
@@ -24,28 +24,28 @@ export const LEADER_PROFILES: Record<
     country: '🇮🇷 Iran',
     startPop: 28,
     startFactories: 6,
-    startAp: 3,
+    startAp: 6,
   },
   starmless: {
     name: 'Starmless',
     country: '🇬🇧 UK',
     startPop: 25,
     startFactories: 6,
-    startAp: 3,
+    startAp: 6,
   },
   carnage: {
     name: 'Carnage',
     country: '🇨🇦 Canada',
     startPop: 25,
     startFactories: 6,
-    startAp: 3,
+    startAp: 6,
   },
   'mileigh-hem': {
     name: 'Mileigh-hem',
     country: '🇦🇷 Argentina',
     startPop: 22,
     startFactories: 4,
-    startAp: 2,
+    startAp: 4,
     bonusRule: 'mileigh-aggression-bonus',
   },
   netanyahoo: {
@@ -53,7 +53,7 @@ export const LEADER_PROFILES: Record<
     country: '🇮🇱 Israel',
     startPop: 18,
     startFactories: 6,
-    startAp: 3,
+    startAp: 6,
     bonusRule: 'netanyahoo-launch-bonus',
   },
   player1: {
@@ -61,35 +61,35 @@ export const LEADER_PROFILES: Record<
     country: '🦆 Freedonia',
     startPop: 25,
     startFactories: 6,
-    startAp: 3,
+    startAp: 6,
   },
   player2: {
     name: 'Player 2',
     country: '🦆 Freedonia 2',
     startPop: 25,
     startFactories: 6,
-    startAp: 3,
+    startAp: 6,
   },
   player3: {
     name: 'Player 3',
     country: '🦆 Freedonia 3',
     startPop: 25,
     startFactories: 6,
-    startAp: 3,
+    startAp: 6,
   },
   player4: {
     name: 'Player 4',
     country: '🦆 Freedonia 4',
     startPop: 25,
     startFactories: 6,
-    startAp: 3,
+    startAp: 6,
   },
   player5: {
     name: 'Player 5',
     country: '🦆 Freedonia 5',
     startPop: 25,
     startFactories: 6,
-    startAp: 3,
+    startAp: 6,
   },
 };
 
@@ -100,10 +100,11 @@ export const ACTION_COSTS = {
   buildWarheadSmall: 1,
   buildWarheadMedium: 2,
   buildWarheadLarge: 3,
-  buildDefence: 2,
+  buildDefence: 4,
+  deployDefence: 4,
   launch: 2,
   propaganda: 1,
-  wooPerPoint: 1,
+  woo: 1,
 } as const;
 
 export const YIELD_DAMAGE: Record<
@@ -115,8 +116,8 @@ export const YIELD_DAMAGE: Record<
   large: { peopleDeaths: 15, factoriesDestroyed: 3 },
 };
 
-export const FACTORY_AP_RATE = 0.5;
-export const AP_BANK_CAP = 2;
+export const FACTORY_AP_RATE = 1.0;
+export const AP_BANK_CAP = 4;
 /** Population (in millions) transferred from victim to propagandist per propaganda order. Tunable. */
 export const PROPAGANDA_TRANSFER_M = 1;
 /** Favourability points decayed per round per relationship. Tunable. */

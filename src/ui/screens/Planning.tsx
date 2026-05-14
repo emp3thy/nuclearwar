@@ -1,173 +1,84 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useState } from 'react';
 import type { ScreenProps } from '../App';
-import type { GameState, LeaderId, Order } from '../../engine/types';
+import type { LeaderId, Order, TargetType } from '../../engine/types';
 import { isHuman } from '../../engine/state';
 import { totalApCost, analyseOrderSequence } from '../../engine/orders';
-import LeaderCard from '../components/LeaderCard';
-import ApBudget from '../components/ApBudget';
-import OrderForm from '../components/OrderForm';
+import BuildGrid from '../components/BuildGrid';
+import DefenceGrid from '../components/DefenceGrid';
+import TargetRow from '../components/TargetRow';
 import SoftWarnPanel from '../components/SoftWarnPanel';
+import { projectInventory } from '../util/projection';
 import styles from './Planning.module.css';
-
-const HOLD_MS = 600;
 
 export default function Planning({ state, dispatch }: ScreenProps) {
   const game = state.game!;
   const activeId = state.activeHumanTurn ?? 'player1';
   const player = game.leaders[activeId];
+
   const aiLeaders = game.cast.filter((id) => !isHuman(id) && game.leaders[id].alive);
 
   const [orders, setOrders] = useState<Order[]>([]);
-  const [holding, setHolding] = useState(false);
-  const holdTimer = useRef<number | null>(null);
-
-  function addOrder(o: Order) { setOrders((q) => [...q, o]); }
-  function removeOrder(i: number) { setOrders((q) => q.filter((_, idx) => idx !== i)); }
-
-  const startHold = useCallback(() => {
-    setHolding(true);
-    holdTimer.current = window.setTimeout(() => {
-      setHolding(false);
-      holdTimer.current = null;
-      dispatch({ type: 'PLAYER_SUBMIT', leaderId: state.activeHumanTurn ?? 'player1', orders });
-    }, HOLD_MS);
-  }, [orders, dispatch]);
-
-  const cancelHold = useCallback(() => {
-    setHolding(false);
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-      holdTimer.current = null;
-    }
-  }, []);
-
-  useEffect(() => () => {
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-      holdTimer.current = null;
-    }
-  }, []);
+  const [targetTypes, setTargetTypes] = useState<Partial<Record<LeaderId, TargetType>>>({});
 
   const apUsed = totalApCost(orders);
-  const apTotal = player.ap; // engine's ap already factors banked + bonus per resolution
+  const apTotal = player.ap;
+  const apRemaining = Math.max(0, apTotal - apUsed);
   const overBudget = apUsed > apTotal;
 
+  const projection = projectInventory(player, orders);
   const softWarnings = analyseOrderSequence(game, activeId, orders);
-  const warnedIndices = new Set(softWarnings.map((w) => w.orderIndex));
 
-  const moodByLeader: Partial<Record<string, string>> = {};
+  const moodByLeader: Partial<Record<LeaderId, string>> = {};
   for (const e of state.events) {
     if (e.kind === 'PreRoundMood') moodByLeader[e.leaderId] = e.quote;
   }
 
-  const lastRoundChips = game.orderHistory.length > 0
-    ? Object.entries(game.orderHistory[game.orderHistory.length - 1])
-        .flatMap(([id, os]) =>
-          (os ?? []).filter((o) => o.kind === 'launch' || o.kind === 'propaganda').map((o) => ({ id, o })),
-        )
-    : [];
-
   return (
     <div className={styles.planning}>
-      <header className={styles.header}>Round {game.round}{state.activeHumanTurn ? ` · ${player.name}` : ''}</header>
+      <header className={styles.header}>
+        Round {game.round}{state.activeHumanTurn ? ` · ${player.name}` : ''}
+      </header>
 
-      <section className={styles.ownPanel}>
-        <h2 className={styles.sectionTitle}>{player.country} {player.name} (you)</h2>
-        <div className={styles.statsRow}>
-          <span>Pop {player.population}M</span>
-          <span>Factories {player.factories}</span>
-        </div>
-        <div className={styles.statsRow}>
-          <span>Missiles {player.stockpile.missiles}</span>
-          <span>Bombers {player.stockpile.bombers}</span>
-          <span>Shields {player.stockpile.shields}</span>
-          <span>AA {player.stockpile.aa}</span>
-        </div>
-        <ApBudget ap={player.ap} apBanked={player.apBanked} />
-      </section>
-
-      <section className={styles.historyStrip}>
-        <h2 className={styles.sectionTitle}>Last round</h2>
-        {lastRoundChips.length === 0 ? (
-          <div className={styles.chip}>—</div>
-        ) : (
-          lastRoundChips.map((c, i) => (
-            <div key={i} className={`${styles.chip} ${styles.attack}`}>
-              {game.leaders[c.id as LeaderId]?.country.split(' ')[0]}{' '}
-              {c.o.kind === 'launch'
-                ? `→ ${game.leaders[c.o.target].country.split(' ')[0]}`
-                : c.o.kind === 'propaganda'
-                ? `📰 ${game.leaders[c.o.target].country.split(' ')[0]}`
-                : ''}
-            </div>
-          ))
-        )}
-      </section>
-
-      <section className={styles.tableGrid}>
-        {aiLeaders.map((id) => {
-          const leader = game.leaders[id];
-          return (
-            <LeaderCard
-              key={id}
-              leader={leader}
-              playerHits={leader.recentAggressionFrom[activeId] ?? 0}
-              playerFav={leader.favourability[activeId] ?? 0}
-              myFav={player.favourability[id] ?? 0}
-              playerGrudge={leader.grudge[activeId] ?? 0}
-              mood={moodByLeader[id]}
-            />
-          );
-        })}
-      </section>
-
-      <section className={styles.ordersList}>
-        <h2 className={styles.sectionTitle}>Your orders</h2>
-        {orders.length === 0 ? (
-          <div className={styles.empty}>No orders yet.</div>
-        ) : (
-          orders.map((o, i) => (
-            <div key={i} className={`${styles.orderRow} ${warnedIndices.has(i) ? styles.warned : ''}`}>
-              <span className={styles.orderLabel}>{formatOrder(o, game)}</span>
-              <button type="button" className={styles.removeBtn} onClick={() => removeOrder(i)}>×</button>
-            </div>
-          ))
-        )}
-        <div className={`${styles.apSummary} ${overBudget ? styles.over : ''}`}>
-          AP used: {apUsed} / {apTotal}
-        </div>
-        <SoftWarnPanel warnings={softWarnings} game={game} />
-      </section>
-
-      <OrderForm state={game} playerId={activeId} committedOrders={orders} onAdd={addOrder} />
-
-      <div className={styles.sealWrap}>
-        <button
-          type="button"
-          className={`${styles.sealBtn} ${holding ? styles.holding : ''}`}
-          disabled={overBudget}
-          onPointerDown={startHold}
-          onPointerUp={cancelHold}
-          onPointerLeave={cancelHold}
-          onPointerCancel={cancelHold}
-        >
-          <span className={styles.sealLabel}>Hold to Seal Orders</span>
-          <span className={styles.sealProgress} />
-        </button>
+      <div className={styles.apBanner}>
+        <span>AP used: {apUsed} / {apTotal}</span>
+        <span>{apRemaining} left</span>
       </div>
+
+      <SoftWarnPanel warnings={softWarnings} game={game} />
+
+      <div className={styles.sectionTitle}>Build</div>
+      <BuildGrid orders={orders} setOrders={setOrders} apRemaining={apRemaining} />
+
+      <div className={styles.sectionTitle}>Defence</div>
+      <DefenceGrid
+        orders={orders}
+        setOrders={setOrders}
+        apRemaining={apRemaining}
+        projectedShieldsInStockpile={projection.shieldsInStockpile}
+        projectedAaInStockpile={projection.aaInStockpile}
+      />
+
+      <div className={styles.sectionTitle}>Actions by target</div>
+      {aiLeaders.map((id) => (
+        <TargetRow
+          key={id}
+          target={game.leaders[id]}
+          mood={moodByLeader[id]}
+          targetType={targetTypes[id] ?? 'people'}
+          onTargetTypeChange={(next) => setTargetTypes((prev) => ({ ...prev, [id]: next }))}
+          orders={orders}
+          setOrders={setOrders}
+          apRemaining={apRemaining}
+          projection={projection}
+        />
+      ))}
+
+      <button
+        type="button"
+        className={styles.sealBtn}
+        disabled={overBudget}
+        onClick={() => dispatch({ type: 'PLAYER_SUBMIT', leaderId: activeId, orders })}
+      >Seal Orders</button>
     </div>
   );
-}
-
-function formatOrder(o: Order, game: GameState): string {
-  switch (o.kind) {
-    case 'build-factory': return 'Build factory (3 AP)';
-    case 'build-missile': return 'Build missile (1 AP)';
-    case 'build-bomber': return 'Build bomber (1 AP)';
-    case 'build-warhead': return `Build ${o.yield} warhead (${o.yield === 'small' ? 1 : o.yield === 'medium' ? 2 : 3} AP)`;
-    case 'build-defence': return `Build ${o.type === 'shield' ? 'shield' : 'AA'} (2 AP)`;
-    case 'launch': return `Launch ${o.warhead} at ${game.leaders[o.target].name} (${o.targetType}, 2 AP)`;
-    case 'propaganda': return `Propaganda → ${game.leaders[o.target].name} (1 AP)`;
-    case 'woo': return `Woo ${game.leaders[o.target].name} × ${o.points} (${o.points} AP)`;
-  }
 }

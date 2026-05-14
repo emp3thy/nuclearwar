@@ -16,8 +16,8 @@ describe('apCostOf', () => {
     expect(apCostOf({ kind: 'build-warhead', yield: 'small' })).toBe(1);
     expect(apCostOf({ kind: 'build-warhead', yield: 'medium' })).toBe(2);
     expect(apCostOf({ kind: 'build-warhead', yield: 'large' })).toBe(3);
-    expect(apCostOf({ kind: 'build-defence', type: 'shield' })).toBe(2);
-    expect(apCostOf({ kind: 'build-defence', type: 'aa' })).toBe(2);
+    expect(apCostOf({ kind: 'build-defence', type: 'shield' })).toBe(4);
+    expect(apCostOf({ kind: 'build-defence', type: 'aa' })).toBe(4);
     expect(
       apCostOf({
         kind: 'launch',
@@ -28,7 +28,7 @@ describe('apCostOf', () => {
       }),
     ).toBe(2);
     expect(apCostOf({ kind: 'propaganda', target: 'carnage' })).toBe(1);
-    expect(apCostOf({ kind: 'woo', target: 'carnage', points: 3 })).toBe(3);
+    expect(apCostOf({ kind: 'woo', target: 'carnage' })).toBe(1);
   });
 });
 
@@ -122,12 +122,11 @@ describe('validateOrder', () => {
     expect(r.ok).toBe(false);
   });
 
-  it('rejects woo orders with non-positive points', () => {
-    const r = validateOrder(baseState, 'chump', {
-      kind: 'woo',
-      target: 'carnage',
-      points: 0,
-    });
+  it('rejects woo orders targeting a dead leader', () => {
+    // P4b: woo is flat (no points field). Validate that dead-target rejection still holds.
+    const s = structuredClone(baseState);
+    s.leaders.carnage.alive = false;
+    const r = validateOrder(s, 'chump', { kind: 'woo', target: 'carnage' });
     expect(r.ok).toBe(false);
   });
 

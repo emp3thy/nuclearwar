@@ -42,6 +42,8 @@ export function initialState(opts: NewGameOpts): GameState {
       favourability: {},
       grudge: {},
       recentAggressionFrom: {},
+      deployedShields: 0,
+      deployedAA: 0,
       bonusRule: profile.bonusRule,
     };
   }

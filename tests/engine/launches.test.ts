@@ -84,7 +84,7 @@ describe('consumeStockFor', () => {
 describe('applyLaunches (assumes stock pre-consumed)', () => {
   it('intercepts when defenders fully cover incoming (always intercepted)', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
-    s.leaders.carnage.stockpile.shields = 5;
+    s.leaders.carnage.deployedShields = 5; // deployed pool is what intercept reads
     const r = applyLaunches(s, [smallLaunch]);
     expect(r.state.leaders.carnage.population).toBe(25);
     expect(r.events.map((e) => e.kind)).toEqual(['MissileLaunched', 'MissileIntercepted']);
@@ -143,14 +143,14 @@ describe('applyLaunches (assumes stock pre-consumed)', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
     s.leaders.chump.alive = false;
     s.leaders.chump.population = 0;
-    s.leaders.carnage.stockpile.shields = 5; // force intercept so deterministic
+    s.leaders.carnage.deployedShields = 5; // deployed pool forces deterministic intercept
     const r = applyLaunches(s, [smallLaunch]);
     expect(r.events.map((e) => e.kind)).toEqual(['MissileLaunched', 'MissileIntercepted']);
   });
 
   it('threaded incoming counter accumulates across consecutive applyLaunches calls', () => {
     const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
-    s.leaders.carnage.stockpile.shields = 2;
+    s.leaders.carnage.deployedShields = 2; // deployed pool is what intercept reads
     // Two separate launches in two separate calls — counter must persist between them.
     const launch: Launch = {
       from: 'chump',

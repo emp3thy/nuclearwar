@@ -13,7 +13,7 @@ describe('initialState', () => {
     expect(s.cast).toEqual(['chump', 'carnage']);
     expect(s.leaders.chump.population).toBe(33);
     expect(s.leaders.chump.factories).toBe(10);
-    expect(s.leaders.chump.ap).toBe(5);
+    expect(s.leaders.chump.ap).toBe(10);
     expect(s.leaders.chump.alive).toBe(true);
     expect(s.leaders.carnage.population).toBe(25);
   });
@@ -89,7 +89,7 @@ describe('initialState', () => {
     expect(s.leaders.player1.country).toBe('🦆 Freedonia');
     expect(s.leaders.player1.population).toBe(25);
     expect(s.leaders.player1.factories).toBe(6);
-    expect(s.leaders.player1.ap).toBe(3);
+    expect(s.leaders.player1.ap).toBe(6);
     expect(s.leaders.player1.alive).toBe(true);
     expect(s.leaders.player1.bonusRule).toBeUndefined();
   });
@@ -140,6 +140,31 @@ describe('initialState', () => {
     });
     expect(s.leaders.player1.name).toBe('Tony');
     expect(s.leaders.player1.country).toBe('🦆 Freedonia');
+  });
+});
+
+describe('initialState (P4b additions)', () => {
+  it('seeds deployedShields and deployedAA to 0 for every leader', () => {
+    const s = initialState({
+      cast: ['player1', 'chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'p4b-schema-test',
+    });
+    for (const id of s.cast) {
+      expect(s.leaders[id].deployedShields).toBe(0);
+      expect(s.leaders[id].deployedAA).toBe(0);
+    }
+  });
+
+  it('chump starts with 10 AP, others with 6 AP, mileigh-hem with 4 AP', () => {
+    const s = initialState({
+      cast: ['chump', 'carnage', 'mileigh-hem'],
+      difficulty: 'normal',
+      seed: 'ap-test',
+    });
+    expect(s.leaders.chump.ap).toBe(10);
+    expect(s.leaders.carnage.ap).toBe(6);
+    expect(s.leaders['mileigh-hem'].ap).toBe(4);
   });
 });
 

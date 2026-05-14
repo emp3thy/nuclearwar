@@ -1,5 +1,5 @@
 import type { GameState, LeaderId, Order, ResolutionEvent } from './types';
-import { WOO_FAVOURABILITY_DECAY } from './balance';
+import { WOO_FAVOURABILITY_DECAY, ACTION_COSTS } from './balance';
 
 export interface WooingResult {
   state: GameState;
@@ -21,8 +21,9 @@ export function applyWooing(
       const target = next.leaders[o.target];
       if (!me || !me.alive || !target || !target.alive) continue;
       const current = target.favourability[id] ?? 0;
-      target.favourability[id] = current + o.points;
-      events.push({ kind: 'WooApplied', from: id, to: o.target, points: o.points });
+      const points = ACTION_COSTS.woo;
+      target.favourability[id] = current + points;
+      events.push({ kind: 'WooApplied', from: id, to: o.target, points });
     }
   }
   return { state: next, events };

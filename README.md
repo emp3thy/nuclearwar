@@ -172,3 +172,7 @@ What's NOT in this phase (deferred to P4c / P5):
 - Approach B / C lookahead upgrades — P4c
 - Threat-aware defence deployment per personality — P4c
 - Persistence, animations, audio, SVG art, PWA — P5
+
+## Phase 4c slice 1 status
+
+Phase 4c slice 1 (Bomber Reuse + Carnage Bias) ships two tightly-coupled changes: a bomber-reuse engine rule (a bomber that impacts returns to the attacker's stockpile; an intercepted bomber stays gone) and Carnage AI personality tuning (builds bombers instead of missiles, prefers bomber delivery when stock is available). Full AI scoring-weight tuning, Approach B/C lookahead upgrades, and threat-aware defence deployment per personality are deferred to slice 2+, which will use the new duel distribution as its balance baseline. Verification: `npm run test:run` (255 tests).

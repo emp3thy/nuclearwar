@@ -30,8 +30,15 @@ describe('<Planning> soft-warn panel', () => {
 
   it('shows the panel after adding a warhead with no delivery owned', () => {
     render(<Planning state={makeState()} dispatch={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText(/order kind/i), { target: { value: 'build-warhead' } });
-    fireEvent.click(screen.getByRole('button', { name: /add/i }));
+    // Click the + button on the Sm Warhead cell in BuildGrid.
+    // player1 starts with 0 missiles + 0 bombers, so queuing a warhead
+    // triggers the warhead-no-delivery soft warning.
+    const smWarheadLabel = screen.getByText(/Sm Warhead/i);
+    const cell = smWarheadLabel.closest('[class*="cell"]') as HTMLElement;
+    const buttons = cell.querySelectorAll('button');
+    // stepper layout: [−] count [+]; + is the last button
+    const plusBtn = buttons[buttons.length - 1] as HTMLButtonElement;
+    fireEvent.click(plusBtn);
     expect(screen.getByText(/suggestions/i)).toBeInTheDocument();
     expect(screen.getByText(/no delivery/i)).toBeInTheDocument();
   });

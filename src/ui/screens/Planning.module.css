@@ -1,155 +1,25 @@
 .planning {
   max-width: 480px;
   margin: 0 auto;
-  padding: 12px 14px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f4ede2;
-  color: #1a1a1a;
-  min-height: 100vh;
-  box-sizing: border-box;
+  padding: 12px;
+  font-size: 12px;
 }
 
-.header {
-  text-align: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: #6b1d1d;
-  margin-bottom: 12px;
+.header { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+
+.apBanner {
+  background: #198754; color: white; padding: 6px 12px; border-radius: 4px;
+  margin-bottom: 12px; font-size: 12px; display: flex; justify-content: space-between;
 }
 
 .sectionTitle {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #8a7a6b;
-  margin: 12px 0 6px;
-  font-weight: 600;
-}
-
-.ownPanel {
-  background: #e8d8c0;
-  border-radius: 8px;
-  padding: 10px 12px;
-}
-
-.statsRow {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 12px;
-  color: #5a4a3a;
-  margin: 2px 0;
-}
-
-.historyStrip {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  align-items: center;
-}
-
-.chip {
-  background: #fff8eb;
-  border: 1px solid #d0c8b8;
-  border-radius: 6px;
-  padding: 4px 7px;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.chip.attack { color: #8a1a1a; }
-
-.tableGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: 8px 0;
-}
-
-.ordersList {
-  background: #fff8eb;
-  border-radius: 8px;
-  padding: 8px 10px;
-  border: 1px solid #d0c8b8;
-}
-
-.empty {
-  font-size: 12px;
-  color: #8a7a6b;
-  font-style: italic;
-  padding: 4px 0;
-}
-
-.orderRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 0;
-  border-bottom: 1px dashed #d0c8b8;
-  font-size: 12px;
-}
-
-.orderRow:last-of-type { border-bottom: none; }
-
-.orderRow.warned { background: #fff8e1; border-color: #f59f00; }
-
-.orderLabel { color: #2a2a2a; }
-
-.removeBtn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  color: #8a1a1a;
-  cursor: pointer;
-  padding: 0 4px;
-}
-
-.apSummary {
-  font-size: 11px;
-  color: #5a4a3a;
-  margin-top: 6px;
-  text-align: right;
-}
-
-.apSummary.over { color: #8a1a1a; font-weight: 700; }
-
-.sealWrap {
-  margin-top: 16px;
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #856404; font-weight: 700; margin: 10px 0 4px;
 }
 
 .sealBtn {
-  position: relative;
-  display: block;
-  width: 100%;
-  padding: 14px;
-  background: #6b1d1d;
-  color: #fff8eb;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  background: #b02a37; color: white; border: none; border-radius: 24px;
+  padding: 14px 28px; font-size: 14px; font-weight: 600; width: 100%; margin-top: 16px;
   cursor: pointer;
-  overflow: hidden;
 }
-
-.sealBtn:disabled { background: #c9b89a; cursor: not-allowed; }
-
-.sealLabel { position: relative; z-index: 1; }
-
-.sealProgress {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.25);
-  transform-origin: left center;
-  transform: scaleX(0);
-  pointer-events: none;
-  transition: transform 0ms linear;
-}
-
-.sealBtn.holding .sealProgress {
-  transform: scaleX(1);
-  transition: transform 600ms linear;
-}
+.sealBtn:disabled { background: #adb5bd; cursor: not-allowed; }

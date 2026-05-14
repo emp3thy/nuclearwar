@@ -41,3 +41,23 @@ describe('Netanyahoo (Warmonger)', () => {
     expect(launch?.target).toBe('carnage');
   });
 });
+
+describe('Netanyahoo missile bias regression (P4c.1)', () => {
+  it('still emits build-missile and never build-bomber', () => {
+    // No delivery owned → planner must build. Full AP budget ensures the build
+    // path is reached. Uses the same initialState factory as the existing tests.
+    const s = initialState({
+      cast: ['netanyahoo', 'chump'],
+      difficulty: 'normal',
+      seed: 'netanyahoo-missile-bias',
+    });
+    s.leaders.netanyahoo.stockpile.missiles = 0;
+    s.leaders.netanyahoo.stockpile.bombers = 0;
+    s.leaders.netanyahoo.ap = 6;
+
+    const orders = planNetanyahoo(s, 'netanyahoo');
+
+    expect(orders.some((o) => o.kind === 'build-missile')).toBe(true);
+    expect(orders.some((o) => o.kind === 'build-bomber')).toBe(false);
+  });
+});

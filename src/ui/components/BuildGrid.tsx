@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { Order } from '../../engine/types';
 import { ACTION_COSTS } from '../../engine/balance';
 import styles from './BuildGrid.module.css';
+import { findLastIndexMatching } from '../util/arrays';
 
 interface Props {
   orders: Order[];
@@ -42,10 +43,7 @@ export default function BuildGrid({ orders, setOrders, apRemaining }: Props) {
                 type="button"
                 disabled={count === 0}
                 onClick={() => setOrders((prev) => {
-                  let idx = -1;
-                  for (let j = prev.length - 1; j >= 0; j--) {
-                    if (cell.matches(prev[j])) { idx = j; break; }
-                  }
+                  const idx = findLastIndexMatching(prev, cell.matches);
                   if (idx === -1) return prev;
                   return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
                 })}

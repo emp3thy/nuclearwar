@@ -30,10 +30,8 @@ describe('deploy-defence resolution', () => {
       expect(deployed.by).toBe('player1');
       expect(deployed.type).toBe('shield');
     }
-    // After round end, stockpile.shields=0 (was 1, deployed used it), deployed=0 (cleared)
+    // After round end, stockpile.shields=0 (was 1, deployed used it)
     expect(r.state.leaders.player1.stockpile.shields).toBe(0);
-    // Note: deployedShields clear happens in Task 5 (resolution.ts). For now, this
-    // assertion may fail. That's expected — we accept partial pass and Task 5 closes the loop.
   });
 
   it('build-then-deploy in one round: stockpile correctly reflects the cycle', () => {

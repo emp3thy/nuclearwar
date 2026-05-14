@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { Order } from '../../engine/types';
 import { ACTION_COSTS } from '../../engine/balance';
 import styles from './DefenceGrid.module.css';
+import { findLastIndexMatching } from '../util/arrays';
 
 interface Props {
   orders: Order[];
@@ -19,13 +20,6 @@ interface CellSpec {
   make: () => Order;
   ownedHint?: number;
   canAddMore: boolean;
-}
-
-function findLastIndexMatching<T>(arr: T[], pred: (x: T) => boolean): number {
-  for (let i = arr.length - 1; i >= 0; i--) {
-    if (pred(arr[i])) return i;
-  }
-  return -1;
 }
 
 export default function DefenceGrid({

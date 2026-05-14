@@ -4,6 +4,7 @@ import type { ProjectedInventory } from '../util/projection';
 import { ACTION_COSTS } from '../../engine/balance';
 import LaunchCell from './LaunchCell';
 import styles from './TargetRow.module.css';
+import { findLastIndexMatching } from '../util/arrays';
 
 interface Props {
   target: Leader;
@@ -21,13 +22,6 @@ const YIELDS: Array<{ label: 'small' | 'med' | 'big'; yield: Yield }> = [
   { label: 'med',   yield: 'medium' },
   { label: 'big',   yield: 'large' },
 ];
-
-function findLastIndexMatching<T>(arr: T[], pred: (x: T) => boolean): number {
-  for (let i = arr.length - 1; i >= 0; i--) {
-    if (pred(arr[i])) return i;
-  }
-  return -1;
-}
 
 export default function TargetRow({
   target, mood, targetType, onTargetTypeChange, orders, setOrders, apRemaining, projection,

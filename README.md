@@ -154,3 +154,21 @@ What's NOT in this phase (deferred to P4b / P5):
 - Audio (`play(name)` wrapper, sfx + ambient music) — P5
 - SVG art (leader portraits, world map, Freedonia flag, mushroom-cloud illustration, ruined-iconography) — P5
 - PWA manifest + service worker — P5
+
+## Phase 4b status
+
+Phase 4b (Balance & Planning Rework) doubles the AP economy, makes defences consumable (build + deploy = 8 AP all-in), rewrites the Planning screen as an action-card grid, and simplifies woo/propaganda to flat 1-AP toggles. Verification: `npm run test:run` (246 tests).
+
+What's in this phase:
+
+- **AP economy doubled** — startAp ×2 for every leader; FACTORY_AP_RATE 0.5 → 1.0; AP_BANK_CAP 2 → 4. ACTION_COSTS unchanged (math-equivalent to halving costs, no fractions).
+- **Consumable defences** — new `deploy-defence` order kind. Build 4 AP adds to stockpile; deploy 4 AP moves stockpile → round-scoped deployed pool. `interceptProbability` reads the deployed pool. Deployed pool clears at round end regardless of intercept (deploy = commit).
+- **Planning UI rewrite** — replaces the order-kind dropdown + queue list with `<BuildGrid>` + `<DefenceGrid>` + `<TargetRow>` (one per opponent). Each cell has a +/- stepper bound to a count of that order kind. Per-target rows show 6 launch combos (3 yields × 2 deliveries), each with projected warhead inventory. Mood quote renders under each target's name.
+- **Woo + Propaganda flat toggles** — both 1 AP, one per target per round. Dropped the points dimension on woo.
+
+What's NOT in this phase (deferred to P4c / P5):
+
+- AI scoring-weight balance pass against the new rules baseline — P4c (was P4b)
+- Approach B / C lookahead upgrades — P4c
+- Threat-aware defence deployment per personality — P4c
+- Persistence, animations, audio, SVG art, PWA — P5

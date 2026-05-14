@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { applyLaunches, collectLaunches, consumeStockFor, makeIncomingCounter } from '../../src/engine/launches';
 import { initialState } from '../../src/engine/state';
+import { reduce } from '../../src/engine/reducer';
+import { resolveRound } from '../../src/engine/resolution';
 import type { Launch, Order } from '../../src/engine/types';
 
 const smallLaunch: Launch = {
@@ -178,5 +180,105 @@ describe('applyLaunches (assumes stock pre-consumed)', () => {
     // The KEY invariant: counter mutates correctly across calls.
     expect(r2.incoming.carnage.missile).toBe(2);
     expect(r4.incoming.carnage.missile).toBe(4);
+  });
+});
+
+describe('bombers are reusable (P4c slice 1)', () => {
+  it('bomber impact (people) restores bomber to attacker stockpile', () => {
+    let s = initialState({
+      cast: ['chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'bomber-people-restore',
+    });
+    s.leaders.chump.stockpile.bombers = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    s.leaders.chump.ap = 5;
+    s.leaders.carnage.deployedShields = 0;
+
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'chump',
+      orders: [{ kind: 'launch', target: 'carnage', delivery: 'bomber', warhead: 'small', targetType: 'people' }],
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+    const r = resolveRound(s);
+
+    const impact = r.events.find((e) => e.kind === 'ImpactPeople');
+    expect(impact).toBeDefined();
+    expect(r.state.leaders.chump.stockpile.bombers).toBe(1); // restored
+    expect(r.state.leaders.chump.stockpile.warheadsSmall).toBe(0); // warhead consumed
+  });
+
+  it('bomber impact (infra) restores bomber to attacker stockpile', () => {
+    let s = initialState({
+      cast: ['chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'bomber-infra-restore',
+    });
+    s.leaders.chump.stockpile.bombers = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    s.leaders.chump.ap = 5;
+    s.leaders.carnage.deployedShields = 0;
+
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'chump',
+      orders: [{ kind: 'launch', target: 'carnage', delivery: 'bomber', warhead: 'small', targetType: 'infra' }],
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+    const r = resolveRound(s);
+
+    const impact = r.events.find((e) => e.kind === 'ImpactInfrastructure');
+    expect(impact).toBeDefined();
+    expect(r.state.leaders.chump.stockpile.bombers).toBe(1); // restored
+  });
+
+  it('bomber intercept does NOT restore bomber', () => {
+    let s = initialState({
+      cast: ['chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'bomber-intercept-gone',
+    });
+    s.leaders.chump.stockpile.bombers = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    s.leaders.chump.ap = 5;
+    s.leaders.carnage.deployedAA = 5; // ensure 100% intercept
+
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'chump',
+      orders: [{ kind: 'launch', target: 'carnage', delivery: 'bomber', warhead: 'small', targetType: 'people' }],
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+    const r = resolveRound(s);
+
+    const intercepted = r.events.find((e) => e.kind === 'MissileIntercepted');
+    expect(intercepted).toBeDefined();
+    expect(r.state.leaders.chump.stockpile.bombers).toBe(0); // gone after intercept
+  });
+
+  it('missile launch unchanged: missile consumed on impact AND on intercept', () => {
+    let s = initialState({
+      cast: ['chump', 'carnage'],
+      difficulty: 'normal',
+      seed: 'missile-regression',
+    });
+    s.leaders.chump.stockpile.missiles = 2;
+    s.leaders.chump.stockpile.warheadsSmall = 2;
+    s.leaders.chump.ap = 10;
+
+    s = reduce(s, {
+      type: 'SUBMIT_ORDERS',
+      leaderId: 'chump',
+      orders: [
+        { kind: 'launch', target: 'carnage', delivery: 'missile', warhead: 'small', targetType: 'people' },
+        { kind: 'launch', target: 'carnage', delivery: 'missile', warhead: 'small', targetType: 'people' },
+      ],
+    });
+    s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+    const r = resolveRound(s);
+
+    expect(r.state.leaders.chump.stockpile.missiles).toBe(0);
+    expect(r.state.leaders.chump.stockpile.warheadsSmall).toBe(0);
   });
 });

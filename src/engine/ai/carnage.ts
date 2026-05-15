@@ -51,9 +51,10 @@ export function planCarnage(state: GameState, leaderId: LeaderId): Order[] {
     );
   }
 
+  const hasDelivery = me.stockpile.bombers >= 1 || me.stockpile.missiles >= 1;
   const canLaunch =
     launchTarget !== undefined &&
-    me.stockpile.missiles >= 1 &&
+    hasDelivery &&
     me.stockpile.warheadsSmall >= 1 &&
     budget >= LAUNCH_COST;
 
@@ -67,9 +68,20 @@ export function planCarnage(state: GameState, leaderId: LeaderId): Order[] {
   const totalReserve = launchReserve + propagandaSlots * PROPAGANDA_COST;
   const buildBudget = budget - totalReserve;
 
-  // --- 1. Builds: warheads with leftover budget ---
+  // --- 1. Builds ---
   let remaining = buildBudget;
 
+  // P4c.1: Carnage values bombers (reusable assets). If he owns none,
+  // build one as first priority. Single-shot — projection-safe.
+  if (me.stockpile.bombers === 0 && remaining >= 1) {
+    const o: Order = { kind: 'build-bomber' };
+    if (validateOrder(state, leaderId, o).ok) {
+      orders.push(o);
+      remaining -= 1;
+    }
+  }
+
+  // Build small warheads with the rest.
   while (remaining >= 1) {
     const o: Order = { kind: 'build-warhead', yield: 'small' };
     if (validateOrder(state, leaderId, o).ok) {
@@ -84,10 +96,11 @@ export function planCarnage(state: GameState, leaderId: LeaderId): Order[] {
 
   // --- 2. Launch at the best combined-score target ---
   if (canLaunch && launchTarget !== undefined && budget >= LAUNCH_COST) {
+    const delivery: 'bomber' | 'missile' = me.stockpile.bombers >= 1 ? 'bomber' : 'missile';
     const launch: Order = {
       kind: 'launch',
       target: launchTarget,
-      delivery: 'missile',
+      delivery,
       warhead: 'small',
       targetType: 'people',
     };

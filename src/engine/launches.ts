@@ -142,6 +142,11 @@ export function applyLaunches(
         warhead: l.warhead,
         deaths,
       });
+      // P4c.1: bomber is reusable — restore on impact (lost only on intercept).
+      if (l.delivery === 'bomber') {
+        const attacker = next.leaders[l.from];
+        if (attacker) attacker.stockpile.bombers += 1;
+      }
     } else {
       const destroyed = factoriesDestroyed(l.warhead, receiver.factories);
       receiver.factories -= destroyed;
@@ -152,6 +157,11 @@ export function applyLaunches(
         warhead: l.warhead,
         factoriesDestroyed: destroyed,
       });
+      // P4c.1: bomber is reusable — restore on impact (lost only on intercept).
+      if (l.delivery === 'bomber') {
+        const attacker = next.leaders[l.from];
+        if (attacker) attacker.stockpile.bombers += 1;
+      }
     }
   }
 

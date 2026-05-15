@@ -52,6 +52,11 @@ describe('AI-duel headless', () => {
   // and changed defences to consumable; the AI duel will produce a different
   // distribution. P4c uses the new distribution as the tuning baseline. This
   // test continues to assert only "no crash" — it has no balance assertions.
+  //
+  // P4c slice 1 shifts the distribution again: bomber reuse (engine rule) means
+  // successful bomber launches return the bomber to stock, and Carnage now builds
+  // and launches bombers preferentially. Slice 2+ treats the post-slice-1
+  // distribution as its new baseline for balance assertions and further tuning.
   it('runs 100 all-AI games over full cast without crashing (balance assertions deferred to P4)', () => {
     // Player1..player5 are zero-initialised because the duel is AI-only and
     // never includes player slots — kept to satisfy Record<LeaderId | 'NOBODY'>.

@@ -79,3 +79,75 @@ describe('Carnage (Rational + Opportunist)', () => {
     expect(props).toHaveLength(0);
   });
 });
+
+describe('Carnage AI bomber bias (P4c.1)', () => {
+  it('builds a bomber when none owned and budget allows', () => {
+    let s = initialState({
+      cast: ['carnage', 'chump'],
+      difficulty: 'normal',
+      seed: 'carnage-build-bomber',
+    });
+    s.leaders.carnage.stockpile.bombers = 0;
+    s.leaders.carnage.stockpile.missiles = 0;
+    s.leaders.carnage.ap = 6;
+
+    const orders = planCarnage(s, 'carnage');
+    expect(orders.some((o) => o.kind === 'build-bomber')).toBe(true);
+    expect(orders.some((o) => o.kind === 'build-missile')).toBe(false);
+  });
+
+  it('does NOT build a second bomber when one is already owned', () => {
+    let s = initialState({
+      cast: ['carnage', 'chump'],
+      difficulty: 'normal',
+      seed: 'carnage-already-has-bomber',
+    });
+    s.leaders.carnage.stockpile.bombers = 1;
+    s.leaders.carnage.stockpile.missiles = 0;
+    s.leaders.carnage.ap = 6;
+
+    const orders = planCarnage(s, 'carnage');
+    expect(orders.filter((o) => o.kind === 'build-bomber')).toHaveLength(0);
+  });
+
+  it('launches with delivery=bomber when a bomber is in stockpile', () => {
+    let s = initialState({
+      cast: ['carnage', 'chump'],
+      difficulty: 'normal',
+      seed: 'carnage-launch-bomber',
+    });
+    s.leaders.carnage.stockpile.bombers = 1;
+    s.leaders.carnage.stockpile.missiles = 1;
+    s.leaders.carnage.stockpile.warheadsSmall = 1;
+    s.leaders.carnage.ap = 6;
+    s.leaders.chump.stockpile.missiles = 2;
+
+    const orders = planCarnage(s, 'carnage');
+    const launch = orders.find((o) => o.kind === 'launch');
+    expect(launch).toBeDefined();
+    if (launch && launch.kind === 'launch') {
+      expect(launch.delivery).toBe('bomber');
+    }
+  });
+
+  it('falls back to delivery=missile when no bomber but missile available', () => {
+    let s = initialState({
+      cast: ['carnage', 'chump'],
+      difficulty: 'normal',
+      seed: 'carnage-launch-missile-fallback',
+    });
+    s.leaders.carnage.stockpile.bombers = 0;
+    s.leaders.carnage.stockpile.missiles = 1;
+    s.leaders.carnage.stockpile.warheadsSmall = 1;
+    s.leaders.carnage.ap = 6;
+    s.leaders.chump.stockpile.missiles = 2;
+
+    const orders = planCarnage(s, 'carnage');
+    const launch = orders.find((o) => o.kind === 'launch');
+    // It's OK if no launch is emitted at all (Carnage may build instead);
+    // the assertion is: IF Carnage launches, delivery is missile.
+    if (launch && launch.kind === 'launch') {
+      expect(launch.delivery).toBe('missile');
+    }
+  });
+});

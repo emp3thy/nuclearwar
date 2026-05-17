@@ -3,42 +3,46 @@ import { apCostOf, validateOrder } from '../orders';
 import { threatScore, wasAttackedBy } from './scoring';
 import { AI_SCORING_WEIGHTS } from '../balance';
 import { nextRandom } from '../rng';
+import { buildToward, launchSalvo, type BuildPlanEntry } from './aggression';
 
 /**
- * Starmless — Cautious + Scapegoat personality.
+ * Starmless — Cautious + Scapegoat personality (P4c.2 rework).
  *
- * Behavioural rules:
- * 1. Defensive baseline: in non-retaliation rounds, prefer building factories
- *    (~60 % of build decisions are factories; warheads otherwise).
- * 2. Retaliation gate: triggered when wasAttackedBy(state, leaderId, any) === true.
- * 3. On retaliation, 35 % chance (starmlessScapegoatPct roll) to scapegoat —
- *    pick a target OTHER than the actual attacker, specifically the candidate with
- *    the highest aggregateThreat (sum of threatScore from all leaders toward them).
- * 4. Propaganda only at leaders who attacked Starmless (wasAttackedBy filter).
+ * Defensive baseline, but with a new kill instinct: launches when retaliating
+ * OR when a finishable (low-population) opponent exists. Low launch cap — he
+ * still builds factories and defence. Scapegoat roll preserved on retaliation.
  */
+const PROPAGANDA_COST = 1;
+const DEPLOY_COST = 4;
+const STARMLESS_FINISH_POP_M = 8;
+const STARMLESS_MAX_LAUNCHES = 2;
+
+// Factory target 7 (starts at 6) so at most one factory is built per low-AP
+// round — leaving budget for the missile + warhead stock the kill instinct
+// needs. A plan with warheads but NO delivery vehicle would recreate the
+// zero-fire bug, so the missile entry is mandatory.
+const STARMLESS_BUILD_PLAN: BuildPlanEntry[] = [
+  { build: { item: 'factory' }, target: 7 },
+  { build: { item: 'missile' }, target: 2 },
+  { build: { item: 'warhead', yield: 'small' }, target: 3 },
+  { build: { item: 'defence', type: 'shield' }, target: 2 },
+];
+
 export function planStarmless(state: GameState, leaderId: LeaderId): Order[] {
   const me = state.leaders[leaderId];
   if (!me || !me.alive) return [];
 
-  const orders: Order[] = [];
   let budget = me.ap;
 
-  const LAUNCH_COST = 2;
-  const PROPAGANDA_COST = 1;
-  const FACTORY_COST = 3;
-
-  // --- Living non-self leaders ---
   const others = state.cast.filter((t) => t !== leaderId && state.leaders[t]?.alive);
-
-  // --- Identify attackers ---
   const attackers = others.filter((t) => wasAttackedBy(state, leaderId, t));
   const isRetaliationRound = attackers.length > 0;
 
   // --- Determine launch target ---
   let launchTarget: LeaderId | undefined;
 
-  if (isRetaliationRound && others.length > 0) {
-    // Identify the primary attacker (highest recentAggressionFrom value, tie-break by grudge).
+  if (isRetaliationRound) {
+    // Primary attacker = highest recentAggressionFrom.
     let primaryAttacker: LeaderId = attackers[0];
     let bestAggression = me.recentAggressionFrom[primaryAttacker] ?? 0;
     for (const a of attackers) {
@@ -48,117 +52,60 @@ export function planStarmless(state: GameState, leaderId: LeaderId): Order[] {
         primaryAttacker = a;
       }
     }
-
-    // Scapegoat roll: read rngState without advancing the shared state.
+    // Scapegoat roll (reads rngState without advancing shared state).
     const roll = nextRandom(state.rngState).value;
     const doScapegoat = roll < AI_SCORING_WEIGHTS.starmlessScapegoatPct;
-
     if (doScapegoat) {
-      // Pick candidate with highest aggregate threat (sum of threatScore from all leaders toward them).
-      // Candidates: alive, not self, NOT the primary attacker.
       const candidates = others.filter((t) => t !== primaryAttacker);
       if (candidates.length > 0) {
-        function aggregateThreat(c: LeaderId): number {
-          return state.cast.reduce(
-            (sum, l) => sum + threatScore(state, l, c),
-            0,
-          );
-        }
+        const aggregateThreat = (c: LeaderId): number =>
+          state.cast.reduce((sum, l) => sum + threatScore(state, l, c), 0);
         launchTarget = candidates.reduce((best, t) =>
           aggregateThreat(t) >= aggregateThreat(best) ? t : best,
         );
       } else {
-        // No other candidate — fall back to primary attacker.
         launchTarget = primaryAttacker;
       }
     } else {
-      // Normal retaliation: target the primary attacker.
       launchTarget = primaryAttacker;
     }
+  } else {
+    // New P4c.2 kill instinct: finish off a low-population opponent.
+    const finishable = others
+      .filter((t) => state.leaders[t].population <= STARMLESS_FINISH_POP_M)
+      .sort((a, b) => state.leaders[a].population - state.leaders[b].population);
+    if (finishable.length > 0) launchTarget = finishable[0];
   }
 
-  const canLaunch =
-    launchTarget !== undefined &&
-    me.stockpile.missiles >= 1 &&
-    me.stockpile.warheadsSmall >= 1 &&
-    budget >= LAUNCH_COST;
+  const rankedTargets = launchTarget !== undefined ? [launchTarget] : [];
 
-  // --- Reserve AP: launch first, then propaganda at attackers ---
-  const launchReserve = canLaunch ? LAUNCH_COST : 0;
-  const propagandaSlots = Math.min(
-    attackers.length,
-    Math.max(0, budget - launchReserve),
+  // Reserve 1 AP per attacker for propaganda.
+  const propagandaReserve = Math.min(attackers.length, Math.max(0, budget - 2));
+  const offenceBudget = budget - propagandaReserve;
+
+  // Launch first (low cap), then build with the remainder.
+  const salvo = launchSalvo(state, leaderId, {
+    budget: offenceBudget,
+    rankedTargets,
+    maxLaunches: STARMLESS_MAX_LAUNCHES,
+  });
+  const build = buildToward(
+    state, leaderId, STARMLESS_BUILD_PLAN, offenceBudget - salvo.apSpent,
   );
-  const totalReserve = launchReserve + propagandaSlots * PROPAGANDA_COST;
-  let buildBudget = budget - totalReserve;
+  budget -= salvo.apSpent + build.apSpent;
 
-  // --- 1. Build orders: factory bias in non-retaliation; warheads otherwise ---
-  let remaining = buildBudget;
+  const orders: Order[] = [...build.orders, ...salvo.orders];
 
-  if (!isRetaliationRound) {
-    // Prefer factory (~60 % factory bias). Build factory if we can afford it,
-    // then fill remainder with warheads.
-    if (remaining >= FACTORY_COST) {
-      const o: Order = { kind: 'build-factory' };
-      if (validateOrder(state, leaderId, o).ok) {
-        orders.push(o);
-        remaining -= FACTORY_COST;
-      }
+  // Deploy a shield if one is in stock and AP allows (deploy = commit).
+  if (me.stockpile.shields >= 1 && budget >= DEPLOY_COST) {
+    const deploy: Order = { kind: 'deploy-defence', type: 'shield' };
+    if (validateOrder(state, leaderId, deploy).ok) {
+      orders.push(deploy);
+      budget -= DEPLOY_COST;
     }
   }
 
-  // Defence: prefer deploying if we own a shield, otherwise build one.
-  const defenceCost = 4;     // P4b: was 2
-  const deployCost = 4;      // P4b: new
-  while (remaining >= defenceCost) {
-    if (me.stockpile.shields >= 1 && remaining >= deployCost) {
-      const o: Order = { kind: 'deploy-defence', type: 'shield' };
-      if (validateOrder(state, leaderId, o).ok) {
-        orders.push(o);
-        remaining -= deployCost;
-      } else {
-        break;
-      }
-    } else {
-      const o: Order = { kind: 'build-defence', type: 'shield' };
-      if (validateOrder(state, leaderId, o).ok) {
-        orders.push(o);
-        remaining -= defenceCost;
-      } else {
-        break;
-      }
-    }
-  }
-
-  // Fill remaining build budget with small warheads.
-  while (remaining >= 1) {
-    const o: Order = { kind: 'build-warhead', yield: 'small' };
-    if (validateOrder(state, leaderId, o).ok) {
-      orders.push(o);
-      remaining -= 1;
-    } else {
-      break;
-    }
-  }
-
-  budget -= buildBudget - remaining;
-
-  // --- 2. Launch if a target was chosen ---
-  if (canLaunch && launchTarget !== undefined && budget >= LAUNCH_COST) {
-    const launch: Order = {
-      kind: 'launch',
-      target: launchTarget,
-      delivery: 'missile',
-      warhead: 'small',
-      targetType: 'people',
-    };
-    if (validateOrder(state, leaderId, launch).ok) {
-      orders.push(launch);
-      budget -= apCostOf(launch);
-    }
-  }
-
-  // --- 3. Propaganda only at attackers ---
+  // Propaganda only at attackers.
   for (const attacker of attackers) {
     if (budget < PROPAGANDA_COST) break;
     const prop: Order = { kind: 'propaganda', target: attacker };

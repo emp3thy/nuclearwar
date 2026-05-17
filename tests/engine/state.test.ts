@@ -73,9 +73,8 @@ describe('initialState', () => {
     expect(a.rngState).not.toBe(c.rngState);
   });
 
-  it('defaults config dominanceThreshold to 2 and fastPlay to false', () => {
-    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'x' });
-    expect(s.config.dominanceThreshold).toBe(2);
+  it('defaults config fastPlay to false', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'cfg' });
     expect(s.config.fastPlay).toBe(false);
   });
 

@@ -25,7 +25,7 @@ What's in `src/engine/`:
 - Full action set (factories, missiles, bombers, S/M/L warheads, shields, AA, launches with people/infra targeting, propaganda, wooing).
 - Spec §3 phase order: defences → builds → propaganda → wooing → launches → final retaliations → status update.
 - Spec §6 overwhelm intercept curve.
-- All four win conditions: survivor, pyrrhic, apocalypse, dominance.
+- Win conditions: survivor, pyrrhic, apocalypse (elimination-only — dominance removed in P4c.2).
 - Per-leader AP bonus rules (Netanyahoo launch bonus; Mileigh-hem aggression bonus; Chump defence-waste hooked but inert until P2).
 - Determinism: same seed + same orders → identical events (property-tested across 25 seeds).
 
@@ -176,3 +176,7 @@ What's NOT in this phase (deferred to P4c / P5):
 ## Phase 4c slice 1 status
 
 Phase 4c slice 1 (Bomber Reuse + Carnage Bias) ships two tightly-coupled changes: a bomber-reuse engine rule (a bomber that impacts returns to the attacker's stockpile; an intercepted bomber stays gone) and Carnage AI personality tuning (builds bombers instead of missiles, prefers bomber delivery when stock is available). Full AI scoring-weight tuning, Approach B/C lookahead upgrades, and threat-aware defence deployment per personality are deferred to slice 2+, which will use the new duel distribution as its balance baseline. Verification: `npm run test:run` (255 tests).
+
+## Phase 4c slice 2 status
+
+(AI aggression rework + elimination-only endings.) The six AI planners were reworked onto two shared helpers — `buildToward` (capped, priority-ordered builds) and `launchSalvo` (largest-yield-first multi-launch). This fixed two planners that structurally could not fire (Netanyahoo's runaway missile-build loop starved warhead production; Mileigh-hem had no build logic), gave Starmless a kill instinct against low-population opponents, and let the whole cast fire multi-launch salvos with a medium/large warhead ramp. The dominance win condition was removed: games now end only by survivor / apocalypse / pyrrhic. The AI-duel test asserts every seeded all-AI game terminates within 60 rounds. Verify: `npm run test:run`.

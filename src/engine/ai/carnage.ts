@@ -2,38 +2,37 @@ import type { GameState, LeaderId, Order } from '../types';
 import { apCostOf, validateOrder } from '../orders';
 import { threatScore, opportunismScore, wasAttackedBy } from './scoring';
 import { AI_SCORING_WEIGHTS } from '../balance';
+import { buildToward, launchSalvo, type BuildPlanEntry } from './aggression';
 
 /**
- * Carnage — Rational + Opportunist personality.
+ * Carnage — Rational + Opportunist personality (P4c.2 rework).
  *
- * Behavioural rules:
- * 1. Score targets by threat = threatScore (arsenal + recent_aggression) with
- *    escalation: if the target hit Carnage last round (recentAggressionFrom[target] > 0),
- *    multiply their threat score by carnageEscalationMultiplier.
- * 2. Add opportunismScore to the combined score to apply "finish them" bonus for
- *    weak targets.
- * 3. Launch at the highest (threat + opportunism) candidate.
- * 4. Propaganda only at leaders who have attacked Carnage
- *    (wasAttackedBy(state, 'carnage', candidate) === true).
- * 5. Reserve AP: launch (2) first, then propaganda (1 per attacker, capped by budget).
+ * Aggressive-rational. Ranks targets by threat (with escalation against
+ * leaders who hit Carnage last round) + opportunism. Keeps the P4c.1 bomber
+ * bias: builds toward a fleet of 3 reusable bombers; launchSalvo prefers bomber
+ * delivery. Moderate launch cap. Propaganda only at attackers.
  */
+const PROPAGANDA_COST = 1;
+const CARNAGE_MAX_LAUNCHES = 3;
+
+// P4c.2 supersedes P4c.1's single-shot bomber rule: Carnage builds a small
+// REUSABLE bomber fleet so his moderate-cap salvo has real multi-launch.
+// Bombers return on impact (P4c.1 rule), so 3 bombers = 3 launches/round.
+const CARNAGE_BUILD_PLAN: BuildPlanEntry[] = [
+  { build: { item: 'bomber' }, target: 3 },
+  { build: { item: 'warhead', yield: 'small' }, target: 4 },
+  { build: { item: 'warhead', yield: 'medium' }, target: 2 },
+];
+
 export function planCarnage(state: GameState, leaderId: LeaderId): Order[] {
   const me = state.leaders[leaderId];
   if (!me || !me.alive) return [];
 
-  const orders: Order[] = [];
   let budget = me.ap;
 
-  const LAUNCH_COST = 2;
-  const PROPAGANDA_COST = 1;
-
-  // --- Living non-self leaders ---
   const others = state.cast.filter((t) => t !== leaderId && state.leaders[t]?.alive);
-
-  // --- Identify attackers (for propaganda targeting) ---
   const attackers = others.filter((t) => wasAttackedBy(state, leaderId, t));
 
-  // --- Score each candidate ---
   function combinedScore(target: LeaderId): number {
     const base = threatScore(state, leaderId, target);
     const escalated =
@@ -43,74 +42,26 @@ export function planCarnage(state: GameState, leaderId: LeaderId): Order[] {
     return escalated + opportunismScore(state, target);
   }
 
-  // --- Pick the highest-scoring launch candidate ---
-  let launchTarget: LeaderId | undefined;
-  if (others.length > 0) {
-    launchTarget = others.reduce((best, t) =>
-      combinedScore(t) >= combinedScore(best) ? t : best,
-    );
-  }
+  const rankedTargets = [...others].sort((a, b) => combinedScore(b) - combinedScore(a));
 
-  const hasDelivery = me.stockpile.bombers >= 1 || me.stockpile.missiles >= 1;
-  const canLaunch =
-    launchTarget !== undefined &&
-    hasDelivery &&
-    me.stockpile.warheadsSmall >= 1 &&
-    budget >= LAUNCH_COST;
+  // Reserve 1 AP per attacker for propaganda (capped so it never starves offence).
+  const propagandaReserve = Math.min(attackers.length, Math.max(0, budget - 2));
+  const offenceBudget = budget - propagandaReserve;
 
-  // --- Reserve AP: launch, then propaganda at attackers ---
-  const launchReserve = canLaunch ? LAUNCH_COST : 0;
+  // Launch first (moderate cap), then build with the remainder.
+  const salvo = launchSalvo(state, leaderId, {
+    budget: offenceBudget,
+    rankedTargets,
+    maxLaunches: CARNAGE_MAX_LAUNCHES,
+  });
+  const build = buildToward(
+    state, leaderId, CARNAGE_BUILD_PLAN, offenceBudget - salvo.apSpent,
+  );
+  budget -= salvo.apSpent + build.apSpent;
 
-  // Count how many propaganda orders we can afford after launch reserve.
-  const propagandaBudget = budget - launchReserve;
-  const propagandaSlots = Math.min(attackers.length, Math.max(0, propagandaBudget));
+  const orders: Order[] = [...build.orders, ...salvo.orders];
 
-  const totalReserve = launchReserve + propagandaSlots * PROPAGANDA_COST;
-  const buildBudget = budget - totalReserve;
-
-  // --- 1. Builds ---
-  let remaining = buildBudget;
-
-  // P4c.1: Carnage values bombers (reusable assets). If he owns none,
-  // build one as first priority. Single-shot — projection-safe.
-  if (me.stockpile.bombers === 0 && remaining >= 1) {
-    const o: Order = { kind: 'build-bomber' };
-    if (validateOrder(state, leaderId, o).ok) {
-      orders.push(o);
-      remaining -= 1;
-    }
-  }
-
-  // Build small warheads with the rest.
-  while (remaining >= 1) {
-    const o: Order = { kind: 'build-warhead', yield: 'small' };
-    if (validateOrder(state, leaderId, o).ok) {
-      orders.push(o);
-      remaining -= 1;
-    } else {
-      break;
-    }
-  }
-
-  budget -= buildBudget - remaining;
-
-  // --- 2. Launch at the best combined-score target ---
-  if (canLaunch && launchTarget !== undefined && budget >= LAUNCH_COST) {
-    const delivery: 'bomber' | 'missile' = me.stockpile.bombers >= 1 ? 'bomber' : 'missile';
-    const launch: Order = {
-      kind: 'launch',
-      target: launchTarget,
-      delivery,
-      warhead: 'small',
-      targetType: 'people',
-    };
-    if (validateOrder(state, leaderId, launch).ok) {
-      orders.push(launch);
-      budget -= apCostOf(launch);
-    }
-  }
-
-  // --- 3. Propaganda only at leaders who attacked Carnage ---
+  // Propaganda only at leaders who attacked Carnage.
   for (const attacker of attackers) {
     if (budget < PROPAGANDA_COST) break;
     const prop: Order = { kind: 'propaganda', target: attacker };

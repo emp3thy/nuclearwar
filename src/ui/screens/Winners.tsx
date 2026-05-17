@@ -7,7 +7,6 @@ function pickHeadline(outcome: WinOutcome, leaders: GameState['leaders']): strin
     case 'apocalypse': return 'WINNER: NOBODY';
     case 'survivor':
     case 'pyrrhic':
-    case 'dominance':
       return `${leaders[outcome.winner].name.toUpperCase()} WINS`;
   }
 }
@@ -16,7 +15,6 @@ function pickSubLine(
   outcome: WinOutcome,
   leaders: GameState['leaders'],
   initialPopulations: Partial<Record<LeaderId, number>>,
-  cast: LeaderId[],
 ): string {
   switch (outcome.type) {
     case 'apocalypse':
@@ -30,15 +28,6 @@ function pickSubLine(
       const initial = initialPopulations[outcome.winner] ?? winner.population;
       return `${winner.name} had ${initial}M when the bombs flew. They have 0M now. So does everyone else. Briefly, they had more.`;
     }
-    case 'dominance': {
-      const winner = leaders[outcome.winner];
-      const others = cast
-        .filter((id) => id !== outcome.winner)
-        .map((id) => leaders[id].population)
-        .sort((a, b) => b - a);
-      const secondPop = others[0] ?? 0;
-      return `${winner.name} rules over ${winner.population}M. The next-largest has ${secondPop}M.`;
-    }
   }
 }
 
@@ -46,7 +35,7 @@ export default function Winners({ state, dispatch }: ScreenProps) {
   const game = state.game!;
   const outcome = game.outcome!;
   const headline = pickHeadline(outcome, game.leaders);
-  const subLine = pickSubLine(outcome, game.leaders, state.initialPopulations, game.cast);
+  const subLine = pickSubLine(outcome, game.leaders, state.initialPopulations);
 
   const tollRows = game.cast.map((id) => {
     const leader = game.leaders[id];

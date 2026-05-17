@@ -1,5 +1,5 @@
 import type { Difficulty, GameConfig, GameState, Leader, LeaderId } from './types';
-import { DOMINANCE_THRESHOLD_DEFAULT, LEADER_PROFILES } from './balance';
+import { LEADER_PROFILES } from './balance';
 import { seedFromString } from './rng';
 import { shuffleMastheads } from './masthead';
 
@@ -63,7 +63,6 @@ export function initialState(opts: NewGameOpts): GameState {
     log: [],
     outcome: null,
     config: {
-      dominanceThreshold: DOMINANCE_THRESHOLD_DEFAULT,
       fastPlay: false,
       ...opts.config,
     },

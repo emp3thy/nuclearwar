@@ -96,16 +96,19 @@ describe('Carnage AI bomber bias (P4c.1)', () => {
     expect(orders.some((o) => o.kind === 'build-missile')).toBe(false);
   });
 
-  it('does NOT build a second bomber when one is already owned', () => {
-    let s = initialState({
-      cast: ['carnage', 'chump'],
-      difficulty: 'normal',
-      seed: 'carnage-already-has-bomber',
-    });
+  it('builds toward a 3-bomber fleet (P4c.2 supersedes the single-shot rule)', () => {
+    const s = initialState({ cast: ['carnage', 'chump'], difficulty: 'normal', seed: 'carnage-fleet' });
     s.leaders.carnage.stockpile.bombers = 1;
-    s.leaders.carnage.stockpile.missiles = 0;
-    s.leaders.carnage.ap = 6;
+    s.leaders.carnage.ap = 10;
+    const orders = planCarnage(s, 'carnage');
+    // 1 owned + 2 built = fleet of 3.
+    expect(orders.filter((o) => o.kind === 'build-bomber')).toHaveLength(2);
+  });
 
+  it('does not exceed the 3-bomber fleet cap', () => {
+    const s = initialState({ cast: ['carnage', 'chump'], difficulty: 'normal', seed: 'carnage-fleet-cap' });
+    s.leaders.carnage.stockpile.bombers = 3;
+    s.leaders.carnage.ap = 10;
     const orders = planCarnage(s, 'carnage');
     expect(orders.filter((o) => o.kind === 'build-bomber')).toHaveLength(0);
   });
@@ -149,5 +152,25 @@ describe('Carnage AI bomber bias (P4c.1)', () => {
     if (launch && launch.kind === 'launch') {
       expect(launch.delivery).toBe('missile');
     }
+  });
+});
+
+describe('Carnage aggression (P4c.2)', () => {
+  it('fires a multi-launch salvo when armed', () => {
+    const s = initialState({ cast: ['carnage', 'chump'], difficulty: 'normal', seed: 'ca1' });
+    s.leaders.carnage.stockpile.bombers = 3;
+    s.leaders.carnage.stockpile.warheadsSmall = 3;
+    s.leaders.carnage.ap = 12;
+    const orders = planCarnage(s, 'carnage');
+    expect(orders.filter((o) => o.kind === 'launch').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('still builds bombers (not missiles) when no delivery owned — P4c.1 bias preserved', () => {
+    const s = initialState({ cast: ['carnage', 'chump'], difficulty: 'normal', seed: 'ca2' });
+    s.leaders.carnage.stockpile.bombers = 0;
+    s.leaders.carnage.ap = 10;
+    const orders = planCarnage(s, 'carnage');
+    expect(orders.some((o) => o.kind === 'build-bomber')).toBe(true);
+    expect(orders.some((o) => o.kind === 'build-missile')).toBe(false);
   });
 });

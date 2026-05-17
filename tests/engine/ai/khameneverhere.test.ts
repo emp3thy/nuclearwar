@@ -32,3 +32,26 @@ describe('Khameneverhere (Grudge)', () => {
     expect(orders.some((o) => o.kind.startsWith('build-'))).toBe(true);
   });
 });
+
+describe('Khameneverhere aggression (P4c.2)', () => {
+  it('fires a multi-launch salvo at the top grudge target when armed', () => {
+    const s = initialState({ cast: ['khameneverhere', 'carnage', 'chump'], difficulty: 'normal', seed: 'ka1' });
+    s.leaders.khameneverhere.stockpile.missiles = 3;
+    s.leaders.khameneverhere.stockpile.warheadsSmall = 3;
+    s.leaders.khameneverhere.ap = 12;
+    s.leaders.khameneverhere.grudge = { carnage: 9 };
+    const orders = planKhameneverhere(s, 'khameneverhere');
+    const launches = orders.filter((o) => o.kind === 'launch');
+    expect(launches.length).toBeGreaterThanOrEqual(2);
+    expect(launches.every((o) => o.kind === 'launch' && o.target === 'carnage')).toBe(true);
+  });
+
+  it('builds medium warheads into the ramp', () => {
+    const s = initialState({ cast: ['khameneverhere', 'carnage'], difficulty: 'normal', seed: 'ka2' });
+    s.leaders.khameneverhere.stockpile.missiles = 6;
+    s.leaders.khameneverhere.stockpile.warheadsSmall = 4;
+    s.leaders.khameneverhere.ap = 12;
+    const orders = planKhameneverhere(s, 'khameneverhere');
+    expect(orders.some((o) => o.kind === 'build-warhead' && o.yield === 'medium')).toBe(true);
+  });
+});

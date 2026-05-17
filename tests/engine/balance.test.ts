@@ -7,7 +7,6 @@ import {
   AP_BANK_CAP,
   PROPAGANDA_TRANSFER_M,
   WOO_FAVOURABILITY_DECAY,
-  DOMINANCE_THRESHOLD_DEFAULT,
 } from '../../src/engine/balance';
 
 describe('LEADER_PROFILES', () => {
@@ -80,7 +79,6 @@ describe('economy constants', () => {
     expect(AP_BANK_CAP).toBe(4);
     expect(PROPAGANDA_TRANSFER_M).toBeGreaterThan(0);
     expect(WOO_FAVOURABILITY_DECAY).toBeGreaterThan(0);
-    expect(DOMINANCE_THRESHOLD_DEFAULT).toBe(2);
   });
 });
 

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { planMileighHem } from '../../../src/engine/ai/mileighhem';
 import { initialState } from '../../../src/engine/state';
+import type { Order } from '../../../src/engine/types';
 
 describe('Mileigh-hem (Glass cannon)', () => {
   it('activates all-out mode when apBanked + ap >= 4 and emits launch orders', () => {
@@ -164,5 +165,32 @@ describe('Mileigh-hem (Glass cannon)', () => {
     const orders = planMileighHem(s, 'mileigh-hem');
     const launches = orders.filter((o) => o.kind === 'launch');
     expect(launches.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('Mileigh-hem aggression (P4c.2)', () => {
+  it('builds delivery + warheads in activated mode — the zero-fire bug is gone', () => {
+    const s = initialState({ cast: ['mileigh-hem', 'carnage'], difficulty: 'normal', seed: 'ma1' });
+    // Activated by AP alone: ap=10, apBanked=0 → 10 >= 4 (mileighActivationApThreshold).
+    // grudge sets rankedTargets (carnage), not the activation flag.
+    s.leaders['mileigh-hem'].ap = 10;
+    s.leaders['mileigh-hem'].grudge = { carnage: 3 };
+    const orders = planMileighHem(s, 'mileigh-hem');
+    expect(orders.some((o) => o.kind === 'build-missile' || o.kind === 'build-warhead')).toBe(true);
+  });
+
+  it('fires a spread salvo across targets when armed in activated mode', () => {
+    const s = initialState({ cast: ['mileigh-hem', 'carnage', 'chump'], difficulty: 'normal', seed: 'ma2' });
+    s.leaders['mileigh-hem'].ap = 12;
+    s.leaders['mileigh-hem'].stockpile.missiles = 4;
+    s.leaders['mileigh-hem'].stockpile.warheadsSmall = 4;
+    s.leaders['mileigh-hem'].grudge = { carnage: 2, chump: 2 };
+    const orders = planMileighHem(s, 'mileigh-hem');
+    const launches = orders.filter(
+      (o): o is Extract<Order, { kind: 'launch' }> => o.kind === 'launch',
+    );
+    const targets = new Set(launches.map((o) => o.target));
+    expect(launches.length).toBeGreaterThanOrEqual(2);
+    expect(targets.size).toBeGreaterThanOrEqual(2); // spread across targets
   });
 });

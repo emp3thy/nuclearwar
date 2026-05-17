@@ -75,3 +75,28 @@ describe('Starmless (Cautious + Scapegoat)', () => {
     expect(props).toHaveLength(0);
   });
 });
+
+describe('Starmless kill instinct (P4c.2)', () => {
+  it('launches at a finishable low-population opponent with no prior attack', () => {
+    const s = initialState({ cast: ['starmless', 'carnage'], difficulty: 'normal', seed: 'sa1' });
+    s.leaders.starmless.stockpile.missiles = 2;
+    s.leaders.starmless.stockpile.warheadsSmall = 2;
+    s.leaders.starmless.ap = 10;
+    s.leaders.carnage.population = 4; // finishable — below the finish threshold
+    // No grudge / aggression from carnage → not a retaliation round.
+    const orders = planStarmless(s, 'starmless');
+    const launch = orders.find((o) => o.kind === 'launch');
+    expect(launch).toBeDefined();
+    expect(launch?.kind === 'launch' && launch.target).toBe('carnage');
+  });
+
+  it('does not launch when no opponent is finishable and no retaliation is pending', () => {
+    const s = initialState({ cast: ['starmless', 'carnage'], difficulty: 'normal', seed: 'sa2' });
+    s.leaders.starmless.stockpile.missiles = 2;
+    s.leaders.starmless.stockpile.warheadsSmall = 2;
+    s.leaders.starmless.ap = 10;
+    s.leaders.carnage.population = 25; // healthy — not finishable
+    const orders = planStarmless(s, 'starmless');
+    expect(orders.some((o) => o.kind === 'launch')).toBe(false);
+  });
+});

@@ -11,6 +11,5 @@ export {
   AP_BANK_CAP,
   PROPAGANDA_TRANSFER_M,
   WOO_FAVOURABILITY_DECAY,
-  DOMINANCE_THRESHOLD_DEFAULT,
 } from './balance';
 export { planAi } from './ai';

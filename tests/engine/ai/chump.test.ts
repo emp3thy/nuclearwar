@@ -61,3 +61,30 @@ describe('Chump (Coward)', () => {
     expect(orders.some((o) => o.kind === 'propaganda')).toBe(true);
   });
 });
+
+describe('Chump aggression (P4c.2)', () => {
+  it('fires a capped multi-launch salvo at a weak target', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'cha1' });
+    s.leaders.chump.stockpile.missiles = 3;
+    s.leaders.chump.stockpile.warheadsSmall = 3;
+    s.leaders.chump.ap = 12;
+    s.leaders.carnage.population = 4; // weak — opportunismScore > 0
+    s.leaders.carnage.factories = 0;
+    const orders = planChump(s, 'chump');
+    const launches = orders.filter((o) => o.kind === 'launch');
+    expect(launches.length).toBeGreaterThanOrEqual(1);
+    expect(launches.length).toBeLessThanOrEqual(2); // low cap
+  });
+
+  it('never launches at a leader who has wooed Chump', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'cha2' });
+    s.leaders.chump.stockpile.missiles = 3;
+    s.leaders.chump.stockpile.warheadsSmall = 3;
+    s.leaders.chump.ap = 12;
+    s.leaders.carnage.population = 4;
+    s.leaders.carnage.factories = 0;
+    s.leaders.chump.favourability = { carnage: 5 }; // carnage wooed chump
+    const orders = planChump(s, 'chump');
+    expect(orders.some((o) => o.kind === 'launch')).toBe(false);
+  });
+});

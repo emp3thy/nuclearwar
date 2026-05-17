@@ -26,17 +26,5 @@ export function checkOutcome(
     return { type: 'apocalypse' };
   }
 
-  // 3) Dominance — leading population >= threshold * second-highest.
-  const sortedByPop = [...alive].sort(
-    (a, b) => state.leaders[b].population - state.leaders[a].population,
-  );
-  if (sortedByPop.length >= 2) {
-    const lead = state.leaders[sortedByPop[0]].population;
-    const next = state.leaders[sortedByPop[1]].population;
-    if (next > 0 && lead >= state.config.dominanceThreshold * next) {
-      return { type: 'dominance', winner: sortedByPop[0] };
-    }
-  }
-
   return null;
 }

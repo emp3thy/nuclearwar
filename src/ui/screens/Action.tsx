@@ -2,6 +2,7 @@ import type { ScreenProps } from '../App';
 import type { ResolutionEvent } from '../../engine/types';
 import EventCard from '../components/EventCard';
 import PhaseTracker from '../components/PhaseTracker';
+import { groupPhaseEvents } from '../util/eventGrouping';
 import styles from './Action.module.css';
 
 type Phase = 'DEFENCES' | 'BUILDS' | 'PROPAGANDA' | 'WOOING' | 'LAUNCHES' | 'FINAL_RETALIATIONS';
@@ -81,7 +82,9 @@ export default function Action({ state, dispatch }: ScreenProps) {
         return (
           <section key={phase} className={styles.phaseSection}>
             <h2 className={styles.phaseHeader}>{PHASE_LABELS[phase]}</h2>
-            {events.map((e, i) => <EventCard key={i} event={e} game={game} />)}
+            {groupPhaseEvents(events).map((g, i) => (
+              <EventCard key={i} event={g.event} count={g.count} game={game} />
+            ))}
           </section>
         );
       })}

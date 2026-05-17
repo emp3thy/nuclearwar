@@ -56,6 +56,8 @@
 
 Self-contained, independent of the helpers. Removes the dominance rule and all its dead code across engine, UI, and tests.
 
+**Confidence: 95%** — pure deletion; the full blast radius was grepped at plan-write time and every reference is enumerated below. Residual risk: the `Winners.tsx` switch edit, but the narrowed `WinOutcome` makes the compiler enforce exhaustiveness.
+
 **Files:**
 - Modify: `src/engine/winConditions.ts`
 - Modify: `src/engine/types.ts`
@@ -73,10 +75,10 @@ Self-contained, independent of the helpers. Removes the dominance rule and all i
 
 Delete these three `it(...)` blocks entirely: `'returns dominance when one leader has 2× the next-highest population'`, `'does not return dominance when ratio is below threshold'`, and `'survivor takes priority over dominance'`. Rename the first remaining test from `'returns null while multiple leaders are alive and no dominance'` to `'returns null while multiple leaders are alive'`. The file keeps four tests: returns-null, survivor, pyrrhic, apocalypse.
 
-- [ ] **Step 2: Run the win-condition tests to verify they fail**
+- [ ] **Step 2: Run the win-condition tests to confirm the edited file is green**
 
 Run: `npx vitest run tests/engine/winConditions.test.ts`
-Expected: FAIL — the renamed/kept tests still pass, but the file will not yet compile cleanly once later steps land. At this point it should still PASS (no source change yet). This step just confirms the edited test file is green before touching source. Expected: PASS, 4 tests.
+Expected: PASS — 4 tests (returns-null, survivor, pyrrhic, apocalypse). Source is unchanged at this point, so the four kept tests stay green. This is a removal task, not a red-green TDD cycle — there is no "failing" intermediate state; the suite stays green throughout as dead code is removed in lockstep across Steps 3–8.
 
 - [ ] **Step 3: Remove the dominance branch from `checkOutcome`**
 
@@ -185,6 +187,8 @@ git commit -m "engine: remove dominance win condition — games end by eliminati
 ## Task 2: `buildToward` helper
 
 The capped build helper. A planner passes an ordered, capped build plan; `buildToward` emits build orders up to each cap, in priority order, until budget runs out.
+
+**Confidence: 95%** — new pure function, full code + tests given. `apCostOf` / `validateOrder` / `warheadFieldFor` signatures verified against source at plan-write time.
 
 **Files:**
 - Create: `src/engine/ai/aggression.ts`
@@ -383,6 +387,8 @@ git commit -m "engine: add buildToward AI helper — capped, priority-ordered bu
 ## Task 3: `launchSalvo` helper
 
 The volume+yield core. Pairs delivery vehicles with warheads largest-yield-first, emits launches until AP, ammo, or the cap runs out.
+
+**Confidence: 93%** — new pure function, full code + tests given. The projected-stockpile self-limiting logic is the one subtle part; the `'never emits more launches than the projected stockpile can arm'` test pins it.
 
 **Files:**
 - Modify: `src/engine/ai/aggression.ts`
@@ -600,6 +606,8 @@ git commit -m "engine: add launchSalvo AI helper — largest-yield-first multi-l
 
 Fixes the zero-fire bug. Capped `buildToward` plan with a yield ramp; uncapped `launchSalvo`. Chump-exception and Chump-propaganda preserved.
 
+**Confidence: 94%** — full rewrite given; all four existing tests + the P4c.1 regression were traced against the new code at plan-write time and confirmed to pass unchanged.
+
 **Files:**
 - Modify: `src/engine/ai/netanyahoo.ts`
 - Modify: `tests/engine/ai/netanyahoo.test.ts`
@@ -753,17 +761,19 @@ git commit -m "engine: Netanyahoo rework — fix zero-fire bug, multi-launch yie
 
 Very aggressive. `buildToward` with raised targets + medium warheads; uncapped `launchSalvo` focus-firing the top grudge target.
 
+**Confidence: 94%** — full rewrite given; all three existing tests traced against the new code at plan-write time and confirmed to pass unchanged.
+
 **Files:**
 - Modify: `src/engine/ai/khameneverhere.ts`
 - Modify: `tests/engine/ai/khameneverhere.test.ts`
 
-- [ ] **Step 1: Read the existing test file**
+- [ ] **Step 1: Confirm existing tests survive the rework**
 
-Read `tests/engine/ai/khameneverhere.test.ts` to see which existing assertions survive. The grudge-targeting behaviour is preserved; tests that assert "launches at top grudge target" still hold. Tests that assert the old `MISSILE_TARGET = 3` / `WARHEAD_TARGET = 3` exact stockpile caps must be updated to the new targets (missile 6, small 4, medium 3).
+`tests/engine/ai/khameneverhere.test.ts` has three tests — `'targets the top of the grudge list when launching'`, `'fallback: if grudge empty, picks any living non-self leader'`, and `'builds when no stockpile yet'`. All three pass unchanged against the new planner code below (verified at plan-write time — the file contains no exact-stockpile-cap assertions). Keep all three.
 
 - [ ] **Step 2: Update `khameneverhere.test.ts`**
 
-Keep grudge-targeting and fallback tests. Replace any exact-stockpile-cap assertions, and append:
+Keep all three existing tests unchanged. Append:
 
 ```ts
 import { planKhameneverhere } from '../../../src/engine/ai/khameneverhere';
@@ -866,17 +876,19 @@ git commit -m "engine: Khameneverhere rework — multi-launch grudge salvo, rais
 
 Fixes the zero-fire bug (no build logic). Keeps the two-mode identity: activated → build + spread-fire salvo; not activated → diplomatic mode unchanged.
 
+**Confidence: 93%** — full rewrite given; all seven existing tests traced against the new code at plan-write time and confirmed to pass unchanged (incl. the exact `launches.length === 3` largest-yield-first test).
+
 **Files:**
 - Modify: `src/engine/ai/mileighhem.ts`
 - Modify: `tests/engine/ai/mileighhem.test.ts`
 
-- [ ] **Step 1: Read the existing test file**
+- [ ] **Step 1: Confirm existing tests survive the rework**
 
-Read `tests/engine/ai/mileighhem.test.ts`. Diplomatic-mode tests (woo/propaganda when not activated) survive unchanged. All-out-mode tests that assumed a pre-seeded stockpile survive; the new behaviour adds build orders in activated mode.
+`tests/engine/ai/mileighhem.test.ts` has seven tests (activation trigger, diplomatic woo/propaganda, no-defence in either mode, attacker-only targeting in all-out mode, largest-yield-first, banked-AP activation). All seven pass unchanged against the new planner code below (verified at plan-write time — the new all-out mode still emits launches largest-yield-first via `launchSalvo`, still skips defence, and the diplomatic branch is unchanged). Keep all seven.
 
 - [ ] **Step 2: Update `mileighhem.test.ts`**
 
-Keep the diplomatic-mode tests. Append:
+Keep all seven existing tests unchanged. Append:
 
 ```ts
 import { planMileighHem } from '../../../src/engine/ai/mileighhem';
@@ -1015,40 +1027,68 @@ git commit -m "engine: Mileigh-hem rework — fix zero-fire bug, build logic + s
 
 ## Task 7: Carnage — Rational + Opportunist rework
 
-Keeps the P4c.1 bomber bias. `buildToward` builds a bomber + warhead mix; moderate-capped `launchSalvo` focus-fires the top threat+opportunism target. Attacker-propaganda preserved.
+Keeps and extends the P4c.1 bomber bias. `buildToward` builds a 3-bomber reusable fleet + warhead mix; moderate-capped `launchSalvo` focus-fires the top threat+opportunism target. Attacker-propaganda preserved.
+
+**Confidence: 92%** — full rewrite given. The confidence-lift pass found that a 1-bomber plan would give Carnage only one launch/round; fixed to a 3-bomber fleet. One P4c.1 test (`'does NOT build a second bomber'`) is superseded and explicitly replaced in Step 2 — that test change is the only residual risk, and it is fully specified.
 
 **Files:**
 - Modify: `src/engine/ai/carnage.ts`
 - Modify: `tests/engine/ai/carnage.test.ts`
 
-- [ ] **Step 1: Read the existing test file**
+- [ ] **Step 1: Confirm which existing tests survive, and which must change**
 
-Read `tests/engine/ai/carnage.test.ts`. The P4c.1 bomber-bias tests (`'Carnage AI bomber bias (P4c.1)'`) must still hold: Carnage builds a bomber when none owned, does not build a second, launches with bomber delivery when available. The new code preserves all of this — `buildToward` with `{ bomber, target: 1 }` builds exactly one bomber, and `launchSalvo` prefers bomber delivery.
+`tests/engine/ai/carnage.test.ts` has nine tests: five in `describe('Carnage (Rational + Opportunist)')` and four in `describe('Carnage AI bomber bias (P4c.1)')`.
+
+- The five targeting/propaganda tests pass unchanged against the new planner (verified at plan-write time).
+- Three of the four P4c.1 tests pass unchanged: `'builds a bomber when none owned and budget allows'` still holds (`some(build-bomber)` true, `some(build-missile)` false — the new `CARNAGE_BUILD_PLAN` has no missile entry); and both delivery tests (`'launches with delivery=bomber...'`, `'falls back to delivery=missile...'`) still hold because `launchSalvo` prefers bomber delivery.
+- **One P4c.1 test must be REPLACED:** `'does NOT build a second bomber when one is already owned'` hard-asserts `filter(build-bomber).length === 0` for an owned bomber. P4c.2 supersedes the single-shot rule — Carnage now builds toward a 3-bomber fleet — so Step 2 replaces it with two fleet tests.
 
 - [ ] **Step 2: Update `carnage.test.ts`**
 
-Keep the existing combined-score targeting tests and the P4c.1 bomber-bias tests. Append:
+Keep the five targeting/propaganda tests and three of the four P4c.1 tests. Inside `describe('Carnage AI bomber bias (P4c.1)')`, **delete** the `'does NOT build a second bomber when one is already owned'` test and add the two fleet tests in its place. Then append the new top-level `describe('Carnage aggression (P4c.2)')` block.
 
 ```ts
 import { planCarnage } from '../../../src/engine/ai/carnage';
 
+// --- Inside describe('Carnage AI bomber bias (P4c.1)'), REPLACING the deleted
+//     'does NOT build a second bomber' test: ---
+
+  it('builds toward a 3-bomber fleet (P4c.2 supersedes the single-shot rule)', () => {
+    const s = initialState({ cast: ['carnage', 'chump'], difficulty: 'normal', seed: 'carnage-fleet' });
+    s.leaders.carnage.stockpile.bombers = 1;
+    s.leaders.carnage.ap = 10;
+    const orders = planCarnage(s, 'carnage');
+    // 1 owned + 2 built = fleet of 3.
+    expect(orders.filter((o) => o.kind === 'build-bomber')).toHaveLength(2);
+  });
+
+  it('does not exceed the 3-bomber fleet cap', () => {
+    const s = initialState({ cast: ['carnage', 'chump'], difficulty: 'normal', seed: 'carnage-fleet-cap' });
+    s.leaders.carnage.stockpile.bombers = 3;
+    s.leaders.carnage.ap = 10;
+    const orders = planCarnage(s, 'carnage');
+    expect(orders.filter((o) => o.kind === 'build-bomber')).toHaveLength(0);
+  });
+
+// --- New top-level describe block: ---
+
 describe('Carnage aggression (P4c.2)', () => {
   it('fires a multi-launch salvo when armed', () => {
     const s = initialState({ cast: ['carnage', 'chump'], difficulty: 'normal', seed: 'ca1' });
-    s.leaders.carnage.stockpile.bombers = 1;
-    s.leaders.carnage.stockpile.missiles = 2;
+    s.leaders.carnage.stockpile.bombers = 3;
     s.leaders.carnage.stockpile.warheadsSmall = 3;
     s.leaders.carnage.ap = 12;
     const orders = planCarnage(s, 'carnage');
     expect(orders.filter((o) => o.kind === 'launch').length).toBeGreaterThanOrEqual(2);
   });
 
-  it('still builds exactly one bomber when none owned (P4c.1 bias preserved)', () => {
+  it('still builds bombers (not missiles) when no delivery owned — P4c.1 bias preserved', () => {
     const s = initialState({ cast: ['carnage', 'chump'], difficulty: 'normal', seed: 'ca2' });
     s.leaders.carnage.stockpile.bombers = 0;
     s.leaders.carnage.ap = 10;
     const orders = planCarnage(s, 'carnage');
-    expect(orders.filter((o) => o.kind === 'build-bomber')).toHaveLength(1);
+    expect(orders.some((o) => o.kind === 'build-bomber')).toBe(true);
+    expect(orders.some((o) => o.kind === 'build-missile')).toBe(false);
   });
 });
 ```
@@ -1080,8 +1120,11 @@ import { buildToward, launchSalvo, type BuildPlanEntry } from './aggression';
 const PROPAGANDA_COST = 1;
 const CARNAGE_MAX_LAUNCHES = 3;
 
+// P4c.2 supersedes P4c.1's single-shot bomber rule: Carnage builds a small
+// REUSABLE bomber fleet so his moderate-cap salvo has real multi-launch.
+// Bombers return on impact (P4c.1 rule), so 3 bombers = 3 launches/round.
 const CARNAGE_BUILD_PLAN: BuildPlanEntry[] = [
-  { build: { item: 'bomber' }, target: 1 },
+  { build: { item: 'bomber' }, target: 3 },
   { build: { item: 'warhead', yield: 'small' }, target: 4 },
   { build: { item: 'warhead', yield: 'medium' }, target: 2 },
 ];
@@ -1160,17 +1203,19 @@ git commit -m "engine: Carnage rework — multi-launch salvo, P4c.1 bomber bias 
 
 Adds the opportunism finish path: Starmless now launches when retaliating **or** when a finishable (low-population) opponent exists. Low launch cap. Keeps factory/defence building, deploy logic, scapegoat roll.
 
+**Confidence: 92%** — full rewrite given; all five existing tests traced against the new code at plan-write time. The confidence-lift pass found the build plan had no delivery vehicle (would recreate the zero-fire bug); fixed by adding a `missile` entry, with `factory` target 7 so the factory-bias test still holds on a 5-AP round.
+
 **Files:**
 - Modify: `src/engine/ai/starmless.ts`
 - Modify: `tests/engine/ai/starmless.test.ts`
 
-- [ ] **Step 1: Read the existing test file**
+- [ ] **Step 1: Confirm existing tests survive the rework**
 
-Read `tests/engine/ai/starmless.test.ts`. Retaliation-targeting and scapegoat-roll tests survive. The new behaviour adds: Starmless launches at a low-population opponent even with no prior attack on him.
+`tests/engine/ai/starmless.test.ts` has five tests — factory-bias in non-retaliation, primary-attacker targeting (scapegoat roll fails), scapegoat targeting, propaganda-only-at-attackers, no-propaganda-without-attacker. All five pass unchanged against the new planner code below (verified at plan-write time — `factory` stays first in the build plan so the factory-bias test holds; the retaliation + scapegoat path is preserved verbatim). Keep all five.
 
 - [ ] **Step 2: Update `starmless.test.ts`**
 
-Keep retaliation + scapegoat tests. Append:
+Keep all five existing tests unchanged. Append:
 
 ```ts
 import { planStarmless } from '../../../src/engine/ai/starmless';
@@ -1230,10 +1275,15 @@ const DEPLOY_COST = 4;
 const STARMLESS_FINISH_POP_M = 8;
 const STARMLESS_MAX_LAUNCHES = 2;
 
+// Factory target 7 (starts at 6) so at most one factory is built per low-AP
+// round — leaving budget for the missile + warhead stock the kill instinct
+// needs. A plan with warheads but NO delivery vehicle would recreate the
+// zero-fire bug, so the missile entry is mandatory.
 const STARMLESS_BUILD_PLAN: BuildPlanEntry[] = [
-  { build: { item: 'factory' }, target: 8 },
-  { build: { item: 'defence', type: 'shield' }, target: 2 },
+  { build: { item: 'factory' }, target: 7 },
+  { build: { item: 'missile' }, target: 2 },
   { build: { item: 'warhead', yield: 'small' }, target: 3 },
+  { build: { item: 'defence', type: 'shield' }, target: 2 },
 ];
 
 export function planStarmless(state: GameState, leaderId: LeaderId): Order[] {
@@ -1352,17 +1402,19 @@ git commit -m "engine: Starmless rework — new kill instinct, multi-launch unde
 
 Routes Chump's existing opportunism-launch path through `launchSalvo` with a low cap. Heavy defence build + deploy, propaganda, and wooing-suppression preserved.
 
+**Confidence: 92%** — full rewrite given; all five existing tests traced against the new code at plan-write time. The confidence-lift pass found the build plan had no delivery vehicle; fixed by adding a `missile` entry after defence.
+
 **Files:**
 - Modify: `src/engine/ai/chump.ts`
 - Modify: `tests/engine/ai/chump.test.ts`
 
-- [ ] **Step 1: Read the existing test file**
+- [ ] **Step 1: Confirm existing tests survive the rework**
 
-Read `tests/engine/ai/chump.test.ts`. The wooing-suppression rule (never launch at a leader with `favourability[t] > 0`), the weak-target selection, and infra-vs-people targeting all survive. Defence-building tests survive.
+`tests/engine/ai/chump.test.ts` has five tests — defence/warhead build bias, wooing-suppression (no launch at a wooer), launch-at-weak-targets, infra targeting, propaganda-when-AP-allows. All five pass unchanged against the new planner code below (verified at plan-write time). Keep all five.
 
 - [ ] **Step 2: Update `chump.test.ts`**
 
-Keep the existing tests. Append:
+Keep all five existing tests unchanged. Append:
 
 ```ts
 import { planChump } from '../../../src/engine/ai/chump';
@@ -1422,8 +1474,11 @@ const PROPAGANDA_COST = 1;
 const DEPLOY_COST = 4;
 const CHUMP_MAX_LAUNCHES = 2;
 
+// The missile entry is mandatory — a plan with warheads but no delivery
+// vehicle would recreate the zero-fire bug. Defence stays first (coward).
 const CHUMP_BUILD_PLAN: BuildPlanEntry[] = [
   { build: { item: 'defence', type: 'shield' }, target: 3 },
+  { build: { item: 'missile' }, target: 2 },
   { build: { item: 'warhead', yield: 'small' }, target: 4 },
 ];
 
@@ -1509,6 +1564,8 @@ git commit -m "engine: Chump rework — capped opportunistic salvo, defence pres
 ## Task 10: AI-duel termination assertion + README
 
 Replaces the duel test's "no crash" assertion with a termination assertion: every seeded all-AI game reaches an outcome within a round cap. This is the success criterion for the whole slice.
+
+**Confidence: 80% — surfaced for user attention.** Writing the test is trivial (~95%), but whether the assertion *passes* is empirically unknown until the reworked AIs are run — it cannot be lifted above 90% by plan edits alone. The unfixable-by-planning risk: if aggressive elimination-only games stall, T10 Step 2's diagnose-and-tune procedure absorbs it, but tuning could expand scope. This is the spec's documented real concern (§6.1.1). See the "Confidence summary" section below.
 
 **Files:**
 - Modify: `tests/engine/ai-duel.test.ts`
@@ -1604,6 +1661,30 @@ git commit -m "test: AI-duel termination assertion; docs: P4c slice 2 status"
 3. Use `superpowers:finishing-a-development-branch`: push + PR + babysit BugBot + merge + main pull + worktree prune (the standing flow for this project).
 
 ---
+
+## Confidence summary
+
+Per-task confidence after the confidence-lift pass (read the existing planner test files, traced every existing test against the new code, fixed the build-plan bugs):
+
+| Task | Confidence | Note |
+|------|-----------|------|
+| T1 — remove dominance | 95% | pure deletion, blast radius grepped |
+| T2 — `buildToward` | 95% | new pure fn, signatures verified |
+| T3 — `launchSalvo` | 93% | new pure fn, projection logic pinned by test |
+| T4 — Netanyahoo | 94% | existing tests traced, pass unchanged |
+| T5 — Khameneverhere | 94% | existing tests traced, pass unchanged |
+| T6 — Mileigh-hem | 93% | existing tests traced, pass unchanged |
+| T7 — Carnage | 92% | bomber-fleet fix applied; one P4c.1 test replaced |
+| T8 — Starmless | 92% | missing-delivery build-plan bug fixed |
+| T9 — Chump | 92% | missing-delivery build-plan bug fixed |
+| **T10 — duel termination** | **80%** | **surfaced — see below** |
+
+**Bugs the confidence-lift pass surfaced and fixed in this plan (before execution):**
+1. **Starmless and Chump build plans had no missile/bomber entry** — they would have built warheads with no delivery vehicle, recreating the exact zero-fire bug this slice exists to fix. Fixed: a `missile` entry added to both `STARMLESS_BUILD_PLAN` and `CHUMP_BUILD_PLAN`.
+2. **Carnage's plan built only 1 bomber** — with no missile builds, that is exactly one launch per round, contradicting the "multi-launch" design. Fixed: `bomber` target raised to 3 (a reusable fleet); the superseded P4c.1 test is explicitly replaced in T7.
+3. **T1 Step 2 had contradictory wording** ("Expected: FAIL … should still PASS"). Fixed: rewritten as a coherent green-throughout removal step.
+
+**T10 — the one task that cannot be lifted above 90% by planning.** Writing the termination assertion is trivial; whether it *passes* depends on the empirical behaviour of six reworked AIs in elimination-only games, which is unknowable until run. The mitigation (diagnose-and-tune) is embedded in T10 Step 2, and the spec flagged this as real concern §6.1.1. **Decision point for the user:** proceed with T10 as written (tune-if-it-fails inside this slice), or treat a stall as a scope boundary and split duel-tuning into a follow-up slice. Recommended: proceed as written — the defence AP economy makes a true stall unlikely, and the embedded procedure bounds the work.
 
 ## Notes on test count
 

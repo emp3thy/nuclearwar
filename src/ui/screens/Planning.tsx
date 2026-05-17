@@ -65,7 +65,14 @@ export default function Planning({ state, dispatch }: ScreenProps) {
           target={game.leaders[id]}
           mood={moodByLeader[id]}
           targetType={targetTypes[id] ?? 'people'}
-          onTargetTypeChange={(next) => setTargetTypes((prev) => ({ ...prev, [id]: next }))}
+          onTargetTypeChange={(next) => {
+            setTargetTypes((prev) => ({ ...prev, [id]: next }));
+            // Retarget every launch already queued at this leader so the
+            // toggle and the orders never disagree.
+            setOrders((prev) => prev.map((o) =>
+              o.kind === 'launch' && o.target === id ? { ...o, targetType: next } : o,
+            ));
+          }}
           orders={orders}
           setOrders={setOrders}
           apRemaining={apRemaining}

@@ -89,6 +89,7 @@
 }
 .reactionFlag { font-size: 16px; }
 .reactionName { font-weight: 600; min-width: 90px; }
+.reactionStats { font-family: 'Consolas', monospace; font-size: 11px; color: #3a3a3a; min-width: 116px; white-space: nowrap; }
 .reactionDelta { font-family: 'Consolas', monospace; color: #b02a37; min-width: 40px; }
 .reactionQuote { font-style: italic; color: #5a4a3a; font-size: 11px; }
 

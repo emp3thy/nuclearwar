@@ -5,11 +5,13 @@ import styles from './EventCard.module.css';
 export interface EventCardProps {
   event: ResolutionEvent;
   game: GameState;
+  /** How many identical build events this card stands for (default 1). */
+  count?: number;
 }
 
-export default function EventCard({ event, game }: EventCardProps) {
+export default function EventCard({ event, game, count = 1 }: EventCardProps) {
   if (event.kind === 'DisparageCameo') return <DisparageCard event={event} />;
-  const result = formatEventCard(event, game);
+  const result = formatEventCard(event, game, count);
   if (!result) return null;
   const { icon, body, className, quote } = result;
   return (
@@ -33,23 +35,31 @@ function name(game: GameState, id: keyof GameState['leaders']): string {
 export function formatEventCard(
   event: ResolutionEvent,
   game: GameState,
+  count = 1,
 ): { icon: string; body: string; className?: string; quote?: string } | null {
   switch (event.kind) {
     case 'OrdersSealed':
       return null;  // not rendered
     case 'FactoryBuilt':
-      return { icon: '⚙', body: `${flag(game, event.by)} ${name(game, event.by)} builds 1 factory`, quote: event.quote };
+      return {
+        icon: '⚙',
+        body: `${flag(game, event.by)} ${name(game, event.by)} builds ${count} ${count === 1 ? 'factory' : 'factories'}`,
+        quote: event.quote,
+      };
     case 'DeliveryBuilt':
       return {
         icon: event.type === 'missile' ? '🚀' : '🛩',
-        body: `${flag(game, event.by)} ${name(game, event.by)} builds 1 ${event.type}`,
+        body: `${flag(game, event.by)} ${name(game, event.by)} builds ${count} ${event.type}${count === 1 ? '' : 's'}`,
       };
     case 'WarheadBuilt':
-      return { icon: '☢', body: `${flag(game, event.by)} ${name(game, event.by)} builds 1 ${event.yield} warhead` };
+      return {
+        icon: '☢',
+        body: `${flag(game, event.by)} ${name(game, event.by)} builds ${count} ${event.yield} warhead${count === 1 ? '' : 's'}`,
+      };
     case 'DefenceBuilt':
       return {
         icon: '🛡',
-        body: `${flag(game, event.by)} ${name(game, event.by)} builds 1 ${event.type === 'shield' ? 'shield' : 'AA'}`,
+        body: `${flag(game, event.by)} ${name(game, event.by)} builds ${count} ${event.type === 'shield' ? (count === 1 ? 'shield' : 'shields') : 'AA'}`,
         quote: event.quote,
       };
     case 'PropagandaTransfer':

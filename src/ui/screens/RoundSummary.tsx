@@ -31,12 +31,22 @@ function pickHeadline(
   return `ROUND ${round - 1} SETTLES`;
 }
 
-function pickSubhead(events: ResolutionEvent[], leaders: GameState['leaders']): string {
-  const impacts = events.filter((e): e is Extract<ResolutionEvent, { kind: 'ImpactPeople' }> =>
-    e.kind === 'ImpactPeople',
-  );
-  if (impacts.length === 0) return 'No casualties this round.';
-  const biggest = impacts.reduce((a, b) => (a.deaths > b.deaths ? a : b));
+export function pickSubhead(events: ResolutionEvent[], leaders: GameState['leaders']): string {
+  // Sum people-deaths per attacker→target pair, then name the biggest pairing.
+  // A single round can land several strikes from one attacker on one target;
+  // the subhead must report the total, not the largest single hit.
+  const pairs = new Map<string, { from: LeaderId; target: LeaderId; deaths: number }>();
+  for (const e of events) {
+    if (e.kind !== 'ImpactPeople') continue;
+    const k = `${e.from}|${e.target}`;
+    const cur = pairs.get(k);
+    if (cur) cur.deaths += e.deaths;
+    else pairs.set(k, { from: e.from, target: e.target, deaths: e.deaths });
+  }
+  const all = [...pairs.values()];
+  if (all.length === 0) return 'No casualties this round.';
+  let biggest = all[0];
+  for (const p of all) if (p.deaths > biggest.deaths) biggest = p;
   return `${leaders[biggest.from].name} hits ${leaders[biggest.target].name} for ${biggest.deaths}M.`;
 }
 
@@ -91,6 +101,7 @@ export default function RoundSummary({ state, dispatch }: ScreenProps) {
             <div key={id} className={styles.reactionRow}>
               <span className={styles.reactionFlag}>{leader.country.split(' ')[0]}</span>
               <span className={styles.reactionName}>{leader.name}</span>
+              <span className={styles.reactionStats}>👥 {leader.population}M · 🏭 {leader.factories}</span>
               <span className={styles.reactionDelta}>{delta >= 0 ? `+${delta}` : delta}M</span>
               {quote && <span className={styles.reactionQuote}>"{quote}"</span>}
             </div>

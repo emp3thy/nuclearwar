@@ -47,30 +47,6 @@ describe('integration — three-leader scripted game', () => {
     }
   });
 
-  it('reaches an outcome within 100 rounds for sample seeds', () => {
-    for (const seed of ['s1', 's2', 's3']) {
-      let s = initialState({
-        cast: ['chump', 'carnage', 'starmless'],
-        difficulty: 'normal',
-        seed,
-        // dominanceThreshold=1.5 ensures termination within ~80 rounds with the
-        // scripted-orders cycle; default threshold=2 requires ~150 rounds because
-        // shields accumulate and propaganda gain is slow.
-        config: { dominanceThreshold: 1.5 },
-      });
-      let rounds = 0;
-      while (!s.outcome && rounds < 100) {
-        for (const id of s.cast) {
-          const orders = scriptedOrders(s, id);
-          s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: id, orders });
-        }
-        s = reduce(s, { type: 'RESOLVE_ROUND' });
-        rounds++;
-      }
-      expect(s.outcome).not.toBeNull();
-    }
-  });
-
   it('runs a mixed-cast round end-to-end (player1 + 2 AI), and persists orderHistory', () => {
     let s = initialState({
       cast: ['player1', 'chump', 'carnage'],

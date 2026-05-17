@@ -5,14 +5,10 @@ import { scriptedOrders } from '../helpers/scripted-orders';
 import type { GameState, LeaderId } from '../../src/engine/types';
 
 function runGame(seed: string, cast: LeaderId[], maxRounds = 80): GameState {
-  // dominanceThreshold=1.5 — see Task 17 second test for context. The scripted-orders
-  // cycle creates an unbounded shield-stockpile + slow propaganda dynamic that
-  // makes 2× dominance require ~150 rounds; 1.5× terminates within ~80.
   let s = initialState({
     cast,
     difficulty: 'normal',
     seed,
-    config: { dominanceThreshold: 1.5 },
   });
   while (!s.outcome && s.round <= maxRounds) {
     for (const id of cast) {

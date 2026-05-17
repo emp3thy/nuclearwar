@@ -11,7 +11,6 @@ function runOneGame(seed: string, maxRounds = 100): { winner: LeaderId | null; t
     cast: FULL_CAST,
     difficulty: 'normal',
     seed,
-    config: { dominanceThreshold: 1.5 },
   });
   let rounds = 0;
   while (!s.outcome && rounds < maxRounds) {

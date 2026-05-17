@@ -21,7 +21,7 @@ export type DefenceType = 'shield' | 'aa';
 
 export type TargetType = 'people' | 'infra';
 
-export type WinType = 'survivor' | 'pyrrhic' | 'apocalypse' | 'dominance';
+export type WinType = 'survivor' | 'pyrrhic' | 'apocalypse';
 
 export type BonusRule = 'chump-defence-waste' | 'mileigh-aggression-bonus' | 'netanyahoo-launch-bonus';
 
@@ -99,13 +99,12 @@ export interface GameConfig {
   startPopOverride?: Partial<Record<LeaderId, number>>;
   /** Per-game name/country overrides for player slots. Keys should be 'player1'..'player5'; entries for AI leaders are merged but the Setup UI does not surface them. Setup screen populates this from user input. */
   playerProfiles?: Partial<Record<LeaderId, { name?: string; country?: string }>>;
-  dominanceThreshold: number;
   fastPlay: boolean;
 }
 
 export type WinOutcome =
   | { type: 'apocalypse' }
-  | { type: 'survivor' | 'pyrrhic' | 'dominance'; winner: LeaderId };
+  | { type: 'survivor' | 'pyrrhic'; winner: LeaderId };
 
 export type SoftWarning =
   | { kind: 'warhead-no-delivery'; orderIndex: number }

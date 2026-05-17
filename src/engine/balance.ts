@@ -122,8 +122,6 @@ export const AP_BANK_CAP = 4;
 export const PROPAGANDA_TRANSFER_M = 1;
 /** Favourability points decayed per round per relationship. Tunable. */
 export const WOO_FAVOURABILITY_DECAY = 1;
-export const DOMINANCE_THRESHOLD_DEFAULT = 2;
-
 /**
  * Per-leader scoring weights. First-pass values; balance-pass deferred to P4.
  * Each personality module reads from this table to compose its own scoring function.

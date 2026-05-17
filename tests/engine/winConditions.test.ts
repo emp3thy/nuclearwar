@@ -5,7 +5,7 @@ import { initialState } from '../../src/engine/state';
 describe('checkOutcome', () => {
   const base = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'x' });
 
-  it('returns null while multiple leaders are alive and no dominance', () => {
+  it('returns null while multiple leaders are alive', () => {
     expect(checkOutcome(base, { chump: 33, carnage: 25, starmless: 25 })).toBeNull();
   });
 
@@ -42,35 +42,4 @@ describe('checkOutcome', () => {
     expect(checkOutcome(s, { chump: 0, carnage: 0, starmless: 0 })).toEqual({ type: 'apocalypse' });
   });
 
-  it('returns dominance when one leader has 2× the next-highest population', () => {
-    const s = structuredClone(base);
-    s.leaders.chump.population = 30;
-    s.leaders.carnage.population = 14;
-    s.leaders.starmless.population = 10;
-    expect(checkOutcome(s, { chump: 33, carnage: 25, starmless: 25 })).toEqual({
-      type: 'dominance',
-      winner: 'chump',
-    });
-  });
-
-  it('does not return dominance when ratio is below threshold', () => {
-    const s = structuredClone(base);
-    s.leaders.chump.population = 30;
-    s.leaders.carnage.population = 16; // 30 / 16 = 1.87 < 2
-    s.leaders.starmless.population = 10;
-    expect(checkOutcome(s, { chump: 33, carnage: 25, starmless: 25 })).toBeNull();
-  });
-
-  it('survivor takes priority over dominance', () => {
-    const s = structuredClone(base);
-    s.leaders.carnage.population = 0;
-    s.leaders.carnage.alive = false;
-    s.leaders.starmless.population = 0;
-    s.leaders.starmless.alive = false;
-    s.leaders.chump.population = 100;
-    expect(checkOutcome(s, { chump: 33, carnage: 25, starmless: 25 })).toEqual({
-      type: 'survivor',
-      winner: 'chump',
-    });
-  });
 });

@@ -61,3 +61,50 @@ describe('Netanyahoo missile bias regression (P4c.1)', () => {
     expect(orders.some((o) => o.kind === 'build-bomber')).toBe(false);
   });
 });
+
+describe('Netanyahoo aggression (P4c.2)', () => {
+  it('actually fires when armed — the zero-fire bug is gone', () => {
+    const s = initialState({ cast: ['netanyahoo', 'carnage'], difficulty: 'normal', seed: 'na1' });
+    s.leaders.netanyahoo.stockpile.missiles = 3;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 3;
+    s.leaders.netanyahoo.ap = 10;
+    const orders = planNetanyahoo(s, 'netanyahoo');
+    expect(orders.filter((o) => o.kind === 'launch').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('fires a multi-launch salvo when richly armed', () => {
+    const s = initialState({ cast: ['netanyahoo', 'carnage'], difficulty: 'normal', seed: 'na2' });
+    s.leaders.netanyahoo.stockpile.missiles = 4;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 4;
+    s.leaders.netanyahoo.ap = 12;
+    const orders = planNetanyahoo(s, 'netanyahoo');
+    expect(orders.filter((o) => o.kind === 'launch').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('builds toward a yield ramp (medium/large warheads), not only small', () => {
+    const s = initialState({ cast: ['netanyahoo', 'carnage'], difficulty: 'normal', seed: 'na3' });
+    s.leaders.netanyahoo.stockpile.missiles = 6;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 4;
+    s.leaders.netanyahoo.ap = 12;
+    const orders = planNetanyahoo(s, 'netanyahoo');
+    expect(orders.some((o) => o.kind === 'build-warhead' && o.yield === 'medium')).toBe(true);
+  });
+
+  it('emits builds before launches (validateOrderSequence ordering)', () => {
+    const s = initialState({ cast: ['netanyahoo', 'carnage'], difficulty: 'normal', seed: 'na4' });
+    s.leaders.netanyahoo.stockpile.missiles = 2;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 2;
+    s.leaders.netanyahoo.ap = 12;
+    const orders = planNetanyahoo(s, 'netanyahoo');
+    const firstLaunch = orders.findIndex((o) => o.kind === 'launch');
+    let lastBuild = -1;
+    orders.forEach((o, i) => {
+      if (o.kind.startsWith('build-')) lastBuild = i;
+    });
+    // Both must be present for this scenario, and every build must precede
+    // the first launch — the reducer validates the order array in sequence.
+    expect(firstLaunch).toBeGreaterThan(-1);
+    expect(lastBuild).toBeGreaterThan(-1);
+    expect(lastBuild).toBeLessThan(firstLaunch);
+  });
+});

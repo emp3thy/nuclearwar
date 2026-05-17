@@ -1,6 +1,7 @@
 import type { GameState, LeaderId, Order, Yield } from '../types';
 import { apCostOf, validateOrder } from '../orders';
 import { warheadFieldFor } from '../launches';
+import { ACTION_COSTS } from '../balance';
 
 // --- buildToward ---------------------------------------------------------
 
@@ -77,4 +78,81 @@ export function buildToward(
     }
   }
   return { orders, apSpent: budget - remaining };
+}
+
+// --- launchSalvo ---------------------------------------------------------
+
+export interface LaunchSalvoOpts {
+  /** AP available for launches this round. */
+  budget: number;
+  /** Targets ranked best-first. Each must be alive and non-self. */
+  rankedTargets: LeaderId[];
+  /** Hard cap on launches emitted. Omit to fire until AP/ammo run out. */
+  maxLaunches?: number;
+  /** false (default) = focus-fire rankedTargets[0]; true = cycle targets. */
+  spread?: boolean;
+  /** Per-target targetType selector. Default: () => 'people'. */
+  targetTypeFor?: (target: LeaderId) => 'people' | 'infra';
+}
+
+export interface SalvoResult {
+  orders: Order[];
+  apSpent: number;
+}
+
+const YIELD_ORDER: Yield[] = ['large', 'medium', 'small'];
+
+/**
+ * Pair available delivery vehicles with warheads, largest-yield-first, and
+ * emit launch orders until budget, ammo, or maxLaunches runs out. A projected
+ * stockpile is tracked internally so the salvo never over-commits.
+ */
+export function launchSalvo(
+  state: GameState,
+  leaderId: LeaderId,
+  opts: LaunchSalvoOpts,
+): SalvoResult {
+  const me = state.leaders[leaderId];
+  const orders: Order[] = [];
+  if (!me || opts.rankedTargets.length === 0) return { orders, apSpent: 0 };
+
+  let remaining = opts.budget;
+  let bombers = me.stockpile.bombers;
+  let missiles = me.stockpile.missiles;
+  const warheads: Record<Yield, number> = {
+    large: me.stockpile.warheadsLarge,
+    medium: me.stockpile.warheadsMedium,
+    small: me.stockpile.warheadsSmall,
+  };
+  const targetTypeFor = opts.targetTypeFor ?? ((): 'people' => 'people');
+
+  let launched = 0;
+  while (true) {
+    if (opts.maxLaunches !== undefined && launched >= opts.maxLaunches) break;
+    if (remaining < ACTION_COSTS.launch) break;
+    if (bombers + missiles < 1) break;
+    const y = YIELD_ORDER.find((yy) => warheads[yy] > 0);
+    if (y === undefined) break;
+
+    const delivery: 'bomber' | 'missile' = bombers >= 1 ? 'bomber' : 'missile';
+    const target = opts.spread
+      ? opts.rankedTargets[launched % opts.rankedTargets.length]
+      : opts.rankedTargets[0];
+    const launch: Order = {
+      kind: 'launch',
+      target,
+      delivery,
+      warhead: y,
+      targetType: targetTypeFor(target),
+    };
+    if (!validateOrder(state, leaderId, launch).ok) break;
+
+    orders.push(launch);
+    remaining -= ACTION_COSTS.launch;
+    warheads[y] -= 1;
+    if (delivery === 'bomber') bombers -= 1;
+    else missiles -= 1;
+    launched += 1;
+  }
+  return { orders, apSpent: opts.budget - remaining };
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildToward, type BuildPlanEntry } from '../../../src/engine/ai/aggression';
+import { buildToward, launchSalvo, type BuildPlanEntry } from '../../../src/engine/ai/aggression';
 import { initialState } from '../../../src/engine/state';
 
 describe('buildToward', () => {
@@ -78,5 +78,98 @@ describe('buildToward', () => {
     const r = buildToward(s, 'netanyahoo', plan, 10);
     expect(r.orders).toHaveLength(0);
     expect(r.apSpent).toBe(0);
+  });
+});
+
+describe('launchSalvo', () => {
+  it('fires until AP and ammo run out when no cap is given', () => {
+    const s = initialState({ cast: ['netanyahoo', 'chump'], difficulty: 'normal', seed: 'l1' });
+    s.leaders.netanyahoo.stockpile.missiles = 3;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 3;
+    const r = launchSalvo(s, 'netanyahoo', { budget: 100, rankedTargets: ['chump'] });
+    expect(r.orders).toHaveLength(3); // 3 missile+warhead pairs
+    expect(r.apSpent).toBe(6); // launch costs 2
+  });
+
+  it('honours maxLaunches', () => {
+    const s = initialState({ cast: ['netanyahoo', 'chump'], difficulty: 'normal', seed: 'l2' });
+    s.leaders.netanyahoo.stockpile.missiles = 5;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 5;
+    const r = launchSalvo(s, 'netanyahoo', { budget: 100, rankedTargets: ['chump'], maxLaunches: 2 });
+    expect(r.orders).toHaveLength(2);
+  });
+
+  it('stops when budget cannot cover another launch', () => {
+    const s = initialState({ cast: ['netanyahoo', 'chump'], difficulty: 'normal', seed: 'l3' });
+    s.leaders.netanyahoo.stockpile.missiles = 5;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 5;
+    const r = launchSalvo(s, 'netanyahoo', { budget: 5, rankedTargets: ['chump'] });
+    expect(r.orders).toHaveLength(2); // 5 AP / 2 per launch = 2
+  });
+
+  it('pairs largest-yield warheads first', () => {
+    const s = initialState({ cast: ['netanyahoo', 'chump'], difficulty: 'normal', seed: 'l4' });
+    s.leaders.netanyahoo.stockpile.missiles = 3;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 1;
+    s.leaders.netanyahoo.stockpile.warheadsMedium = 1;
+    s.leaders.netanyahoo.stockpile.warheadsLarge = 1;
+    const r = launchSalvo(s, 'netanyahoo', { budget: 100, rankedTargets: ['chump'] });
+    const yields = r.orders.map((o) => (o.kind === 'launch' ? o.warhead : null));
+    expect(yields).toEqual(['large', 'medium', 'small']);
+  });
+
+  it('prefers bomber delivery when a bomber is in stock', () => {
+    const s = initialState({ cast: ['carnage', 'chump'], difficulty: 'normal', seed: 'l5' });
+    s.leaders.carnage.stockpile.bombers = 1;
+    s.leaders.carnage.stockpile.missiles = 1;
+    s.leaders.carnage.stockpile.warheadsSmall = 2;
+    const r = launchSalvo(s, 'carnage', { budget: 100, rankedTargets: ['chump'] });
+    expect(r.orders).toHaveLength(2);
+    if (r.orders[0].kind === 'launch') expect(r.orders[0].delivery).toBe('bomber');
+    if (r.orders[1].kind === 'launch') expect(r.orders[1].delivery).toBe('missile');
+  });
+
+  it('focus-fires rankedTargets[0] by default', () => {
+    const s = initialState({ cast: ['netanyahoo', 'chump', 'carnage'], difficulty: 'normal', seed: 'l6' });
+    s.leaders.netanyahoo.stockpile.missiles = 3;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 3;
+    const r = launchSalvo(s, 'netanyahoo', { budget: 100, rankedTargets: ['carnage', 'chump'] });
+    expect(r.orders.every((o) => o.kind === 'launch' && o.target === 'carnage')).toBe(true);
+  });
+
+  it('cycles targets when spread is true', () => {
+    const s = initialState({ cast: ['mileigh-hem', 'chump', 'carnage'], difficulty: 'normal', seed: 'l7' });
+    s.leaders['mileigh-hem'].stockpile.missiles = 4;
+    s.leaders['mileigh-hem'].stockpile.warheadsSmall = 4;
+    const r = launchSalvo(s, 'mileigh-hem', { budget: 100, rankedTargets: ['chump', 'carnage'], spread: true });
+    const targets = r.orders.map((o) => (o.kind === 'launch' ? o.target : null));
+    expect(targets).toEqual(['chump', 'carnage', 'chump', 'carnage']);
+  });
+
+  it('never emits more launches than the projected stockpile can arm', () => {
+    const s = initialState({ cast: ['netanyahoo', 'chump'], difficulty: 'normal', seed: 'l8' });
+    s.leaders.netanyahoo.stockpile.missiles = 1;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 5;
+    const r = launchSalvo(s, 'netanyahoo', { budget: 100, rankedTargets: ['chump'] });
+    expect(r.orders).toHaveLength(1); // only 1 delivery vehicle
+  });
+
+  it('returns nothing for empty rankedTargets', () => {
+    const s = initialState({ cast: ['netanyahoo', 'chump'], difficulty: 'normal', seed: 'l9' });
+    s.leaders.netanyahoo.stockpile.missiles = 3;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 3;
+    const r = launchSalvo(s, 'netanyahoo', { budget: 100, rankedTargets: [] });
+    expect(r.orders).toHaveLength(0);
+    expect(r.apSpent).toBe(0);
+  });
+
+  it('respects the targetTypeFor selector', () => {
+    const s = initialState({ cast: ['chump', 'carnage'], difficulty: 'normal', seed: 'l10' });
+    s.leaders.chump.stockpile.missiles = 1;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    const r = launchSalvo(s, 'chump', {
+      budget: 100, rankedTargets: ['carnage'], targetTypeFor: () => 'infra',
+    });
+    expect(r.orders[0].kind === 'launch' && r.orders[0].targetType).toBe('infra');
   });
 });

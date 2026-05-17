@@ -305,6 +305,41 @@ describe('resolveRound — P4a flavor events', () => {
     expect(fired).toBe(true);
   });
 
+  it('emits at most one DisparageCameo per round (P4c.3 cap)', () => {
+    // 4 missiles + shields=0 + aa=0 → 4 guaranteed impacts → up to 4 cameo
+    // rolls per round. Across 40 seeds the pre-cap code emits 2+ on some seed;
+    // the cap must hold every round regardless.
+    const launchOrder = {
+      kind: 'launch' as const,
+      target: 'carnage' as const,
+      delivery: 'missile' as const,
+      warhead: 'small' as const,
+      targetType: 'people' as const,
+    };
+    for (let n = 0; n < 40; n++) {
+      let s = initialState({
+        cast: ['chump', 'carnage'],
+        difficulty: 'normal',
+        seed: `cameo-cap-${n}`,
+      });
+      s.leaders.chump.stockpile.missiles = 4;
+      s.leaders.chump.stockpile.warheadsSmall = 4;
+      s.leaders.chump.ap = 20;
+      s.leaders.carnage.stockpile.shields = 0;
+      s.leaders.carnage.stockpile.aa = 0;
+      s.leaders.carnage.population = 1000;
+      s = reduce(s, {
+        type: 'SUBMIT_ORDERS',
+        leaderId: 'chump',
+        orders: [launchOrder, launchOrder, launchOrder, launchOrder],
+      });
+      s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: 'carnage', orders: [] });
+      const r = resolveRound(s);
+      const cameos = r.events.filter((e) => e.kind === 'DisparageCameo');
+      expect(cameos.length).toBeLessThanOrEqual(1);
+    }
+  });
+
   it('emits DisparageColumn for at least some seeds; sets lastColumnNamedLeader', () => {
     let fired = false;
     for (const seedStr of ['seed-a', 'seed-b', 'seed-c', 'seed-d', 'seed-e', 'seed-f']) {

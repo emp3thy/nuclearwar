@@ -122,11 +122,16 @@ export function resolveRound(state: GameState): ResolveResult {
 
   // P4a: Disparage cameo. For each ImpactPeople/ImpactInfrastructure event,
   // probabilistically inject a DisparageCameo event immediately after it.
+  // P4c.3: cap at one cameo per round — once one fires, stop rolling.
   {
     const expanded: ResolutionEvent[] = [];
+    let cameoEmitted = false;
     for (const e of events) {
       expanded.push(e);
-      if (e.kind === 'ImpactPeople' || e.kind === 'ImpactInfrastructure') {
+      if (
+        !cameoEmitted &&
+        (e.kind === 'ImpactPeople' || e.kind === 'ImpactInfrastructure')
+      ) {
         const roll = shouldRollCameo(s.rngState);
         s.rngState = roll.rngState;
         if (roll.fire) {
@@ -137,6 +142,7 @@ export function resolveRound(state: GameState): ResolveResult {
             afterImpact: { from: e.from, to: e.target },
             quote: linePick.line,
           });
+          cameoEmitted = true;
         }
       }
     }

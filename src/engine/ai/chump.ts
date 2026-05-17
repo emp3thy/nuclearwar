@@ -15,12 +15,14 @@ const PROPAGANDA_COST = 1;
 const DEPLOY_COST = 4;
 const CHUMP_MAX_LAUNCHES = 2;
 
-// The missile entry is mandatory — a plan with warheads but no delivery
-// vehicle would recreate the zero-fire bug. Defence stays first (coward).
+// Warheads come before the second shield refill so the shield-deploy cycle
+// cannot starve warhead production. Missile is first to ensure a delivery
+// vehicle is always available (a plan with warheads but no delivery would
+// recreate the zero-fire bug).
 const CHUMP_BUILD_PLAN: BuildPlanEntry[] = [
-  { build: { item: 'defence', type: 'shield' }, target: 3 },
   { build: { item: 'missile' }, target: 2 },
   { build: { item: 'warhead', yield: 'small' }, target: 4 },
+  { build: { item: 'defence', type: 'shield' }, target: 3 },
 ];
 
 export function planChump(state: GameState, leaderId: LeaderId): Order[] {

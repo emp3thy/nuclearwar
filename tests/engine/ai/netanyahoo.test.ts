@@ -3,14 +3,28 @@ import { planNetanyahoo } from '../../../src/engine/ai/netanyahoo';
 import { initialState } from '../../../src/engine/state';
 
 describe('Netanyahoo (Warmonger)', () => {
-  it('does not launch at Chump until Chump has attacked first', () => {
-    const s = initialState({ cast: ['netanyahoo', 'chump'], difficulty: 'normal', seed: 'n1' });
+  it('does not launch at Chump when other targets are available and Chump is unprovoked', () => {
+    // Chump-exception: avoid Chump when other targets exist and Chump hasn't attacked.
+    const s = initialState({ cast: ['netanyahoo', 'chump', 'carnage'], difficulty: 'normal', seed: 'n1' });
     s.leaders.netanyahoo.stockpile.missiles = 1;
     s.leaders.netanyahoo.stockpile.warheadsSmall = 1;
-    // No grudge / aggression from chump → Chump-exception fires.
+    // No grudge / aggression from chump → Chump-exception fires; carnage is the preferred target.
     const orders = planNetanyahoo(s, 'netanyahoo');
     const launch = orders.find((o) => o.kind === 'launch');
-    expect(launch).toBeUndefined();
+    expect(launch).toBeDefined(); // a launch must actually happen — not a vacuous pass
+    expect(launch?.target).toBe('carnage'); // the only non-Chump target → Chump-exception held
+  });
+
+  it('launches at Chump as a last resort when Chump is the only remaining opponent', () => {
+    // Deadlock prevention: when all other opponents are eliminated, Netanyahoo
+    // must be able to finish the game even if Chump never fired first.
+    const s = initialState({ cast: ['netanyahoo', 'chump'], difficulty: 'normal', seed: 'n1-lastresort' });
+    s.leaders.netanyahoo.stockpile.missiles = 1;
+    s.leaders.netanyahoo.stockpile.warheadsSmall = 1;
+    // No grudge — but Chump is the only target, so the fallback fires.
+    const orders = planNetanyahoo(s, 'netanyahoo');
+    const launch = orders.find((o) => o.kind === 'launch');
+    expect(launch?.target).toBe('chump');
   });
 
   it('launches at Chump once Chump has attacked', () => {

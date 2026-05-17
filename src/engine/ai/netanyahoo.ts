@@ -29,8 +29,11 @@ export function planNetanyahoo(state: GameState, leaderId: LeaderId): Order[] {
   const chumpAlive = state.cast.includes('chump') && state.leaders['chump']?.alive === true;
   const chumpProvoked = wasAttackedBy(state, leaderId, 'chump');
 
-  // Launch candidates: exclude Chump unless he has attacked first.
-  const launchCandidates = others.filter((t) => t !== 'chump' || chumpProvoked);
+  // Launch candidates: exclude Chump unless he has attacked first — OR unless
+  // Chump is the only remaining opponent (deadlock prevention: Netanyahoo must
+  // be able to finish the game even if Chump never fires first).
+  const preferredCandidates = others.filter((t) => t !== 'chump' || chumpProvoked);
+  const launchCandidates = preferredCandidates.length > 0 ? preferredCandidates : others;
   // Rank by threat, highest first.
   const rankedTargets = [...launchCandidates].sort(
     (a, b) => threatScore(state, leaderId, b) - threatScore(state, leaderId, a),

@@ -187,3 +187,76 @@ describe('recentHumanOrders', () => {
     expect(recentHumanOrders(history, 'player1')).toEqual([launch]);
   });
 });
+
+describe('bestTargetByLookahead — sliding-window human projection (P4c.3)', () => {
+  it('projects a human who passed last round by their most recent acted round', () => {
+    // Scenario: chump leads by gap G=8 (pop 30) over player1 (pop 22).
+    // small-dmg=2, large-dmg=15; constraint: small-dmg(2) < G(8) < large-dmg(15).
+    //
+    // With no human projection (broken), carnage's small hit on chump leaves
+    // chump at 28 vs player1 at 22 → max_other=28 when attacking chump,
+    // max_other=30 when attacking player1 → carnage picks chump.
+    //
+    // With human projected to launch large at chump, chump falls to 15 before
+    // carnage acts. Attacking chump: max_other=22 (player1). Attacking player1:
+    // max_other=max(15, 20)=20. Lower max_other beats chump → carnage flips to
+    // player1. This is the flip that proves the human projection is load-bearing.
+    function makeBase() {
+      const s = initialState({ cast: ['carnage', 'player1', 'chump'], difficulty: 'hard', seed: 'lh-window' });
+      // chump leads by G=8; large-dmg(15) > G > small-dmg(2)
+      s.leaders.chump.population = 30;
+      s.leaders.player1.population = 22;
+      // No deployed defences → no interception
+      s.leaders.chump.deployedShields = 0;
+      s.leaders.chump.deployedAA = 0;
+      s.leaders.player1.deployedShields = 0;
+      s.leaders.player1.deployedAA = 0;
+      s.leaders.carnage.deployedShields = 0;
+      s.leaders.carnage.deployedAA = 0;
+      // Disarm chump so it cannot launch and confound the sim
+      s.leaders.chump.stockpile.missiles = 0;
+      s.leaders.chump.stockpile.bombers = 0;
+      s.leaders.chump.stockpile.warheadsSmall = 0;
+      s.leaders.chump.stockpile.warheadsMedium = 0;
+      s.leaders.chump.stockpile.warheadsLarge = 0;
+      // player1 must hold the stockpile for the projected large launch to survive re-validation
+      s.leaders.player1.stockpile.missiles = 1;
+      s.leaders.player1.stockpile.warheadsLarge = 1;
+      // carnage fires the spec (small) launch
+      s.leaders.carnage.stockpile.missiles = 1;
+      s.leaders.carnage.stockpile.warheadsSmall = 1;
+      return s;
+    }
+
+    const humanLaunch: Order = {
+      kind: 'launch', target: 'chump', delivery: 'missile', warhead: 'large', targetType: 'people',
+    };
+    const spec = { delivery: 'missile' as const, warhead: 'small' as const, targetType: 'people' as const };
+    const candidates: LeaderId[] = ['player1', 'chump'];
+
+    // History A: human launched last round.
+    const launchedLast = makeBase();
+    launchedLast.orderHistory = [{ player1: [humanLaunch] }];
+
+    // History B: human launched, then passed last round (Approach B must walk back).
+    const passedLast = makeBase();
+    passedLast.orderHistory = [{ player1: [humanLaunch] }, { player1: [] }];
+
+    // History C: human never acted — what a BROKEN recentHumanOrders would
+    // effectively produce for passedLast. Used only to prove non-vacuity.
+    const noHistory = makeBase();
+    noHistory.orderHistory = [];
+
+    const tLaunchedLast = bestTargetByLookahead(launchedLast, 'carnage', [], candidates, spec, dispatch);
+    const tPassedLast   = bestTargetByLookahead(passedLast,   'carnage', [], candidates, spec, dispatch);
+    const tNoHistory    = bestTargetByLookahead(noHistory,    'carnage', [], candidates, spec, dispatch);
+
+    // Non-vacuity guard: the human's projected launch MUST change the target —
+    // otherwise this test cannot detect a broken projection.
+    expect(tLaunchedLast).not.toBe(tNoHistory);
+    // Approach B walks back past the empty last round to the same launch round,
+    // so passedLast projects identically to launchedLast.
+    expect(tPassedLast).toBe(tLaunchedLast);
+    expect(candidates).toContain(tPassedLast);
+  });
+});

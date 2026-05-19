@@ -126,12 +126,12 @@ export function bestTargetByLookahead(
       const opp = state.leaders[id];
       if (!opp || !opp.alive) continue;
       if (isHuman(id)) {
-        // Project the human as repeating last round's orders. Falls back to []
-        // for the first round (no history yet) or if they passed last round.
-        // simulateOneRound re-validates and gracefully drops invalid orders
-        // (e.g., a launch order from last round when their stockpile is now empty).
-        const lastRound = state.orderHistory[state.orderHistory.length - 1];
-        ordersByLeader[id] = lastRound?.[id] ?? [];
+        // Project the human by their most recent non-empty round within a
+        // sliding window (Approach B — see recentHumanOrders). A recent pass no
+        // longer reads as passivity. simulateOneRound re-validates and drops
+        // orders the human can no longer afford (e.g. a launch from an earlier
+        // round when their stockpile is now empty).
+        ordersByLeader[id] = recentHumanOrders(state.orderHistory, id);
         continue;
       }
       ordersByLeader[id] = opponentPlanner(state, id);

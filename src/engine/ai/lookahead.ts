@@ -62,6 +62,30 @@ export function scoreState(state: GameState, viewer: LeaderId): number {
   return me.population - maxOther;
 }
 
+/** How many recent rounds the human projection looks back over. */
+const LOOKAHEAD_HISTORY_WINDOW = 5;
+
+/**
+ * Project a human opponent for Hard-mode lookahead: the orders from the most
+ * recent round, within the last LOOKAHEAD_HISTORY_WINDOW rounds, that has a
+ * non-empty order list for `leaderId`.
+ *
+ * A recent pass (`[]`) no longer reads as passivity — the projection walks
+ * back to the human's last real move. A non-empty round older than the window
+ * is treated as stale and ignored (the human is projected as passive `[]`).
+ */
+export function recentHumanOrders(
+  orderHistory: Partial<Record<LeaderId, Order[]>>[],
+  leaderId: LeaderId,
+): Order[] {
+  const stop = Math.max(0, orderHistory.length - LOOKAHEAD_HISTORY_WINDOW);
+  for (let r = orderHistory.length - 1; r >= stop; r--) {
+    const orders = orderHistory[r]?.[leaderId];
+    if (orders && orders.length > 0) return orders;
+  }
+  return [];
+}
+
 /**
  * Pick the candidate launch target whose projected post-round state scores
  * highest from `viewer`'s perspective.

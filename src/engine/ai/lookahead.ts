@@ -62,6 +62,30 @@ export function scoreState(state: GameState, viewer: LeaderId): number {
   return me.population - maxOther;
 }
 
+/** How many recent rounds the human projection looks back over. */
+const LOOKAHEAD_HISTORY_WINDOW = 5;
+
+/**
+ * Project a human opponent for Hard-mode lookahead: the orders from the most
+ * recent round, within the last LOOKAHEAD_HISTORY_WINDOW rounds, that has a
+ * non-empty order list for `leaderId`.
+ *
+ * A recent pass (`[]`) no longer reads as passivity — the projection walks
+ * back to the human's last real move. A non-empty round older than the window
+ * is treated as stale and ignored (the human is projected as passive `[]`).
+ */
+export function recentHumanOrders(
+  orderHistory: Partial<Record<LeaderId, Order[]>>[],
+  leaderId: LeaderId,
+): Order[] {
+  const stop = Math.max(0, orderHistory.length - LOOKAHEAD_HISTORY_WINDOW);
+  for (let r = orderHistory.length - 1; r >= stop; r--) {
+    const orders = orderHistory[r]?.[leaderId];
+    if (orders && orders.length > 0) return orders;
+  }
+  return [];
+}
+
 /**
  * Pick the candidate launch target whose projected post-round state scores
  * highest from `viewer`'s perspective.
@@ -102,12 +126,12 @@ export function bestTargetByLookahead(
       const opp = state.leaders[id];
       if (!opp || !opp.alive) continue;
       if (isHuman(id)) {
-        // Project the human as repeating last round's orders. Falls back to []
-        // for the first round (no history yet) or if they passed last round.
-        // simulateOneRound re-validates and gracefully drops invalid orders
-        // (e.g., a launch order from last round when their stockpile is now empty).
-        const lastRound = state.orderHistory[state.orderHistory.length - 1];
-        ordersByLeader[id] = lastRound?.[id] ?? [];
+        // Project the human by their most recent non-empty round within a
+        // sliding window (Approach B — see recentHumanOrders). A recent pass no
+        // longer reads as passivity. simulateOneRound re-validates and drops
+        // orders the human can no longer afford (e.g. a launch from an earlier
+        // round when their stockpile is now empty).
+        ordersByLeader[id] = recentHumanOrders(state.orderHistory, id);
         continue;
       }
       ordersByLeader[id] = opponentPlanner(state, id);

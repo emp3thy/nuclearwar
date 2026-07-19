@@ -6,23 +6,32 @@ import { buildToward, launchSalvo, type BuildPlanEntry } from './aggression';
 /**
  * Burn'em — the Handbrake Turn (spec 2026-07-19 §2).
  *
- * Placid by default: woos, builds factories and defence, banks AP, never
- * launches first. The first landed hit on him (persistent grudge > 0) flips
- * him permanently into full aggression against the provoker. Patience
- * fallback (round >= 6 unprovoked, or 2 survivors) prevents the
+ * Placid by default: woos, holds at his starting factory count, banks AP,
+ * never launches first. The first landed hit on him (persistent grudge > 0)
+ * flips him permanently into full aggression against the provoker. Patience
+ * fallback (round >= 3 unprovoked, or 2 survivors) prevents the
  * never-attack-first 1v1 stall (cf. Netanyahoo endgame fix).
+ *
+ * Duel-balance note: an unthrottled version of this planner (max launches 4,
+ * placid factory target 8, patience round 6) let Burn'em dominate the
+ * 80-seed AI-duel sweep (46/80 wins) — he sat out early fights, compounded
+ * AP via a growing factory count (see resolution.ts's `factoryAp` term) while
+ * placid, then pounced on already-weakened survivors. A shorter patience
+ * fallback (attack sooner, before rivals have worn each other down) turned
+ * out to be the dominant lever; the lower launch cap and flat factory target
+ * trim the follow-through so he does not simply re-dominate once aggressive.
  */
 const DEPLOY_COST = 4;
-const BURNEM_PATIENCE_ROUND = 6;
-const BURNEM_MAX_LAUNCHES = 4;
+const BURNEM_PATIENCE_ROUND = 3;
+const BURNEM_MAX_LAUNCHES = 2;
 
 const PLACID_BUILD_PLAN: BuildPlanEntry[] = [
-  { build: { item: 'factory' }, target: 8 },
+  { build: { item: 'factory' }, target: 6 },
   { build: { item: 'defence', type: 'shield' }, target: 2 },
 ];
 
 // Missile before warheads: delivery-first avoids the armed-but-undeliverable
-// zero-fire failure. Producers precede consumers in the emitted batch.
+// zero-fire failure.
 const PROVOKED_BUILD_PLAN: BuildPlanEntry[] = [
   { build: { item: 'missile' }, target: 3 },
   { build: { item: 'warhead', yield: 'medium' }, target: 2 },
@@ -63,6 +72,7 @@ export function planBurnem(state: GameState, leaderId: LeaderId): Order[] {
       maxLaunches: BURNEM_MAX_LAUNCHES,
     });
     budget -= build.apSpent + salvo.apSpent;
+    // Producers precede consumers in the emitted batch.
     orders.push(...build.orders, ...salvo.orders);
   } else {
     // --- Placid: friendliest man in the apocalypse. ---

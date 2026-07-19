@@ -26,7 +26,7 @@ Two-state planner, replacing Cautious+Scapegoat:
 
 **Provoked state (permanent once entered).** Full aggression against the primary provoker: build toward warheads + delivery every round, launch maximum affordable salvos at the provoker; if the provoker is eliminated, redirect to the current top grudge target. State derives from existing resolution-time grudge/aggression tracking — no new persistent state shape unless the existing one cannot express "was ever attacked", in which case extend the AI state minimally.
 
-**Patience fallback (deadlock guard).** Treated as provoked (against the strongest surviving rival by threat score) when either: (a) round ≥ 6 and he has never been attacked, or (b) only 2 leaders survive. Prevents the known never-attack-first 1v1 stall (cf. the Netanyahoo endgame fix).
+**Patience fallback (deadlock guard).** Treated as provoked (against the strongest surviving rival by threat score) when either: (a) round ≥ `BURNEM_PATIENCE_ROUND` and he has never been attacked, or (b) only 2 leaders survive. Prevents the known never-attack-first 1v1 stall (cf. the Netanyahoo endgame fix). The round threshold is a balance-tuned constant, currently 3 (was 6 in the original draft; retuned per §5's balance clause after an 80-seed duel sweep showed 57.5% dominance).
 
 **Difficulty interaction.** Same randomization/lookahead wrappers as the rest of the cast — `planAi` orchestration unchanged.
 

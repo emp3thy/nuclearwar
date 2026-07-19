@@ -12,7 +12,7 @@ In-game characters are parody names. Real-world inspiration listed for context o
 | **Chump** | 🇺🇸 US | Donald Trump |
 | **Netanyahoo** | 🇮🇱 Israel | Benjamin Netanyahu |
 | **Khameneverhere** | 🇮🇷 Iran | Mojtaba Khamenei (the never-seen successor) |
-| **Starmless** | 🇬🇧 UK | Keir Starmer |
+| **Burn'em** | 🇬🇧 UK | Andy Burnham |
 | **Carnage** | 🇨🇦 Canada | Mark Carney |
 | **Mileigh-hem** | 🇦🇷 Argentina | Javier Milei |
 
@@ -214,59 +214,60 @@ Grudge profile. Tracks attackers, retaliates randomly against anyone on grudge l
 
 ---
 
-## Starmless 🇬🇧
+## Burn'em 🇬🇧
 
-Cautious technocrat + scapegoat. Defensive, often invests in factories. On retaliation, 35% chance to scapegoat. "Creepy-uncle-from-1978" delivery on jokes.
+Handbrake Turn — placid until provoked (patience round 3 / 2-survivor fallback), then permanent full aggression. King in t' North caricature. Signature tic: the large majority of lines end in a tag question ("…isn't it?" / "…don't we?" / "…can't it?"). Hard exclusions: no Hillsborough references, no religious markers, no "What Manchester does today…" (the refuted Disraeli line).
 
 ### Pre-round mood
-- "Long-term decisions. Sound foundations. Working people." [style + real cadence]
-- "So, let me be very clear…" [real, signature opener]
-- "I'm going to be a show-up prime minister, not a showman." [real]
-- *(adjusts tie awkwardly)* [system narration]
+- "We need to bring people with us, don't we?" [style]
+- "The North is back. Big time." [style]
+- "It's not arrogance, it's just confidence." [real]
+- "The buses run on time now. That's how civilisations survive, isn't it?" [style — Bee Network / £2 fares]
+- "On bended knee, begging for scraps. Well. Not anymore, are we?" [style]
 
-### Launch (proportional, rarely)
-- "So, let me be very clear: this is a measured, proportionate response." [style]
-- "My dad was a toolmaker. He used tools. We are now using tools." [real-pattern dad joke remix]
+### Pre-round mood (snap-back — Disparage named him)
+- "I've heard what he said. We rise above it up here, don't we? Anyway, he's barred from the tram." [style]
 
-### Launch (scapegoat — 35% on retaliation)
-- "So, let me be very clear: intelligence suggests the real threat is **{scapegoat}**." [style — `{scapegoat}` substitutes the chosen target]
-- "Look, the simple fact is **{scapegoat}** has been emboldened by recent events." [style]
-- "We must be honest with the British people: **{scapegoat}** is the actual aggressor here." [style]
+### Launch (handbrake turn — provoked)
+- "Let me be clear — they carried on, so I'm using nuclear force. Anyway. How's the family?" [style — blokey opener, grave pivot, no transition, warm close]
+- "I've been very patient, haven't I? Well. Patience is a renewable resource. This isn't." [style]
+- "They didn't leave us a choice down in Whitehall— sorry, force of habit. THEY didn't leave us a choice." [style]
+- "This one's for every town that ever lost its bus route. It's fair, that, isn't it?" [style]
 
 ### Hit / damaged
-- "So, let me be very clear: this attack will not stand. We will respond proportionately. Probably to {scapegoat}." [style]
-- "Look, the simple fact is, we've been hit. That's just a fact." [style]
+- "That's a kindness taken for weakness, that. Big mistake. Massive." [style]
+- "We've been hit. The handbrake's off now, isn't it?" [style]
 
 ### Wooing send
-- "We've been to IKEA. The shadow cabinet is now flat-pack. Happy to assist with assembly." [real-pattern, IKEA joke]
-- "My dad was a toolmaker. I bring you, in friendship, a metaphorical tool." [style]
+- "Come up north. We'll do the match, couple of pints, £2 bus home. That's diplomacy, that." [style]
+- "I'm offering you a franchise partnership. Not the buses. The buses are ours." [style]
 
 ### Being wooed
-- "I receive your wooing. Look, the simple fact is, friendship matters." [style]
+- "That's very warm, that. We take friendship seriously up here, don't we?" [style]
 
-### Propaganda send (against attackers only)
-- "We've prepared a cross-government workstream on perception. Working people deserve clarity." [style]
+### Propaganda send
+- "We've sent over some leaflets. Just facts about our transport network. Devastating, honest facts." [style]
 
 ### Propaganda receive
-- "So, let me be very clear: their propaganda is incorrect, and frankly, not very British." [style]
+- "They're calling me a plastic Northerner. From a bunker. In London. You couldn't write it, could you?" [style — Woolly Backer / more-Scouse-than-Manc authenticity gag]
 
-### Build factory (Starmer's signature move)
-- "Long-term decisions. Sound foundations. Investing in our future." [style + real]
-- "We've broken ground on a new facility. My dad would be proud. He was a toolmaker." [style]
-- "This is the change Britain voted for. Slowly, methodically, with proper costings." [style]
+### Build factory
+- "New factory. Good growth in every postcode, hope in every heart. And a bus stop right outside." [style]
+- "They didn't build this for us down in Whitehall. We built it ourselves, didn't we?" [style]
+- "To get on in life, I had to head South. Nobody should have to. So we're building here." [real-pattern]
 
 ### Build defence
-- "We have signed a defence procurement agreement. The relevant minister will brief in due course." [style]
+- "We're putting a shield up. It's not paranoia, it's just confidence, isn't it?" [style]
 
 ### Reaction (post-round)
-- "Long-term decisions. Sound foundations. Working people." [style]
-- "So, let me be very clear: intelligence suggests the real threat was **{scapegoat}** all along." [style — when scapegoat applied]
+- "I'm watching all this very calmly. Very calmly indeed. Aren't I?" [style]
+- "Everything's connected to the buses if you look closely enough, isn't it?" [style]
 
 ### Death
-- "Look, the simple fact is, this isn't ideal. I'd like to thank — *(static)*" [style]
+- "Tell them… the North remembers… and tell them the 135 to Bury still runs on ti—" [style]
 
 ### Final Retaliation
-- "So, let me be very clear: this is the final response. Probably to {scapegoat}." [style]
+- "Right. Last orders, everyone. Last orders. It didn't have to be like this, did it?" [style]
 
 ---
 
@@ -435,7 +436,7 @@ When Nigel Disparage's column criticises a specific leader by name, that leader'
 - **Mileigh-hem** (snap-back): "AFUERA, salesman!"
 - **Carnage** (snap-back): "Elbows up. Pint down."
 - **Netanyahoo** (snap-back): "Disparage's red line is the bar tab."
-- **Starmless** (snap-back): "So, let me be very clear: I'm not engaging with that."
+- **Burn'em** (snap-back): "I've heard what he said. We rise above it up here, don't we? Anyway, he's barred from the tram."
 - **Khameneverhere** (snap-back): *(no audio of Khameneverhere is available — his cardboard cutout faces away from the GB News studio.)*
 
 ---

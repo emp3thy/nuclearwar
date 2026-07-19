@@ -2,6 +2,8 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { Leader, Order, TargetType, Yield } from '../../engine/types';
 import type { ProjectedInventory } from '../util/projection';
 import { ACTION_COSTS } from '../../engine/balance';
+import { Panel } from './comic';
+import Portrait from './Portrait';
 import LaunchCell from './LaunchCell';
 import styles from './TargetRow.module.css';
 import { findLastIndexMatching } from '../util/arrays';
@@ -15,6 +17,8 @@ interface Props {
   setOrders: Dispatch<SetStateAction<Order[]>>;
   apRemaining: number;
   projection: ProjectedInventory;
+  /** Panel tilt — Planning alternates -1/+1 by card index. */
+  tilt?: -1 | 1;
 }
 
 const YIELDS: Array<{ label: 'small' | 'med' | 'big'; yield: Yield }> = [
@@ -25,9 +29,8 @@ const YIELDS: Array<{ label: 'small' | 'med' | 'big'; yield: Yield }> = [
 
 export default function TargetRow({
   target, mood, targetType, onTargetTypeChange, orders, setOrders, apRemaining, projection,
+  tilt = -1,
 }: Props) {
-  const flag = target.country.split(' ')[0];
-
   const wooed = orders.some((o) => o.kind === 'woo' && o.target === target.id);
   const propd  = orders.some((o) => o.kind === 'propaganda' && o.target === target.id);
 
@@ -84,70 +87,85 @@ export default function TargetRow({
   };
 
   return (
-    <div className={styles.row} aria-label={`Target row for ${target.name}`}>
-      <div className={styles.head}>
-        <span className={styles.flag}>{flag}</span>
-        <span className={styles.name}>{target.name}</span>
-        <span className={styles.tt}>
-          <span
-            className={`${styles.ttSeg} ${targetType === 'people' ? styles.ttOn : ''}`}
-            onClick={() => onTargetTypeChange('people')}
-          >people</span>
-          <span
-            className={`${styles.ttSeg} ${targetType === 'infra' ? styles.ttOn : ''}`}
-            onClick={() => onTargetTypeChange('infra')}
-          >infra</span>
-        </span>
-      </div>
+    <div aria-label={`Target row for ${target.name}`}>
+      <Panel tilt={tilt} padding={12}>
+        <div className={styles.top}>
+          <Portrait leaderId={target.id} size={56} />
+          <div className={styles.body}>
+            <div className={styles.headRow}>
+              <span className={`display ${styles.name}`}>{target.name}</span>
+              <span className={`mono ${styles.country}`}>{target.country}</span>
+            </div>
+            <div className={styles.ttRow}>
+              <button
+                type="button"
+                aria-pressed={targetType === 'people'}
+                className={`mono ${styles.ttSeg} ${targetType === 'people' ? styles.ttOn : ''}`}
+                onClick={() => onTargetTypeChange('people')}
+              >people</button>
+              <button
+                type="button"
+                aria-pressed={targetType === 'infra'}
+                className={`mono ${styles.ttSeg} ${targetType === 'infra' ? styles.ttOn : ''}`}
+                onClick={() => onTargetTypeChange('infra')}
+              >infra</button>
+            </div>
+            <div className={`mono ${styles.stats}`}>
+              POP {target.population}M · ⚙ {target.factories}
+            </div>
+            {mood && <div className={`hand ${styles.mood}`}>"{mood}"</div>}
+          </div>
+        </div>
 
-      {mood && <div className={styles.mood}>{mood}</div>}
+        <div className={styles.diplo}>
+          <button
+            type="button"
+            aria-pressed={wooed}
+            className={`${styles.miniBtn} ${wooed ? styles.miniOn : ''}`}
+            onClick={toggleWoo}
+          >🤝 WOO · {ACTION_COSTS.woo} AP</button>
+          <button
+            type="button"
+            aria-pressed={propd}
+            className={`${styles.miniBtn} ${propd ? styles.miniOn : ''}`}
+            onClick={togglePropaganda}
+          >📃 PROP · {ACTION_COSTS.propaganda} AP</button>
+        </div>
 
-      <div className={styles.diplo}>
-        <button
-          type="button"
-          className={`${styles.diploBtn} ${wooed ? styles.diploOn : ''}`}
-          onClick={toggleWoo}
-        >💌 Woo<br/><span className={styles.cost}>1 AP</span></button>
-        <button
-          type="button"
-          className={`${styles.diploBtn} ${propd ? styles.diploOn : ''}`}
-          onClick={togglePropaganda}
-        >📰 Propaganda<br/><span className={styles.cost}>1 AP</span></button>
-      </div>
+        <div className={styles.rowLabel}>
+          🚀 missiles <span className={`mono ${styles.inv}`}>· {projection.missiles} left</span>
+        </div>
+        <div className={styles.lcGrid}>
+          {YIELDS.map((Y) => (
+            <LaunchCell
+              key={`m-${Y.yield}`}
+              sizeLabel={Y.label}
+              warheadsLeft={warheadsLeftFor(Y.yield)}
+              count={launchCount('missile', Y.yield)}
+              canAdd={canLaunch('missile', Y.yield)}
+              onInc={() => addLaunch('missile', Y.yield)}
+              onDec={() => removeLaunch('missile', Y.yield)}
+            />
+          ))}
+        </div>
 
-      <div className={styles.rowLabel}>
-        🚀 missiles <span className={styles.inv}>· {projection.missiles} left</span>
-      </div>
-      <div className={styles.lcGrid}>
-        {YIELDS.map((Y) => (
-          <LaunchCell
-            key={`m-${Y.yield}`}
-            sizeLabel={Y.label}
-            warheadsLeft={warheadsLeftFor(Y.yield)}
-            count={launchCount('missile', Y.yield)}
-            canAdd={canLaunch('missile', Y.yield)}
-            onInc={() => addLaunch('missile', Y.yield)}
-            onDec={() => removeLaunch('missile', Y.yield)}
-          />
-        ))}
-      </div>
-
-      <div className={styles.rowLabel}>
-        ✈️ bombers <span className={`${styles.inv} ${projection.bombers === 0 ? styles.invEmpty : ''}`}>· {projection.bombers} left</span>
-      </div>
-      <div className={styles.lcGrid}>
-        {YIELDS.map((Y) => (
-          <LaunchCell
-            key={`b-${Y.yield}`}
-            sizeLabel={Y.label}
-            warheadsLeft={warheadsLeftFor(Y.yield)}
-            count={launchCount('bomber', Y.yield)}
-            canAdd={canLaunch('bomber', Y.yield)}
-            onInc={() => addLaunch('bomber', Y.yield)}
-            onDec={() => removeLaunch('bomber', Y.yield)}
-          />
-        ))}
-      </div>
+        <div className={styles.rowLabel}>
+          ✈️ bombers <span className={`mono ${styles.inv}`}>· {projection.bombers} left</span>
+        </div>
+        <div className={styles.lcGrid}>
+          {YIELDS.map((Y) => (
+            <LaunchCell
+              key={`b-${Y.yield}`}
+              sizeLabel={Y.label}
+              warheadsLeft={warheadsLeftFor(Y.yield)}
+              count={launchCount('bomber', Y.yield)}
+              canAdd={canLaunch('bomber', Y.yield)}
+              onInc={() => addLaunch('bomber', Y.yield)}
+              onDec={() => removeLaunch('bomber', Y.yield)}
+            />
+          ))}
+        </div>
+      </Panel>
     </div>
   );
 }

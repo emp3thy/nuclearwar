@@ -25,12 +25,12 @@ function makeState(): UiState {
 describe('<Planning> action-card grid', () => {
   it('renders build grid with Factory cell', () => {
     render(<Planning state={makeState()} dispatch={vi.fn()} />);
-    expect(screen.getByText(/Factory/i)).toBeInTheDocument();
+    expect(screen.getByText('Factory')).toBeInTheDocument();
   });
 
   it('renders defence grid with Build Shield cell', () => {
     render(<Planning state={makeState()} dispatch={vi.fn()} />);
-    expect(screen.getByText(/Build Shield/i)).toBeInTheDocument();
+    expect(screen.getByText('Build Shield')).toBeInTheDocument();
   });
 
   it('renders target rows for each opponent', () => {
@@ -39,14 +39,15 @@ describe('<Planning> action-card grid', () => {
     expect(screen.getByLabelText(/Target row for Carnage/i)).toBeInTheDocument();
   });
 
-  it('renders AP banner', () => {
+  it('renders the AP meter and orders subtotal', () => {
     render(<Planning state={makeState()} dispatch={vi.fn()} />);
-    expect(screen.getByText(/AP used/i)).toBeInTheDocument();
+    expect(screen.getByText('SUBTOTAL')).toBeInTheDocument();
+    expect(screen.getByText(/will bank/)).toBeInTheDocument();
   });
 
   it('seal button exists', () => {
     const dispatch = vi.fn();
     render(<Planning state={makeState()} dispatch={dispatch} />);
-    expect(screen.getByRole('button', { name: /seal/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /seal orders/i })).toBeInTheDocument();
   });
 });

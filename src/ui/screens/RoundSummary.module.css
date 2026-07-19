@@ -1,115 +1,539 @@
+/* RoundSummary — the fake tabloid front page (comic re-theme slice 4).
+ * Layout lifted from design_handoff_nuke_game/screens-3.jsx SummaryScreen. */
+
 .summary {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 16px;
-  font-family: Georgia, "Times New Roman", serif;
-  background: #efe5d2;
-  color: #1a1a1a;
   min-height: 100vh;
-  box-sizing: border-box;
+  background: var(--ink);
+  padding: 20px 12px 96px;
 }
+
+.sheet {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 28px 16px;
+  border: 4px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--magenta);
+  color: var(--ink);
+}
+
+/* ---- Masthead ---- */
 
 .masthead {
   text-align: center;
-  font-size: 11px;
-  letter-spacing: 0.2em;
+}
+
+.mastheadKicker {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  color: var(--magenta);
   text-transform: uppercase;
-  color: #5a4a3a;
-  border-top: 2px solid #1a1a1a;
-  border-bottom: 2px solid #1a1a1a;
+}
+
+.mastheadTitle {
+  font-family: var(--font-tabloid);
+  font-weight: 900;
+  font-size: clamp(48px, 9vw, 96px);
+  margin: 4px 0;
+  line-height: 0.9;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+}
+
+.ruleLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
   padding: 4px 0;
-  margin-bottom: 12px;
-  font-family: Georgia, serif;
+  font-size: 11px;
+  font-family: var(--font-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* ---- Grid ---- */
+
+.summaryGrid {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: 1fr;
+  margin-top: 12px;
+}
+
+@media (min-width: 920px) {
+  .summaryGrid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+}
+
+.sidebar {
+  align-self: start;
+}
+
+/* ---- Headline + standfirst ---- */
+
+.headlineWrap {
+  margin-top: 14px;
+  position: relative;
 }
 
 .headline {
-  font-size: 32px;
-  font-weight: 900;
-  text-align: center;
-  margin: 16px 0 6px;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: clamp(56px, 10vw, 108px);
+  line-height: 0.88;
+  margin: 0;
+  letter-spacing: -0.005em;
+  color: var(--ink);
 }
 
 .headline.theEnd {
-  font-size: 48px;
-  letter-spacing: 0;
+  color: var(--magenta);
 }
 
-.subhead {
-  font-size: 14px;
-  font-style: italic;
-  text-align: center;
-  color: #5a4a3a;
-  margin: 0 0 16px;
+.headlineStamp {
+  position: absolute;
+  top: -10px;
+  right: 0;
 }
+
+.standfirst {
+  font-family: var(--font-tabloid);
+  font-style: italic;
+  font-size: 17px;
+  margin: 10px 0 0;
+  line-height: 1.35;
+}
+
+/* ---- Casualty strip (4-across at all widths; cells shrink) ---- */
 
 .casualtyStrip {
-  background: #fff8eb;
-  border: 1px solid #d0c8b8;
-  border-radius: 8px;
-  padding: 12px;
-  margin: 12px 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--ink);
+  color: var(--paper);
+  margin-bottom: 14px;
 }
 
-.casualtyPlaceholder {
+.casualtyLabel {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  opacity: 0.6;
+  text-transform: uppercase;
+}
+
+.casualtyValue {
+  font-family: var(--font-display);
+  font-size: 22px;
+}
+
+.casualtyMagenta { color: var(--magenta); }
+.casualtyGreen { color: var(--green); }
+
+/* ---- News stories ---- */
+
+.sectionHead {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  border-top: 3px double var(--ink);
+  border-bottom: 3px double var(--ink);
+  padding: 6px 0;
   text-align: center;
-  color: #8a7a6b;
+  margin: 18px 0 14px;
+  text-transform: uppercase;
+}
+
+.storyFlow {
+  column-count: 2;
+  column-gap: 22px;
+  column-rule: 1px solid rgba(20, 18, 20, 0.3);
+  margin-top: 4px;
+}
+
+@media (max-width: 600px) {
+  .storyFlow { column-count: 1; }
+}
+
+.newsStory {
+  break-inside: avoid;
+  padding: 10px 0 12px;
+  border-bottom: 1px dashed rgba(20, 18, 20, 0.35);
+  margin-bottom: 12px;
+}
+
+.newsStory:last-child { border-bottom: 0; }
+
+.newsStory.lead {
+  column-span: all;
+  border-bottom: 3px double rgba(20, 18, 20, 0.55);
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+
+.newsStory.lead .storyHeadline { font-size: 30px; line-height: 0.98; }
+.newsStory.lead .storyBody { font-size: 14px; column-count: 2; column-gap: 18px; }
+
+.storyKicker {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--magenta);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+
+.storyHeadline {
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 0.005em;
+  color: var(--ink);
+  margin: 0 0 5px;
+  text-transform: uppercase;
+}
+
+.storyByline {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-tabloid);
+  font-size: 10px;
+  color: var(--ink-soft);
+  border-bottom: 1px solid rgba(20, 18, 20, 0.25);
+  padding-bottom: 5px;
+  margin-bottom: 7px;
+}
+
+.bylineWho { font-style: italic; }
+
+.bylineDelta {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.deltaHarm { color: var(--magenta); }
+.deltaGain { color: var(--green); }
+.deltaNeutral { color: var(--ink-soft); }
+
+.storyPortrait {
+  float: left;
+  margin: 2px 10px 4px 0;
+  shape-outside: margin-box;
+}
+
+.storyBody {
+  margin: 0;
+  font-family: var(--font-tabloid);
+  font-size: 12.5px;
+  line-height: 1.42;
+  color: var(--ink);
+  text-align: justify;
+  hyphens: auto;
+}
+
+.storyPull {
+  font-family: var(--font-tabloid);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--ink);
+  margin: 8px 0 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--magenta);
+  clear: both;
+}
+
+.storyTags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  clear: both;
+}
+
+/* ---- Sidebar sections ---- */
+
+.sideSec {
+  padding: 12px;
+  background: var(--paper-warm);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  margin-bottom: 16px;
+}
+
+.sideHead {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  border-top: 3px double var(--ink);
+  border-bottom: 3px double var(--ink);
+  padding: 5px 0;
+  text-align: center;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.sideTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sideTable td {
+  padding: 3px 0;
+  vertical-align: baseline;
+  border-bottom: 1px dotted rgba(20, 18, 20, 0.3);
+}
+
+.sideTable tr:last-child td { border-bottom: 0; }
+
+.sideTable.boxscore td { padding: 4px 0; }
+
+.sideTableLabel {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.sideTableValue {
+  font-family: var(--font-tabloid);
+  font-size: 12px;
+  font-style: italic;
+  text-align: right;
+}
+
+/* Forecast */
+
+.forecastTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(20, 18, 20, 0.3);
+}
+
+.forecastOutlook {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--magenta);
+  line-height: 1;
+}
+
+.forecastTemp {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.forecastTempLabel { opacity: 0.6; }
+
+.uvBlock { text-align: right; }
+
+.uvLabel {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  opacity: 0.6;
+}
+
+.uvValue {
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+/* Market report */
+
+.marketSub {
+  font-family: var(--font-tabloid);
+  font-style: italic;
+  font-size: 10px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.ticker {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tickerRow {
+  display: grid;
+  grid-template-columns: 42px 64px 1fr;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 0;
+  border-bottom: 1px dotted rgba(20, 18, 20, 0.3);
+}
+
+.tickerRow:last-child { border-bottom: 0; }
+
+.tickerSym {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.tickerChange {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tickerNote {
+  font-family: var(--font-tabloid);
+  font-size: 10px;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* Box score */
+
+.boxScoreNames {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.boxScoreArrow { opacity: 0.5; }
+
+.boxScoreScore {
+  font-family: var(--font-display);
+  font-size: 11px;
+  text-align: right;
+}
+
+.boxScoreGood { color: var(--green); }
+.boxScoreHarm { color: var(--magenta); }
+
+.boxScoreEmpty {
+  font-family: var(--font-tabloid);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* Obituaries */
+
+.obit { margin-bottom: 8px; }
+
+.obitName {
+  font-family: var(--font-display);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.obitLine {
+  font-family: var(--font-tabloid);
   font-style: italic;
   font-size: 11px;
-  margin-bottom: 8px;
-  padding: 16px 8px;
-  background: #e8d8c0;
-  border-radius: 6px;
+  color: var(--ink-soft);
 }
 
-.casualtyRow {
-  font-family: ui-monospace, monospace;
-  font-size: 13px;
-  margin: 2px 0;
-}
-
-.sectionTitle {
+.obitEmpty {
+  font-family: var(--font-tabloid);
+  font-style: italic;
   font-size: 12px;
-  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding: 4px 0;
+}
+
+/* Classifieds */
+
+.classified {
+  font-family: var(--font-tabloid);
+  font-size: 11px;
+  line-height: 1.35;
+  margin: 0 0 7px;
+  padding-bottom: 7px;
+  border-bottom: 1px dotted rgba(20, 18, 20, 0.3);
+  color: var(--ink);
+  text-align: justify;
+}
+
+.classified:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+
+.classifiedTag {
+  font-family: var(--font-display);
+  font-size: 9px;
   letter-spacing: 0.1em;
-  color: #5a4a3a;
-  margin: 16px 0 8px;
-  font-weight: 700;
-  font-family: Georgia, serif;
+  margin-right: 4px;
+  text-transform: uppercase;
 }
 
-.worldReactions { margin: 16px 0; }
-.reactionRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  border-bottom: 1px dotted #d0c8b8;
+/* Advertisement */
+
+.adBlock {
+  margin-top: 22px;
+  padding: 14px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  text-align: center;
+}
+
+.adLabel {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.adTitle {
+  font-family: var(--font-bang);
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+  line-height: 0.95;
+}
+
+.adCopy {
+  font-family: var(--font-hand);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* ---- Corrections + continue ---- */
+
+.correctionsBox {
+  margin-top: 20px;
+  padding: 8px 14px;
+  background: var(--paper-warm);
+  border: 2px solid var(--ink);
   font-size: 12px;
+  color: var(--ink);
 }
-.reactionFlag { font-size: 16px; }
-.reactionName { font-weight: 600; min-width: 90px; }
-.reactionStats { font-family: 'Consolas', monospace; font-size: 11px; color: #3a3a3a; min-width: 116px; white-space: nowrap; }
-.reactionDelta { font-family: 'Consolas', monospace; color: #b02a37; min-width: 40px; }
-.reactionQuote { font-style: italic; color: #5a4a3a; font-size: 11px; }
 
-.obituaries { margin: 16px 0; }
-.obit { background: #f4f4f4; border-left: 4px solid #1a1a1a; padding: 10px 12px; margin-bottom: 6px; }
-.obitHeader { font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #1a1a1a; }
-.obitQuote { font-style: italic; font-size: 12px; color: #5a4a3a; margin-top: 4px; }
+.correctionsLabel {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  margin-right: 8px;
+  text-transform: uppercase;
+}
 
-.continueBtn {
-  display: block;
-  width: 100%;
+.correctionsLine {
+  font-family: var(--font-tabloid);
+  font-style: italic;
+}
+
+/* The continue button keeps its mixed-case label strings ('Final Verdict',
+ * 'Round N → Plan') in the DOM; the global .btn text-transform: uppercase
+ * provides the all-caps presentation, so text queries keep matching. */
+.continueBar {
   margin-top: 24px;
-  padding: 16px;
-  font-size: 16px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  background: #8a1a1a;
-  color: #fff8eb;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  padding: 18px;
+  background: var(--ink);
+  text-align: center;
+  border-top: 4px double var(--magenta);
 }

@@ -53,7 +53,7 @@ Any UI copy naming Starmless (newspaper sections, obituaries content, market tic
 ## 5. Testing
 
 - **Rename ripple:** full suite stays green after the id swap (search for `starmless` case-insensitively across src/ tests/ must return zero hits post-change, excluding docs/).
-- **New planner unit tests** (`tests/engine/ai/burnem.test.ts` or the suite's existing per-planner layout): (1) placid state emits no launches when unprovoked; (2) attack on Burn'em → provoked state → launches target the provoker and persist in later rounds; (3) patience fallback: unattacked at round 6 → provoked vs strongest rival; 2-survivor game → provoked; (4) producers-before-consumers order in emitted batches. Assertions unconditional (no `if (x) expect(...)`).
+- **New planner unit tests** (`tests/engine/ai/burnem.test.ts` or the suite's existing per-planner layout): (1) placid state emits no launches when unprovoked; (2) attack on Burn'em → provoked state → launches target the provoker and persist in later rounds; (3) patience fallback: unattacked at the patience threshold (balance-tuned, currently round 3) → provoked vs strongest rival; 2-survivor game → provoked; (4) producers-before-consumers order in emitted batches. Assertions unconditional (no `if (x) expect(...)`).
 - **Balance:** termination + AI-duel seed tests pass; if the handbrake behavior shifts the win distribution outside the suite's expectations, rebalance the planner's placid-state build priorities (not the test thresholds) first.
 - **UI:** Portrait test updated for `burnem`; Setup renders the new tile.
 

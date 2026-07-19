@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import Planning from '../../src/ui/screens/Planning';
 import { initialState } from '../../src/engine/state';
 import type { UiState } from '../../src/ui/store';
@@ -34,13 +34,15 @@ describe('<TargetRow>', () => {
 
   it('woo button toggles when clicked', () => {
     render(<Planning state={makeStateWithMood()} dispatch={vi.fn()} />);
-    const wooBtn = screen.getByRole('button', { name: /Woo/i });
+    const wooBtn = screen.getByRole('button', { name: /woo/i });
+    expect(wooBtn).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(wooBtn);
-    // After click, the button should have the diploOn class
-    expect(wooBtn.className).toMatch(/diploOn|on/i);
+    expect(wooBtn).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(wooBtn);
+    expect(wooBtn).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('retargets queued launches when the target type is toggled to infra', () => {
+  it('retargets queued launches when the target type is toggled to infra', async () => {
     const game = initialState({ cast: ['player1', 'chump'], difficulty: 'normal', seed: 'tt-toggle' });
     game.leaders.player1.ap = 10;
     game.leaders.player1.stockpile.missiles = 2;
@@ -63,10 +65,10 @@ describe('<TargetRow>', () => {
     fireEvent.click(within(row).getAllByText('+')[0]);
     // Toggle the target to infra.
     fireEvent.click(within(row).getByText('infra'));
-    // Seal orders.
-    fireEvent.click(screen.getByRole('button', { name: /Seal Orders/i }));
+    // Seal orders (hold-to-confirm).
+    fireEvent.mouseDown(screen.getByRole('button', { name: /seal orders/i }));
+    await waitFor(() => expect(dispatch).toHaveBeenCalledTimes(1), { timeout: 3000 });
 
-    expect(dispatch).toHaveBeenCalledTimes(1);
     const orders = dispatch.mock.calls[0][0].orders as Order[];
     const launches = orders.filter((o) => o.kind === 'launch');
     expect(launches).toHaveLength(1);

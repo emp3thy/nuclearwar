@@ -7,7 +7,7 @@ import { scriptedOrders } from '../helpers/scripted-orders';
 describe('integration — three-leader scripted game', () => {
   it('runs at least 5 rounds without error and produces a typed event stream', () => {
     let s = initialState({
-      cast: ['chump', 'carnage', 'starmless'],
+      cast: ['chump', 'carnage', 'burnem'],
       difficulty: 'normal',
       seed: 'integration-1',
     });

@@ -5,7 +5,7 @@ import { totalApCost } from '../../../src/engine/orders';
 
 describe('planAi dispatcher', () => {
   it('returns valid orders within budget for every leader on normal difficulty', () => {
-    for (const id of ['chump', 'carnage', 'starmless', 'khameneverhere', 'netanyahoo', 'mileigh-hem'] as const) {
+    for (const id of ['chump', 'carnage', 'burnem', 'khameneverhere', 'netanyahoo', 'mileigh-hem'] as const) {
       const s = initialState({ cast: [id, 'carnage'], difficulty: 'normal', seed: `dispatch-${id}` });
       const orders = planAi(s, id);
       expect(totalApCost(orders)).toBeLessThanOrEqual(s.leaders[id].ap);
@@ -43,15 +43,15 @@ describe('planAi dispatcher', () => {
   });
 
   it('Hard Chump picks the target whose projected outcome favours him', () => {
-    const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'hard', seed: 'hard-chump' });
+    const s = initialState({ cast: ['chump', 'carnage', 'burnem'], difficulty: 'hard', seed: 'hard-chump' });
     s.leaders.chump.stockpile.missiles = 1;
     s.leaders.chump.stockpile.warheadsSmall = 1;
     // Carnage is wide-open (shields=0) — a launch lands, hurting carnage's threat to Chump.
-    // Starmless has shields=5 — any launch always intercepts, no real progress.
+    // Burn'em has shields=5 — any launch always intercepts, no real progress.
     s.leaders.carnage.population = 8;
     s.leaders.carnage.stockpile.shields = 0;
-    s.leaders.starmless.population = 8;
-    s.leaders.starmless.stockpile.shields = 5;
+    s.leaders.burnem.population = 8;
+    s.leaders.burnem.stockpile.shields = 5;
     const orders = planAi(s, 'chump');
     const launch = orders.find((o) => o.kind === 'launch');
     expect(launch).toBeDefined();

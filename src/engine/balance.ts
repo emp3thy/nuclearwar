@@ -26,8 +26,8 @@ export const LEADER_PROFILES: Record<
     startFactories: 6,
     startAp: 6,
   },
-  starmless: {
-    name: 'Starmless',
+  burnem: {
+    name: 'Burn\'em',
     country: '🇬🇧 UK',
     startPop: 25,
     startFactories: 6,
@@ -145,8 +145,6 @@ export const AI_SCORING_WEIGHTS = {
   },
   // Carnage's escalation multiplier on attacker's threat next round.
   carnageEscalationMultiplier: 2,
-  // Starmless's scapegoat probability on retaliation (35 %).
-  starmlessScapegoatPct: 0.35,
   // Mileigh-hem's all-out activation trigger.
   mileighActivationApThreshold: 4,
   // Khameneverhere grudge weight per impact (multiplied by warhead yield index 1/2/4).

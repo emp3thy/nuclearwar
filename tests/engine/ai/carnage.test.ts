@@ -33,23 +33,23 @@ describe('Carnage (Rational + Opportunist)', () => {
   });
 
   it('opportunism bonus pushes a weak leader above a stronger one', () => {
-    const s = initialState({ cast: ['carnage', 'chump', 'starmless'], difficulty: 'normal', seed: 'c3' });
+    const s = initialState({ cast: ['carnage', 'chump', 'burnem'], difficulty: 'normal', seed: 'c3' });
     s.leaders.carnage.stockpile.missiles = 1;
     s.leaders.carnage.stockpile.warheadsSmall = 1;
     // Chump: moderate arsenal, healthy population.
     s.leaders.chump.stockpile.warheadsSmall = 4;
     s.leaders.chump.population = 20;
     s.leaders.chump.factories = 5;
-    // Starmless: slightly weaker arsenal but critically low population → big opportunism bonus.
-    s.leaders.starmless.stockpile.warheadsSmall = 2;
-    s.leaders.starmless.population = 3;  // triggers perPopBelow10M bonus: (10-3)*4 = 28
-    s.leaders.starmless.factories = 1;   // triggers perFactoryBelow3 bonus: (3-1)*2 = 4
+    // Burn'em: slightly weaker arsenal but critically low population → big opportunism bonus.
+    s.leaders.burnem.stockpile.warheadsSmall = 2;
+    s.leaders.burnem.population = 3;  // triggers perPopBelow10M bonus: (10-3)*4 = 28
+    s.leaders.burnem.factories = 1;   // triggers perFactoryBelow3 bonus: (3-1)*2 = 4
 
     const orders = planCarnage(s, 'carnage');
     const launch = orders.find((o) => o.kind === 'launch');
-    // Starmless: threat=2, opportunism=28+4=32, total=34
+    // Burn'em: threat=2, opportunism=28+4=32, total=34
     // Chump: threat=4, opportunism=0, total=4
-    expect(launch?.target).toBe('starmless');
+    expect(launch?.target).toBe('burnem');
   });
 
   it('emits propaganda only at leaders who attacked Carnage, not others', () => {

@@ -1,94 +1,171 @@
+/* Winners — ironic final page (comic re-theme slice 4).
+ * Layout lifted from design_handoff_nuke_game/screens-3.jsx WinnersScreen. */
+
 .winners {
-  max-width: 520px;
-  margin: 0 auto;
-  padding: 24px 16px;
-  font-family: Georgia, serif;
-  background: #1a1a1a;
-  color: #f4ede2;
   min-height: 100vh;
-  box-sizing: border-box;
+  padding: 40px 16px 96px;
+  background: var(--ink);
+  color: var(--paper);
+  position: relative;
+  overflow: hidden;
+}
+
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.finalTag {
   text-align: center;
+  margin-bottom: 12px;
+}
+
+/* ---- Hero ---- */
+
+.hero {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--ink-soft);
+  padding: 28px;
+  border: 3px solid var(--paper);
+  box-shadow: 8px 8px 0 var(--magenta);
+}
+
+@media (max-width: 720px) {
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.portraitBlock {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.heroStamp {
+  position: absolute;
+  top: -14px;
+  right: -22px;
+}
+
+.apocalypsePanel {
+  width: 200px;
+  height: 200px;
+  background: var(--ink);
+  border: 3px solid var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 120px;
+  line-height: 1;
+  color: var(--magenta);
+}
+
+.heroText {
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 .headline {
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  margin: 16px 0;
-  color: #ffe9c8;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: clamp(48px, 8vw, 110px);
+  letter-spacing: -0.005em;
+  line-height: 0.9;
+  margin: 0;
+  word-break: break-word;
 }
 
 .subline {
-  font-size: 16px;
-  font-style: italic;
-  color: #c9b89a;
-  margin: 8px 0 32px;
+  font-family: var(--font-hand);
+  font-size: 20px;
+  margin: 14px 0 0;
+  color: var(--paper-edge);
+  line-height: 1.35;
 }
-
-.sectionTitle {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #c9b89a;
-  margin: 24px 0 8px;
-  font-weight: 700;
-}
-
-.tollTable {
-  width: 100%;
-  border-collapse: collapse;
-  background: #2a2a2a;
-  border-radius: 6px;
-  overflow: hidden;
-  margin: 8px 0 24px;
-}
-
-.tollTable th,
-.tollTable td {
-  padding: 8px 12px;
-  font-size: 13px;
-  text-align: left;
-  border-bottom: 1px solid #3a3a3a;
-}
-
-.tollTable th {
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 11px;
-  color: #c9b89a;
-  background: #1a1a1a;
-}
-
-.tollTable .numCell {
-  font-family: ui-monospace, monospace;
-  text-align: right;
-}
-
-.playerRow { background: #3a2a1a; }
 
 .buttonRow {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ---- Death toll ---- */
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.deathTable {
+  display: flex;
+  flex-direction: column;
+  min-width: 560px;
+}
+
+.deathHead,
+.deathRow {
   display: flex;
   gap: 8px;
-  margin-top: 24px;
+  align-items: center;
+  padding: 8px 10px;
 }
 
-.button {
-  flex: 1;
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 700;
+.deathHead {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  background: #8a1a1a;
-  color: #fff8eb;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
 }
 
-.button.secondary {
-  background: transparent;
-  border: 1px solid #c9b89a;
-  color: #c9b89a;
+.deathRow {
+  border-bottom: 1px dashed rgba(20, 18, 20, 0.3);
+}
+
+.deathRow:last-child { border-bottom: 0; }
+
+.cellLeader { flex: 2; }
+
+.leaderCell {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.cellNum { flex: 1; }
+
+.cellState { flex: 2; }
+
+.numCell { font-family: var(--font-mono); }
+
+.endDead { color: var(--magenta); }
+.endAlive { color: var(--green); }
+
+.pctCell { font-weight: 700; }
+
+/* ---- Final word ---- */
+
+.finalWord {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.finalQuote {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--magenta);
+  letter-spacing: 0.04em;
+}
+
+.finalAttribution {
+  font-family: var(--font-hand);
+  font-size: 16px;
+  margin-top: 6px;
+  color: var(--paper-edge);
 }

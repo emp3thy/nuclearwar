@@ -4,7 +4,7 @@ import { reduce } from '../../src/engine/reducer';
 import { planAi } from '../../src/engine/ai';
 import type { LeaderId, WinOutcome } from '../../src/engine/types';
 
-const FULL_CAST: LeaderId[] = ['chump', 'khameneverhere', 'starmless', 'carnage', 'mileigh-hem', 'netanyahoo'];
+const FULL_CAST: LeaderId[] = ['chump', 'khameneverhere', 'burnem', 'carnage', 'mileigh-hem', 'netanyahoo'];
 
 // Round cap is a TEST TRIPWIRE, not a game rule. With the P4c.2 aggression
 // rework + elimination-only endings, all-AI games terminate by elimination /

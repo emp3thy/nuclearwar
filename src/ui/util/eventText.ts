@@ -1,28 +1,9 @@
 import type { GameState, ResolutionEvent } from '../../engine/types';
-import DisparageCard from './DisparageCard';
-import styles from './EventCard.module.css';
 
-export interface EventCardProps {
-  event: ResolutionEvent;
-  game: GameState;
-  /** How many identical build events this card stands for (default 1). */
-  count?: number;
-}
-
-export default function EventCard({ event, game, count = 1 }: EventCardProps) {
-  if (event.kind === 'DisparageCameo') return <DisparageCard event={event} />;
-  const result = formatEventCard(event, game, count);
-  if (!result) return null;
-  const { icon, body, className, quote } = result;
-  return (
-    <div className={`${styles.card} ${className ?? ''}`}>
-      <span className={styles.icon}>{icon}</span>
-      <div className={styles.bodyColumn}>
-        <span className={styles.body}>{body}</span>
-        {quote && <span className={styles.quote}>{quote}</span>}
-      </div>
-    </div>
-  );
+export interface EventText {
+  icon: string;
+  body: string;
+  quote?: string;
 }
 
 function flag(game: GameState, id: keyof GameState['leaders']): string {
@@ -32,11 +13,16 @@ function name(game: GameState, id: keyof GameState['leaders']): string {
   return game.leaders[id]?.name ?? id;
 }
 
-export function formatEventCard(
+/**
+ * Per-kind display text for a resolution event (icon + body + merged quote).
+ * Moved verbatim from EventCard's formatEventCard (slice-3 re-theme) minus the
+ * className field. Returns null for kinds never rendered on the Action screen.
+ */
+export function formatEventText(
   event: ResolutionEvent,
   game: GameState,
   count = 1,
-): { icon: string; body: string; className?: string; quote?: string } | null {
+): EventText | null {
   switch (event.kind) {
     case 'OrdersSealed':
       return null;  // not rendered
@@ -101,7 +87,6 @@ export function formatEventCard(
       return {
         icon: '⬛',
         body: `${name(game, event.id)} eliminated`,
-        className: styles.obituary,
         quote: event.quote,
       };
     case 'DefenceDeployed':
@@ -125,7 +110,7 @@ export function formatEventCard(
       return null;
     case 'PostRoundReaction':
       return null;
-    // DisparageCameo is handled before formatEventCard is called (routes to DisparageCard).
+    // DisparageCameo renders as the cameo overlay card, not banner text.
     // DisparageColumn is not rendered on Action.
     case 'DisparageCameo':
       return null;

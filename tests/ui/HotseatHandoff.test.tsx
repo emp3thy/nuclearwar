@@ -28,17 +28,18 @@ function makeState(): UiState {
 }
 
 describe('<HotseatHandoff>', () => {
-  it('renders the next leader\'s country and name', () => {
+  it('renders PASS TO, the next leader\'s name, and their country flag', () => {
     render(<HotseatHandoff state={makeState()} dispatch={vi.fn()} />);
-    expect(screen.getByText(/Sylvania/i)).toBeInTheDocument();
-    expect(screen.getByText(/Bob/i)).toBeInTheDocument();
+    expect(screen.getByText('PASS TO')).toBeInTheDocument();
+    expect(screen.getByText('Bob')).toBeInTheDocument();
+    expect(screen.getByText('🐢')).toBeInTheDocument();
     expect(screen.getByText(/previous orders sealed/i)).toBeInTheDocument();
   });
 
-  it('tap dispatches BEGIN_PLANNING with the active human', () => {
+  it('BEGIN MY TURN dispatches BEGIN_PLANNING with the active human', () => {
     const dispatch = vi.fn();
     render(<HotseatHandoff state={makeState()} dispatch={dispatch} />);
-    fireEvent.click(screen.getByRole('button', { name: /tap to begin/i }));
+    fireEvent.click(screen.getByRole('button', { name: /begin my turn/i }));
     expect(dispatch).toHaveBeenCalledWith({ type: 'BEGIN_PLANNING', leaderId: 'player2' });
   });
 });

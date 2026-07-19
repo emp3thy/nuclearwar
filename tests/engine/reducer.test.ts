@@ -8,14 +8,14 @@ describe('reduce — NEW_GAME', () => {
     a.round = 5;
     const b = reduce(a, {
       type: 'NEW_GAME',
-      cast: ['chump', 'carnage', 'starmless'],
+      cast: ['chump', 'carnage', 'burnem'],
       difficulty: 'easy',
       seed: 'second',
     });
     expect(b.round).toBe(1);
     expect(b.difficulty).toBe('easy');
     expect(b.seed).toBe('second');
-    expect(b.cast).toEqual(['chump', 'carnage', 'starmless']);
+    expect(b.cast).toEqual(['chump', 'carnage', 'burnem']);
   });
 });
 

@@ -116,6 +116,8 @@ One story per **living** cast member (same iteration + `alive` filter as today's
 
 **Lead story selection**: the living leader with the largest population loss this round; ties broken by `game.cast` order; if no one lost population, the first living leader in cast order.
 
+**DOM order**: the lead story renders **first** in the story flow, followed by the remaining living leaders in `game.cast` order. Because `.lead` is `column-span: all`, placing it anywhere but first would split the 2-column flow mid-stream; the handoff always renders the lead at the top (`screens-3.jsx` `big = i === 0`) with its `3px double` rule separating it from the columned stories below. Do not iterate the cast in order and tag the matching story in place — reorder so the selected lead comes first.
+
 The old compact reaction rows (`👥 {pop}M · 🏭 {factories}` line) are replaced by this section; the data they showed survives in byline deltas and badges.
 
 ### 3.5 Existing behaviors preserved (main column)
@@ -148,6 +150,8 @@ Conditions table (label Anton 10px / value Playfair italic 12px right-aligned, d
 
 UV block right-aligned: label `UV INDEX`, value `☢` repeated n times.
 
+> **Deliberate divergence from the mock:** `data.jsx` `NEWS_WEATHER` pairs `FALLOUT: HEAVY` with `uv: 5` ("out of 5"). This spec's 1/2/4/5 ladder reserves UV 5 for the BIBLICAL tier so the scale has headroom; HEAVY = 4 is intentional. Do not "fix" it back to match the sample datum.
+
 ### 4.2 MARKET REPORT
 
 Sub-line: `Population exchange · close of round` (Playfair italic 10px, ink-soft). One ticker row per cast member **including the dead** (grid `42px 64px 1fr`, dotted rules):
@@ -155,6 +159,8 @@ Sub-line: `Population exchange · close of round` (Playfair italic 10px, ink-sof
 - **sym** (mono 12px bold): AI static map — chump `USA`, khameneverhere `IRN`, starmless `UK`, carnage `CAN`, mileigh-hem `ARG`, netanyahoo `ISR`. Humans: country name with flag stripped, uppercased, first 3 characters (Freedonia → `FRE`).
 - **change**: `prev > 0 ? Math.round((cur − prev) / prev × 100) : 0` (prev from `prevPopulations`, 0 fallback when undefined). Rendered `▲ {n}%` green / `▬ 0%` ink-soft / `▼ {n}%` magenta (absolute value shown).
 - **note** (Playfair italic 10px): dead → `delisted`; change ≤ −20 → `clobbered`; −20 < change < 0 → `down`; 0 → `holds`; > 0 → `up`.
+
+> **Deliberate divergence from the mock:** the deterministic first-3-chars rule yields `FRE` for Freedonia, while `data.jsx` `NEWS_MARKET` hand-picks `FRD`. Humans can enter any country name, so a hand-tuned abbreviation table is impossible; the rule wins and the tests assert `FRE`. A side-by-side check against the prototype showing `FRD` is not a defect.
 
 ### 4.3 TONIGHT'S EXCHANGES (box score)
 
@@ -166,7 +172,9 @@ One row per qualifying event, in event order (mono attacker `›` target on the 
 | `ImpactInfrastructure` | `−{factoriesDestroyed} fac` | `--magenta` |
 | `MissileIntercepted` | `INTERCEPT` | `--green` |
 
-Names use `leader.name` (first 9 chars + `.` when longer). Empty state (no qualifying events): single Playfair-italic line `No exchanges. The censors are baffled.`
+Names use `leader.name` (first 9 chars + `.` when longer). Intercept rows render `{attacker} › {defender}` (from the event's `from`/`to`), with `INTERCEPT` in green. Empty state (no qualifying events): single Playfair-italic line `No exchanges. The censors are baffled.`
+
+> **Deliberate divergence from the mock:** `data.jsx` `NEWS_BOXSCORE` renders its intercept row as `{defender} › —`. The `{attacker} › {defender}` form is unambiguous (names who fired the intercepted shot) and keeps one row shape for all three event kinds; the mock's `—` form is not adopted. A side-by-side visual check will differ here by design.
 
 ### 4.4 OBITUARIES
 
@@ -222,7 +230,7 @@ Full-viewport ink background, paper text, `padding: 40px 16px 96px`, `<Halftone 
   - market rows: percent math, `▬ 0%` when prev undefined, `delisted` note for dead leaders, human sym derivation (`FRE` from `🦆 Freedonia`);
   - box score mapping for ImpactPeople / ImpactInfrastructure / MissileIntercepted and the empty-state row;
   - story headline precedence (a leader who both lost ≥10M and launched gets the DIGS OUT headline; an idle leader gets DOES NOTHING);
-  - lead-story selection (largest loss wins; cast-order fallback when no losses);
+  - lead-story selection (largest loss wins; cast-order fallback when no losses) **and story ordering** — the derived story list puts the lead first, then the remaining living leaders in cast order (§3.4 DOM order);
   - photo caption: impact-zone country for the biggest pairing vs. the file-photo line when no casualties.
 - **Render tests** (testing-library, query by role/text): RoundSummary shows the masthead from `game.mastheadOrder`, casualty-strip values, corrections line rotating with round; DisparageColumn section renders only when the event is present; Winners renders sorted death-toll rows, ELIMINATED badge for `end === 0`, and both buttons dispatch their existing actions.
 - Visual verification: `npm run dev` side-by-side with `design_handoff_nuke_game/index.html` (Summary + Winners via its nav).

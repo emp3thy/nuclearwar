@@ -55,9 +55,9 @@ describe('Burn\'em (Handbrake Turn)', () => {
     }
   });
 
-  it('patience fallback at round 6 targets the highest-threat rival even unprovoked', () => {
+  it('patience fallback at round 3 targets the highest-threat rival even unprovoked', () => {
     const s = initialState({ cast: ['burnem', 'carnage', 'chump'], difficulty: 'normal', seed: 'be4' });
-    s.round = 6;
+    s.round = 3;
     s.leaders.burnem.ap = 10;
     // No grudge entries.
     s.leaders.carnage.stockpile.warheadsLarge = 5;
@@ -72,6 +72,21 @@ describe('Burn\'em (Handbrake Turn)', () => {
     for (const l of launches) {
       expect(l.kind === 'launch' && l.target).toBe('carnage');
     }
+  });
+
+  it('stays placid at round 2 with 3+ leaders alive and no grudges', () => {
+    const s = initialState({ cast: ['burnem', 'carnage', 'chump'], difficulty: 'normal', seed: 'be4b' });
+    s.round = 2;
+    s.leaders.burnem.ap = 10;
+    // No grudge entries.
+    s.leaders.carnage.stockpile.warheadsLarge = 5;
+    s.leaders.chump.stockpile.warheadsSmall = 1;
+    s.leaders.burnem.stockpile.missiles = 3;
+    s.leaders.burnem.stockpile.warheadsSmall = 3;
+
+    const orders = planBurnem(s, 'burnem');
+
+    expect(orders.filter((o) => o.kind === 'launch').length).toBe(0);
   });
 
   it('patience fallback with only 2 survivors fires before round 6', () => {

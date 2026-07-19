@@ -95,29 +95,42 @@ export function KhameneverhereFace(): JSX.Element {
 export function BurnemFace(): JSX.Element {
   return (
     <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-      {/* suit (grey) */}
-      <path d="M 5 102 L 12 78 L 88 78 L 95 102 Z" fill="#444851" stroke="#141214" strokeWidth="2.5" strokeLinejoin="round"/>
-      <path d="M 38 78 L 50 96 L 62 78 Z" fill="#f1e6cc" stroke="#141214" strokeWidth="2.2" strokeLinejoin="round"/>
-      {/* red tie */}
-      <path d="M 47 78 L 53 78 L 56 100 L 50 110 L 44 100 Z" fill="#8a1729" stroke="#141214" strokeWidth="2.2" strokeLinejoin="round"/>
+      {/* black zip-up crew-neck — only suit-less cast member besides Mileigh */}
+      <path d="M 5 102 L 12 76 L 88 76 L 95 102 Z" fill="#1c1a1c" stroke="#141214" strokeWidth="2.5" strokeLinejoin="round"/>
+      {/* zip line + pull */}
+      <line x1="50" y1="78" x2="50" y2="100" stroke="#5a5a5a" strokeWidth="2"/>
+      <rect x="48.6" y="80" width="2.8" height="5" fill="#8a8a8a" stroke="#141214" strokeWidth="1"/>
+      {/* crew-neck collar */}
+      <path d="M 40 76 Q 50 84 60 76" fill="none" stroke="#141214" strokeWidth="2.2"/>
       {/* neck */}
-      <rect x="42" y="68" width="16" height="12" fill="#e4c5a3" stroke="#141214" strokeWidth="2.2"/>
-      {/* oval head */}
-      <ellipse cx="50" cy="46" rx="26" ry="28" fill="#eccaa8" stroke="#141214" strokeWidth="2.5"/>
-      {/* side-parted grey hair */}
-      <path d="M 24 30 Q 26 18 48 16 Q 74 18 76 30 Q 70 26 56 28 Q 40 32 24 30 Z"
-        fill="#7a7a7a" stroke="#141214" strokeWidth="2.5" strokeLinejoin="round"/>
-      {/* part line */}
-      <path d="M 40 18 Q 44 24 50 28" stroke="#141214" strokeWidth="1.5" fill="none"/>
-      {/* glasses */}
-      <rect x="30" y="42" width="14" height="8" rx="1" fill="none" stroke="#141214" strokeWidth="2"/>
-      <rect x="56" y="42" width="14" height="8" rx="1" fill="none" stroke="#141214" strokeWidth="2"/>
-      <line x1="44" y1="46" x2="56" y2="46" stroke="#141214" strokeWidth="2"/>
-      {/* eyes through glasses */}
-      <circle cx="37" cy="46" r="1.5" fill="#141214"/>
-      <circle cx="63" cy="46" r="1.5" fill="#141214"/>
-      {/* awkward thin smile */}
-      <path d="M 40 62 Q 50 66 60 62" stroke="#141214" strokeWidth="2" fill="none" strokeLinecap="round"/>
+      <rect x="42" y="66" width="16" height="12" fill="#ecd0b4" stroke="#141214" strokeWidth="2.2"/>
+      {/* long pale face */}
+      <path d="M 28 26 L 28 56 Q 30 70 40 73 L 60 73 Q 70 70 72 56 L 72 26 Q 50 22 28 26 Z"
+        fill="#f2d8bc" stroke="#141214" strokeWidth="2.5" strokeLinejoin="round"/>
+      {/* flat dark hair, side sweep */}
+      <path d="M 24 28 Q 25 12 50 10 Q 75 12 76 28 L 76 22 Q 62 14 40 17 Q 28 19 24 26 Z"
+        fill="#241f1d" stroke="#141214" strokeWidth="2.5" strokeLinejoin="round"/>
+      {/* very thick rectangular brows */}
+      <rect x="31" y="36" width="15" height="5" fill="#241f1d" stroke="#141214" strokeWidth="1.6"/>
+      <rect x="54" y="36" width="15" height="5" fill="#241f1d" stroke="#141214" strokeWidth="1.6"/>
+      {/* rectangular glasses */}
+      <rect x="30" y="43" width="17" height="11" rx="1.5" fill="none" stroke="#141214" strokeWidth="2.4"/>
+      <rect x="53" y="43" width="17" height="11" rx="1.5" fill="none" stroke="#141214" strokeWidth="2.4"/>
+      <line x1="47" y1="48" x2="53" y2="48" stroke="#141214" strokeWidth="2.4"/>
+      {/* eyes — famous lashes rendered as slightly heavy upper lids */}
+      <path d="M 34 48 Q 38 46 42 48" fill="none" stroke="#141214" strokeWidth="2.6" strokeLinecap="round"/>
+      <path d="M 58 48 Q 62 46 66 48" fill="none" stroke="#141214" strokeWidth="2.6" strokeLinecap="round"/>
+      <circle cx="38" cy="49" r="1.6" fill="#141214"/>
+      <circle cx="62" cy="49" r="1.6" fill="#141214"/>
+      {/* stern flat mouth */}
+      <line x1="42" y1="64" x2="58" y2="64" stroke="#141214" strokeWidth="2.4" strokeLinecap="round"/>
+      {/* mini campaign placard prop, corner (cast-prop tradition) */}
+      <g transform="translate(80 78) rotate(8)">
+        <rect x="-1.2" y="0" width="2.4" height="22" fill="#a47a3e" stroke="#141214" strokeWidth="1.2"/>
+        <rect x="-13" y="-16" width="26" height="18" fill="#c8283c" stroke="#141214" strokeWidth="1.8"/>
+        <text x="0" y="-8.5" textAnchor="middle" fill="#f1e6cc" fontFamily="Anton, sans-serif" fontSize="6.5" letterSpacing="0.5">VOTE</text>
+        <text x="0" y="-1.5" textAnchor="middle" fill="#f3c318" fontFamily="Anton, sans-serif" fontSize="6.5" letterSpacing="0.5">FOR US</text>
+      </g>
     </svg>
   );
 }

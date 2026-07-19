@@ -1,47 +1,238 @@
-.action {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 16px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f4ede2;
-  color: #1a1a1a;
+/* Action — sequential resolution playback on the world map (slice-3 spec §3). */
+
+.screen {
+  background: var(--ink);
+  color: var(--paper);
   min-height: 100vh;
-  box-sizing: border-box;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
 }
+
+/* ── Header ─────────────────────────────────────────────────────────── */
 
 .header {
-  text-align: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #6b1d1d;
-  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px 10px;
+  border-bottom: 2px solid var(--paper);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.phaseSection {
-  margin: 12px 0;
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.phaseHeader {
+.headerRight {
+  display: flex;
+  gap: 8px;
+}
+
+.title {
+  font-size: 22px;
+  letter-spacing: 0.04em;
+}
+
+.ctrlBtn {
+  font-family: var(--font-display);
   font-size: 11px;
+  letter-spacing: 0.12em;
+  background: transparent;
+  color: var(--paper);
+  border: 2px solid var(--paper);
+  padding: 4px 10px;
+  cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #8a7a6b;
-  margin: 0 0 6px;
-  font-weight: 600;
+}
+.ctrlBtn:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+.ctrlBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
-.continueBtn {
+.trackWrap {
+  padding: 0 4px;
+}
+
+/* ── Event banner ───────────────────────────────────────────────────── */
+
+.banner {
+  background: var(--magenta);
+  padding: 8px 12px;
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  margin-top: 6px;
+}
+
+/* ── The map ────────────────────────────────────────────────────────── */
+
+.map {
+  flex: 1;
+  position: relative;
+  min-height: 360px;
+  background: var(--cyan);
+  background-image:
+    radial-gradient(rgba(0, 0, 0, 0.3) 1px, transparent 1.4px),
+    linear-gradient(180deg, #2a8eb4 0%, #1d7fb0 50%, #16527a 100%);
+  background-size: 6px 6px, 100% 100%;
+  border: 3px solid var(--paper);
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.actorPortrait,
+.receiverPortrait {
+  position: absolute;
+  z-index: 4;
+}
+.actorPortrait {
+  left: 14px;
+  top: 14px;
+}
+.receiverPortrait {
+  right: 14px;
+  top: 14px;
+}
+
+.receiverInner {
+  position: relative;
+  display: inline-block;
+}
+
+.eliminatedStamp {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+
+.namePill {
   display: block;
-  width: 100%;
-  margin-top: 24px;
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  background: #6b1d1d;
-  color: #fff8eb;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  margin-top: 4px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 3px 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  border: 2px solid var(--paper);
+  text-align: center;
+}
+
+.bubbleWrap {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 5;
+  max-width: 60%;
+}
+
+.impactBadge {
+  position: absolute;
+  right: 14%;
+  top: 6%;
+  z-index: 6;
+}
+
+.burstWrap {
+  margin-bottom: 6px;
+}
+
+.cameoWrap {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 7;
+}
+
+/* ── Detail strip ───────────────────────────────────────────────────── */
+
+.detailStrip {
+  background: var(--ink-soft);
+  color: var(--paper);
+  border: 2px solid var(--paper);
+  border-top: 0;
+  padding: 10px 14px;
+  margin-top: 6px;
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--paper);
+  background: var(--ink-soft);
+}
+.dot[data-state='past'] {
+  background: var(--paper-edge);
+}
+.dot[data-state='current'] {
+  background: var(--magenta);
+}
+
+.detailQuote {
+  font-size: 16px;
+  color: var(--paper);
+  margin-top: 6px;
+  min-height: 22px;
+}
+
+.stripControls {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.counter {
+  margin-left: auto;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+/* ── Breakpoint (≤600px, verbatim from the handoff) ─────────────────── */
+
+@media (max-width: 600px) {
+  .actorPortrait,
+  .receiverPortrait {
+    transform: scale(0.7);
+  }
+  .actorPortrait {
+    top: 60%;
+    left: 4%;
+  }
+  .receiverPortrait {
+    top: 12%;
+    right: 4%;
+  }
+  .impactBadge {
+    right: 8%;
+    top: 8%;
+    transform: scale(0.85);
+  }
+  .bubbleWrap {
+    left: 4%;
+    top: 92%;
+    max-width: 60%;
+  }
 }

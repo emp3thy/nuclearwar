@@ -1,21 +1,27 @@
+import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ApBudget from '../../src/ui/components/ApBudget';
 
 describe('<ApBudget>', () => {
-  it('renders AP available', () => {
-    render(<ApBudget ap={5} apBanked={1} />);
-    expect(screen.getByText(/AP available/i)).toBeInTheDocument();
-    expect(screen.getByText('5')).toBeInTheDocument();
+  it('renders the ApMeter readout and bank label', () => {
+    render(<ApBudget used={2} max={6} banked={0} />);
+    expect(screen.getByText(/\/ 6 AP/)).toBeInTheDocument();
+    expect(screen.getByText('4 will bank')).toBeInTheDocument();
   });
 
-  it('shows banked row when apBanked > 0', () => {
-    render(<ApBudget ap={5} apBanked={2} />);
-    expect(screen.getByText(/banked/i)).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument();
+  it('shows OVER BUDGET when used exceeds max', () => {
+    render(<ApBudget used={7} max={6} banked={0} />);
+    expect(screen.getByText('OVER BUDGET')).toBeInTheDocument();
   });
 
-  it('omits banked row when apBanked is 0', () => {
-    render(<ApBudget ap={3} apBanked={0} />);
-    expect(screen.queryByText(/banked/i)).not.toBeInTheDocument();
+  it('renders the banking note with the cap', () => {
+    render(<ApBudget used={0} max={6} banked={0} />);
+    expect(screen.getByText(/Banked AP carries over \(cap 4\)\./)).toBeInTheDocument();
+    expect(screen.queryByText(/Of which banked/)).not.toBeInTheDocument();
+  });
+
+  it('appends the banked amount when banked > 0', () => {
+    render(<ApBudget used={0} max={8} banked={2} />);
+    expect(screen.getByText(/Of which banked: 2\./)).toBeInTheDocument();
   });
 });

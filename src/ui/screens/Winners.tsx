@@ -1,5 +1,9 @@
 import type { ScreenProps } from '../App';
 import type { GameState, LeaderId, WinOutcome } from '../../engine/types';
+import { isHuman } from '../../engine/state';
+import { extractFlag } from '../portraits';
+import Portrait from '../components/Portrait';
+import { Btn, Halftone, Panel, RelBadge, Stamp, Tag } from '../components/comic';
 import styles from './Winners.module.css';
 
 function pickHeadline(outcome: WinOutcome, leaders: GameState['leaders']): string {
@@ -55,38 +59,93 @@ export default function Winners({ state, dispatch }: ScreenProps) {
     });
   }
 
+  const flagFor = (id: LeaderId) =>
+    isHuman(id) ? extractFlag(game.leaders[id].country) : undefined;
+
   return (
     <div className={styles.winners}>
-      <h1 className={styles.headline}>{headline}</h1>
-      <p className={styles.subline}>"{subLine}"</p>
+      <Halftone color="rgba(255,255,255,0.06)" />
+      <div className={styles.content}>
+        <div className={styles.finalTag}>
+          <Tag color="yellow" style={{ fontSize: 13, padding: '5px 12px' }}>
+            FINAL SCORE · ROUND {game.round - 1}
+          </Tag>
+        </div>
 
-      <h2 className={styles.sectionTitle}>Death Toll</h2>
-      <table className={styles.tollTable}>
-        <thead>
-          <tr>
-            <th>Leader</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>% lost</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tollRows.map((row) => (
-            <tr key={row.id} className={row.id === 'player1' ? styles.playerRow : ''}>
-              <td>{row.country.split(' ')[0]} {row.name}{row.id === 'player1' ? ' (you)' : ''}</td>
-              <td className={styles.numCell}>{row.start}M</td>
-              <td className={styles.numCell}>{row.end}M</td>
-              <td className={styles.numCell}>{row.pctLost.toFixed(1)}%</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <div className={styles.hero}>
+          {outcome.type === 'apocalypse' ? (
+            <div className={styles.portraitBlock}>
+              <div className={styles.apocalypsePanel} aria-hidden="true">☢</div>
+              <div className={styles.heroStamp}>
+                <Stamp color="magenta" rotate={14} style={{ fontSize: 14, padding: '5px 12px' }}>
+                  NO SURVIVORS
+                </Stamp>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.portraitBlock}>
+              <Portrait leaderId={outcome.winner} size={200} flag={flagFor(outcome.winner)} />
+              <div className={styles.heroStamp}>
+                <Stamp
+                  color={outcome.type === 'survivor' ? 'yellow' : 'magenta'}
+                  rotate={14}
+                  style={{ fontSize: 14, padding: '5px 12px' }}
+                >
+                  {outcome.type === 'survivor' ? 'SURVIVOR' : 'PYRRHIC'}
+                </Stamp>
+              </div>
+            </div>
+          )}
+          <div className={styles.heroText}>
+            <h1 className={styles.headline}>{headline}</h1>
+            <p className={styles.subline}>"{subLine}"</p>
+            <div className={styles.buttonRow}>
+              <Btn variant="primary" size="lg" onClick={newGame}>New Game</Btn>
+              <Btn size="lg" onClick={sameCast}>Same Cast, Again</Btn>
+            </div>
+          </div>
+        </div>
 
-      <div className={styles.buttonRow}>
-        <button type="button" className={styles.button} onClick={newGame}>New Game</button>
-        <button type="button" className={`${styles.button} ${styles.secondary}`} onClick={sameCast}>
-          Same Cast, Again
-        </button>
+        <Panel title="Death Toll" style={{ marginTop: 32, background: 'var(--paper)', color: 'var(--ink)' }}>
+          <div className={styles.tableScroll}>
+            <div className={styles.deathTable}>
+              <div className={styles.deathHead}>
+                <span className={styles.cellLeader}>LEADER</span>
+                <span className={styles.cellNum}>START</span>
+                <span className={styles.cellNum}>END</span>
+                <span className={styles.cellNum}>% LOST</span>
+                <span className={styles.cellState}>STATE</span>
+              </div>
+              {tollRows.map((row) => (
+                <div key={row.id} className={styles.deathRow}>
+                  <span className={`${styles.cellLeader} ${styles.leaderCell}`}>
+                    <Portrait leaderId={row.id} size={36} flag={flagFor(row.id)} />
+                    <strong>{row.name}{row.id === 'player1' ? ' (you)' : ''}</strong>
+                  </span>
+                  <span className={`${styles.cellNum} ${styles.numCell}`}>{row.start}M</span>
+                  <span
+                    className={`${styles.cellNum} ${styles.numCell} ${row.end === 0 ? styles.endDead : styles.endAlive}`}
+                  >
+                    {row.end}M
+                  </span>
+                  <span className={`${styles.cellNum} ${styles.numCell} ${styles.pctCell}`}>
+                    {Math.round(row.pctLost)}%
+                  </span>
+                  <span className={styles.cellState}>
+                    {row.end > 0
+                      ? <RelBadge kind="gain">SURVIVED</RelBadge>
+                      : <RelBadge kind="harm">ELIMINATED</RelBadge>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Panel>
+
+        <div className={styles.finalWord}>
+          <div className={styles.finalQuote}>"EVERYBODY PLAYS. NOBODY WINS."</div>
+          <div className={styles.finalAttribution}>— the original 1989 box, more or less.</div>
+        </div>
       </div>
     </div>
   );

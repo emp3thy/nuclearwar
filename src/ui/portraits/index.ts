@@ -20,15 +20,19 @@ export const FACES: Record<string, () => JSX.Element> = {
   player5: GrouchoFace,
 };
 
-/** Signature disc color + badge flag for the fixed cast. */
+/** Signature disc color + badge flag for the fixed cast.
+ * Colors are concrete hexes (mirroring tokens.css `--c-*`) so they work both as
+ * CSS backgrounds and as SVG `fill` attributes (WorldMap country ellipses,
+ * slice-3 spec §5.3 — interpolating `var(--c-<leaderId>)` would yield undefined
+ * custom properties for the long ids). Keep in sync with tokens.css. */
 export const PORTRAIT_META: Record<string, { color: string; flag: string }> = {
-  chump: { color: 'var(--c-chump)', flag: '🇺🇸' },
-  netanyahoo: { color: 'var(--c-netan)', flag: '🇮🇱' },
-  khameneverhere: { color: 'var(--c-khamen)', flag: '🇮🇷' },
-  starmless: { color: 'var(--c-starm)', flag: '🇬🇧' },
-  carnage: { color: 'var(--c-carnage)', flag: '🇨🇦' },
-  'mileigh-hem': { color: 'var(--c-mileigh)', flag: '🇦🇷' },
-  disparage: { color: 'var(--c-disparage)', flag: '🇬🇧' },
+  chump: { color: '#d6293f', flag: '🇺🇸' },
+  netanyahoo: { color: '#1a4d8c', flag: '🇮🇱' },
+  khameneverhere: { color: '#1f5e3a', flag: '🇮🇷' },
+  starmless: { color: '#8a1729', flag: '🇬🇧' },
+  carnage: { color: '#b22535', flag: '🇨🇦' },
+  'mileigh-hem': { color: '#e6a517', flag: '🇦🇷' },
+  disparage: { color: '#5a3e8a', flag: '🇬🇧' },
 };
 
 /** Fixed per-slot accent for human (Groucho) portraits — spec §3. */

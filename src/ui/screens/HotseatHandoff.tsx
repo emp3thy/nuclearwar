@@ -1,4 +1,5 @@
 import type { ScreenProps } from '../App';
+import { Btn, Tag } from '../components/comic';
 import styles from './HotseatHandoff.module.css';
 
 export default function HotseatHandoff({ state, dispatch }: ScreenProps) {
@@ -6,23 +7,26 @@ export default function HotseatHandoff({ state, dispatch }: ScreenProps) {
   const id = state.activeHumanTurn!;
   const leader = game.leaders[id];
 
-  // Country string is e.g. "🦆 Freedonia"; split into flag (first segment) and name (rest).
-  const [flag, ...rest] = leader.country.split(' ');
-  const countryName = rest.join(' ');
+  // Country string is e.g. "🦆 Freedonia"; the first token is the flag.
+  const flag = leader.country.split(' ')[0];
 
   function begin() {
     dispatch({ type: 'BEGIN_PLANNING', leaderId: id });
   }
 
   return (
-    <div className={styles.curtain}>
-      <div className={styles.passLabel}>Pass the device</div>
-      <div className={styles.flag}>{flag}</div>
-      <div className={styles.country}>{countryName}</div>
-      <div className={styles.leaderName}>{leader.name}</div>
-      <div className={styles.divider} />
-      <div className={styles.sealed}>Previous orders sealed.</div>
-      <button type="button" className={styles.tapBtn} onClick={begin}>Tap to begin →</button>
+    <div className={`screen ${styles.curtain}`}>
+      <div aria-hidden className={styles.dotGrid} />
+      <div className={styles.content}>
+        <Tag color="yellow" style={{ fontSize: 12, padding: '5px 12px' }}>HOTSEAT HANDOFF</Tag>
+        <div className={styles.flag}>{flag}</div>
+        <div className={`display ${styles.kicker}`}>PASS TO</div>
+        <h1 className={`display ${styles.leaderName}`}>{leader.name}</h1>
+        <div className={`hand ${styles.sealed}`}>Previous orders sealed. Don't peek.</div>
+        <Btn variant="primary" size="xl" onClick={begin} style={{ marginTop: 28 }}>
+          BEGIN MY TURN
+        </Btn>
+      </div>
     </div>
   );
 }

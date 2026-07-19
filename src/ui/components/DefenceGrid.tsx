@@ -60,16 +60,17 @@ export default function DefenceGrid({
         const count = orders.filter(cell.matches).length;
         const canAdd = cell.canAddMore && apRemaining >= cell.cost;
         return (
-          <div key={i} className={`${styles.cell} ${count > 0 ? styles.on : ''}`}>
+          <div key={i} className={`${styles.tile} ${count > 0 ? styles.on : ''}`}>
             <div className={styles.emoji}>{cell.emoji}</div>
-            <div className={styles.label}>{cell.label}</div>
-            <div className={styles.cost}>
+            <div className={`display ${styles.label}`}>{cell.label}</div>
+            <div className={`mono ${styles.cost}`}>
               {cell.cost} AP
               {cell.ownedHint !== undefined ? ` · ${cell.ownedHint} owned` : ''}
             </div>
             <div className={styles.stepper}>
               <button
                 type="button"
+                aria-label={`remove ${cell.label}`}
                 disabled={count === 0}
                 onClick={() => setOrders((prev) => {
                   const idx = findLastIndexMatching(prev, cell.matches);
@@ -80,6 +81,7 @@ export default function DefenceGrid({
               <span className={styles.num}>{count}</span>
               <button
                 type="button"
+                aria-label={`add ${cell.label}`}
                 disabled={!canAdd}
                 onClick={() => setOrders((prev) => [...prev, cell.make()])}
               >+</button>

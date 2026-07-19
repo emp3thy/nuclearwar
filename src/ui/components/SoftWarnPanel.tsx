@@ -1,4 +1,5 @@
 import type { GameState, SoftWarning } from '../../engine/types';
+import { Panel } from './comic';
 import styles from './SoftWarnPanel.module.css';
 
 interface Props {
@@ -6,17 +7,21 @@ interface Props {
   game: GameState;
 }
 
+/** Always-visible warnings panel (handoff screens-2.jsx warnings-panel). */
 export default function SoftWarnPanel({ warnings, game }: Props) {
-  if (warnings.length === 0) return null;
   return (
-    <div className={styles.panel}>
-      <div className={styles.title}>⚠ Suggestions</div>
-      <ul className={styles.list}>
-        {warnings.map((w, i) => (
-          <li key={i}>{describe(w, game)}</li>
-        ))}
-      </ul>
-    </div>
+    <Panel tilt={0}>
+      <div className={`display ${styles.title}`}>SOFT WARNINGS</div>
+      {warnings.length === 0 ? (
+        <div className={`hand ${styles.empty}`}>Nothing obviously stupid. Yet.</div>
+      ) : (
+        <ul className={styles.list}>
+          {warnings.map((w, i) => (
+            <li key={i} className={`hand ${styles.warning}`}>⚠ {describe(w, game)}</li>
+          ))}
+        </ul>
+      )}
+    </Panel>
   );
 }
 

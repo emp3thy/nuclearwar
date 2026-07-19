@@ -9,13 +9,14 @@ interface Props {
   onDec: () => void;
 }
 
+/** Mini comic tile for one yield of one delivery type. */
 export default function LaunchCell({ sizeLabel, warheadsLeft, count, canAdd, onInc, onDec }: Props) {
   const stateClass = count > 0 ? styles.on : warheadsLeft === 0 && count === 0 ? styles.off : '';
   return (
     <div className={`${styles.cell} ${stateClass}`}>
       <div className={styles.emoji}>💥</div>
-      <div className={styles.label}>{sizeLabel}</div>
-      <div className={styles.inv}>{warheadsLeft} left</div>
+      <div className={`display ${styles.label}`}>{sizeLabel}</div>
+      <div className={`mono ${styles.inv}`}>{warheadsLeft} left</div>
       <div className={styles.stepper}>
         <button type="button" disabled={count === 0} onClick={onDec}>−</button>
         <span className={styles.num}>{count}</span>

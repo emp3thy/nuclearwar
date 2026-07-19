@@ -16,7 +16,7 @@ export interface CountryPos {
 export const COUNTRY_POS: Record<LeaderId, CountryPos> = {
   chump: { cx: 23, cy: 36, label: 'USA' },
   carnage: { cx: 24, cy: 24, label: 'CANADA' },
-  starmless: { cx: 44, cy: 13, label: 'UK' },
+  burnem: { cx: 44, cy: 13, label: 'UK' },
   netanyahoo: { cx: 58, cy: 40, label: 'ISR' },
   khameneverhere: { cx: 64, cy: 38, label: 'IRAN' },
   'mileigh-hem': { cx: 33, cy: 78, label: 'ARG' },
@@ -216,7 +216,7 @@ export default function WorldMap({ game, event }: WorldMapProps) {
               ? HUMAN_ACCENTS[id]
               : PORTRAIT_META[id].color;
         const label = p.label ?? stripFlag(game.leaders[id].country).toUpperCase();
-        const isUK = id === 'starmless';
+        const isUK = id === 'burnem';
         return (
           <g key={id} data-leader={id}>
             <ellipse

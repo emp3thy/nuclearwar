@@ -44,9 +44,9 @@ describe('buildToward', () => {
   });
 
   it('emits nothing when budget is below the cheapest item cost', () => {
-    const s = initialState({ cast: ['starmless', 'chump'], difficulty: 'normal', seed: 'b5' });
+    const s = initialState({ cast: ['burnem', 'chump'], difficulty: 'normal', seed: 'b5' });
     const plan: BuildPlanEntry[] = [{ build: { item: 'factory' }, target: 5 }];
-    const r = buildToward(s, 'starmless', plan, 2); // factory costs 3
+    const r = buildToward(s, 'burnem', plan, 2); // factory costs 3
     expect(r.orders).toHaveLength(0);
     expect(r.apSpent).toBe(0);
   });

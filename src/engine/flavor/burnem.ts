@@ -3,7 +3,7 @@ import type { FlavorBank } from './index';
 // Scapegoat-substitution lines embed `{scapegoat}` — the picker substitutes a
 // leader name at call time. Where no scapegoat applies, pick.ts treats the
 // raw {scapegoat}-bearing string as ineligible (filtered before random draw).
-export const starmlessBank: FlavorBank = {
+export const burnemBank: FlavorBank = {
   preRoundMood: [
     'Long-term decisions. Sound foundations. Working people.',
     'So, let me be very clear…',

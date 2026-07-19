@@ -92,7 +92,7 @@ export function KhameneverhereFace(): JSX.Element {
   );
 }
 
-export function StarmlessFace(): JSX.Element {
+export function BurnemFace(): JSX.Element {
   return (
     <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       {/* suit (grey) */}

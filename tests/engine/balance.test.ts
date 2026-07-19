@@ -15,7 +15,7 @@ describe('LEADER_PROFILES', () => {
     expect(ids).toEqual(
       [
         'carnage', 'chump', 'khameneverhere', 'mileigh-hem',
-        'netanyahoo', 'starmless',
+        'netanyahoo', 'burnem',
         'player1', 'player2', 'player3', 'player4', 'player5',
       ].sort(),
     );
@@ -33,7 +33,7 @@ describe('LEADER_PROFILES', () => {
     expect(LEADER_PROFILES.chump.startFactories).toBe(10);
     expect(LEADER_PROFILES.chump.startAp).toBe(10);
     expect(LEADER_PROFILES.khameneverhere.startPop).toBe(28);
-    expect(LEADER_PROFILES.starmless.startPop).toBe(25);
+    expect(LEADER_PROFILES.burnem.startPop).toBe(25);
     expect(LEADER_PROFILES.carnage.startPop).toBe(25);
     expect(LEADER_PROFILES['mileigh-hem'].startPop).toBe(22);
     expect(LEADER_PROFILES['mileigh-hem'].startFactories).toBe(4);

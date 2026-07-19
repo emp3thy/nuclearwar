@@ -36,14 +36,14 @@ describe('cameo', () => {
     const events: ResolutionEvent[] = [
       { kind: 'MissileLaunched', from: 'chump', to: 'carnage', delivery: 'missile', warhead: 'small', targetType: 'people' },
     ];
-    const livingLeaders: LeaderId[] = ['chump', 'carnage', 'starmless'];
+    const livingLeaders: LeaderId[] = ['chump', 'carnage', 'burnem'];
     const r = pickColumnNamedLeader(events, livingLeaders, seedFromString('pick'));
     expect(r.namedLeader).toBe('chump');
   });
 
   it('pickColumnNamedLeader falls back to uniform pick among living leaders when nobody attacked', () => {
     const events: ResolutionEvent[] = [];
-    const livingLeaders: LeaderId[] = ['chump', 'carnage', 'starmless'];
+    const livingLeaders: LeaderId[] = ['chump', 'carnage', 'burnem'];
     const r = pickColumnNamedLeader(events, livingLeaders, seedFromString('fallback'));
     expect(livingLeaders).toContain(r.namedLeader);
   });

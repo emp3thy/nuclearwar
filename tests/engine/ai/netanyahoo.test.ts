@@ -44,12 +44,12 @@ describe('Netanyahoo (Warmonger)', () => {
   });
 
   it('biases toward the largest-arsenal target', () => {
-    const s = initialState({ cast: ['netanyahoo', 'chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'n4' });
+    const s = initialState({ cast: ['netanyahoo', 'chump', 'carnage', 'burnem'], difficulty: 'normal', seed: 'n4' });
     s.leaders.netanyahoo.stockpile.missiles = 1;
     s.leaders.netanyahoo.stockpile.warheadsSmall = 1;
     s.leaders.netanyahoo.grudge = { chump: 1 }; // chump is allowed
     s.leaders.carnage.stockpile.warheadsLarge = 5; // largest arsenal
-    s.leaders.starmless.stockpile.warheadsSmall = 1;
+    s.leaders.burnem.stockpile.warheadsSmall = 1;
     const orders = planNetanyahoo(s, 'netanyahoo');
     const launch = orders.find((o) => o.kind === 'launch');
     expect(launch?.target).toBe('carnage');

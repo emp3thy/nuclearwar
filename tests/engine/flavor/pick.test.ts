@@ -49,9 +49,9 @@ describe('pickLine', () => {
   });
 
   it('filters out lines containing untracked substitution tokens', () => {
-    // starmlessBank.launch has lines with {scapegoat}. With no scapegoat substitution,
+    // burnemBank.launch has lines with {scapegoat}. With no scapegoat substitution,
     // the picker must filter those lines out before drawing.
-    const bank = getBank('starmless')!;
+    const bank = getBank('burnem')!;
     for (const seed of ['x', 'y', 'z'].map(seedFromString)) {
       const r = pickLine(bank, 'launch', seed); // no substitutions
       expect(r.quote).not.toContain('{scapegoat}');

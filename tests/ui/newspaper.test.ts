@@ -58,9 +58,9 @@ describe('deriveForecast', () => {
 
 describe('deriveMarket', () => {
   it('computes rounded percent change from prevPopulations', () => {
-    const game = makeGame(['player1', 'chump', 'starmless']);
+    const game = makeGame(['player1', 'chump', 'burnem']);
     game.leaders.chump.population = 18;
-    const rows = deriveMarket(game, { chump: 33, starmless: 25 });
+    const rows = deriveMarket(game, { chump: 33, burnem: 25 });
     const chump = rows.find((r) => r.id === 'chump');
     expect(chump).toBeDefined();
     // (18 - 33) / 33 * 100 = -45.45… → -45
@@ -91,16 +91,16 @@ describe('deriveMarket', () => {
   });
 
   it('grades down / holds / up notes by change sign', () => {
-    const game = makeGame(['chump', 'starmless', 'mileigh-hem']);
-    game.leaders.starmless.population = 22; // up from 20
+    const game = makeGame(['chump', 'burnem', 'mileigh-hem']);
+    game.leaders.burnem.population = 22; // up from 20
     game.leaders['mileigh-hem'].population = 21; // down from 22
     const rows = deriveMarket(game, {
       chump: game.leaders.chump.population,
-      starmless: 20,
+      burnem: 20,
       'mileigh-hem': 22,
     });
     expect(rows.find((r) => r.id === 'chump')!.note).toBe('holds');
-    const up = rows.find((r) => r.id === 'starmless')!;
+    const up = rows.find((r) => r.id === 'burnem')!;
     expect(up.arrow).toBe('▲');
     expect(up.note).toBe('up');
     const down = rows.find((r) => r.id === 'mileigh-hem')!;
@@ -109,12 +109,12 @@ describe('deriveMarket', () => {
   });
 
   it('derives human ticker symbols from the flag-stripped country (first 3 chars)', () => {
-    const game = makeGame(['player1', 'chump', 'starmless']);
+    const game = makeGame(['player1', 'chump', 'burnem']);
     const rows = deriveMarket(game, {});
     // player1's default country is '🦆 Freedonia' → FRE (rule, not the mock's FRD)
     expect(rows.find((r) => r.id === 'player1')!.sym).toBe('FRE');
     expect(rows.find((r) => r.id === 'chump')!.sym).toBe('USA');
-    expect(rows.find((r) => r.id === 'starmless')!.sym).toBe('UK');
+    expect(rows.find((r) => r.id === 'burnem')!.sym).toBe('UK');
   });
 });
 

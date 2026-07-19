@@ -58,7 +58,7 @@ describe('buildPlaybackSteps', () => {
   it('attaches a cameo that followed a duplicate impact to the surviving collapsed step', () => {
     const events: ResolutionEvent[] = [
       { kind: 'ImpactPeople', from: 'chump', target: 'carnage', warhead: 'small', deaths: 3 },
-      { kind: 'ImpactPeople', from: 'starmless', target: 'carnage', warhead: 'small', deaths: 4 },
+      { kind: 'ImpactPeople', from: 'burnem', target: 'carnage', warhead: 'small', deaths: 4 },
       // Duplicate (target, attacker) pair — groupPhaseEvents folds it into the first.
       { kind: 'ImpactPeople', from: 'chump', target: 'carnage', warhead: 'small', deaths: 2 },
       { kind: 'DisparageCameo', afterImpact: { from: 'chump', to: 'carnage' }, quote: 'Shambles.' },
@@ -74,7 +74,7 @@ describe('buildPlaybackSteps', () => {
   it('drops a cameo whose afterImpact pair matches no step', () => {
     const events: ResolutionEvent[] = [
       { kind: 'ImpactPeople', from: 'chump', target: 'carnage', warhead: 'small', deaths: 3 },
-      { kind: 'DisparageCameo', afterImpact: { from: 'starmless', to: 'chump' }, quote: 'Nobody asked.' },
+      { kind: 'DisparageCameo', afterImpact: { from: 'burnem', to: 'chump' }, quote: 'Nobody asked.' },
     ];
     const steps = buildPlaybackSteps(events);
     expect(steps).toHaveLength(1);

@@ -46,20 +46,20 @@ describe('scoreState', () => {
 
 describe('bestTargetByLookahead', () => {
   it('picks the target whose projected post-round state scores highest', () => {
-    // 3-leader setup: chump can launch at carnage (pop=5) OR starmless (pop=1).
+    // 3-leader setup: chump can launch at carnage (pop=5) OR burnem (pop=1).
     // Carnage has ap=0 so it cannot build or retaliate this round.
     // Scoring (elimination-only, no dominance):
-    //   kill carnage → starmless survives at 1 → score = 33-1 = 32
-    //   kill starmless → carnage survives at 5 → score = 33-5 = 28
+    //   kill carnage → burnem survives at 1 → score = 33-1 = 32
+    //   kill burnem → carnage survives at 5 → score = 33-5 = 28
     // Lookahead should prefer carnage (higher post-round margin).
-    const s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'hard', seed: 'lh5' });
+    const s = initialState({ cast: ['chump', 'carnage', 'burnem'], difficulty: 'hard', seed: 'lh5' });
     s.leaders.chump.stockpile.missiles = 1;
     s.leaders.chump.stockpile.warheadsLarge = 1;
     s.leaders.carnage.population = 5;
     s.leaders.carnage.ap = 0; // no AP — carnage builds nothing and cannot retaliate
-    s.leaders.starmless.population = 1;
+    s.leaders.burnem.population = 1;
     const baseline: Order[] = []; // no other orders this round
-    const candidates: ['carnage', 'starmless'] = ['carnage', 'starmless'];
+    const candidates: ['carnage', 'burnem'] = ['carnage', 'burnem'];
     const best = bestTargetByLookahead(s, 'chump', baseline, candidates, {
       delivery: 'missile', warhead: 'large', targetType: 'people',
     }, dispatch);

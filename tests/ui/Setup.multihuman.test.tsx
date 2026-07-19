@@ -44,13 +44,13 @@ describe('<Setup> multi-human roster', () => {
 
   it('picking a 5th opponent drops the oldest pick', () => {
     render(<Setup state={initialUiState} dispatch={vi.fn()} />);
-    for (const name of [/chump/i, /carnage/i, /starmless/i, /netanyahoo/i]) {
+    for (const name of [/chump/i, /carnage/i, /burn'em/i, /netanyahoo/i]) {
       fireEvent.click(screen.getByRole('button', { name }));
     }
     fireEvent.click(screen.getByRole('button', { name: /khameneverhere/i }));
     // chump (oldest) dropped; the four later picks remain
     expect(screen.getByRole('button', { name: /chump/i })).toHaveAttribute('aria-pressed', 'false');
-    for (const name of [/carnage/i, /starmless/i, /netanyahoo/i, /khameneverhere/i]) {
+    for (const name of [/carnage/i, /burn'em/i, /netanyahoo/i, /khameneverhere/i]) {
       expect(screen.getByRole('button', { name })).toHaveAttribute('aria-pressed', 'true');
     }
   });

@@ -1,7 +1,7 @@
 import type { LeaderId } from '../../engine/types';
 import {
   CarnageFace, ChumpFace, DisparageFace, GrouchoFace,
-  KhameneverhereFace, MileighFace, NetanyahooFace, StarmlessFace,
+  KhameneverhereFace, MileighFace, NetanyahooFace, BurnemFace,
 } from './faces';
 
 /** Face component per AI leader; every human slot maps to the Groucho disguise. */
@@ -9,7 +9,7 @@ export const FACES: Record<string, () => JSX.Element> = {
   chump: ChumpFace,
   netanyahoo: NetanyahooFace,
   khameneverhere: KhameneverhereFace,
-  starmless: StarmlessFace,
+  burnem: BurnemFace,
   carnage: CarnageFace,
   'mileigh-hem': MileighFace,
   disparage: DisparageFace,
@@ -29,7 +29,7 @@ export const PORTRAIT_META: Record<string, { color: string; flag: string }> = {
   chump: { color: '#d6293f', flag: '🇺🇸' },
   netanyahoo: { color: '#1a4d8c', flag: '🇮🇱' },
   khameneverhere: { color: '#1f5e3a', flag: '🇮🇷' },
-  starmless: { color: '#8a1729', flag: '🇬🇧' },
+  burnem: { color: '#8a1729', flag: '🇬🇧' },
   carnage: { color: '#b22535', flag: '🇨🇦' },
   'mileigh-hem': { color: '#e6a517', flag: '🇦🇷' },
   disparage: { color: '#5a3e8a', flag: '🇬🇧' },

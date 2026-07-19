@@ -73,7 +73,7 @@ export interface MarketRow {
 const AI_SYMS: Partial<Record<LeaderId, string>> = {
   chump: 'USA',
   khameneverhere: 'IRN',
-  starmless: 'UK',
+  burnem: 'UK',
   carnage: 'CAN',
   'mileigh-hem': 'ARG',
   netanyahoo: 'ISR',
@@ -191,7 +191,7 @@ const AI_KICKERS: Partial<Record<LeaderId, string>> = {
   carnage: 'PARLIAMENT HILL',
   khameneverhere: 'LOCATION UNDISCLOSED',
   netanyahoo: 'THE KIRYA, TEL AVIV',
-  starmless: 'WESTMINSTER',
+  burnem: 'WESTMINSTER',
   'mileigh-hem': 'CASA ROSADA',
 };
 

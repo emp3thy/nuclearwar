@@ -20,18 +20,18 @@ describe('initialState', () => {
 
   it('supports a 3-leader cast', () => {
     const s = initialState({
-      cast: ['chump', 'carnage', 'starmless'],
+      cast: ['chump', 'carnage', 'burnem'],
       difficulty: 'normal',
       seed: 'x',
     });
-    expect(s.cast).toEqual(['chump', 'carnage', 'starmless']);
-    expect(Object.keys(s.leaders).sort()).toEqual(['carnage', 'chump', 'starmless']);
-    expect(s.leaders.starmless.population).toBe(25);
+    expect(s.cast).toEqual(['chump', 'carnage', 'burnem']);
+    expect(Object.keys(s.leaders).sort()).toEqual(['burnem', 'carnage', 'chump']);
+    expect(s.leaders.burnem.population).toBe(25);
   });
 
   it('supports a 5-leader cast', () => {
     const s = initialState({
-      cast: ['chump', 'carnage', 'starmless', 'netanyahoo', 'mileigh-hem'],
+      cast: ['chump', 'carnage', 'burnem', 'netanyahoo', 'mileigh-hem'],
       difficulty: 'normal',
       seed: 'x',
     });

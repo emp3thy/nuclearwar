@@ -28,7 +28,7 @@ describe('<WorldMap>', () => {
     expect(container.querySelector('[data-leader="carnage"]')).not.toBeNull();
     expect(container.querySelector('[data-leader="player1"]')).not.toBeNull();
     // Not in the cast:
-    expect(container.querySelector('[data-leader="starmless"]')).toBeNull();
+    expect(container.querySelector('[data-leader="burnem"]')).toBeNull();
     expect(container.querySelector('[data-leader="netanyahoo"]')).toBeNull();
   });
 

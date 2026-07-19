@@ -22,21 +22,21 @@ function runGame(seed: string, cast: LeaderId[], maxRounds = 80): GameState {
 
 describe('determinism', () => {
   it('produces identical state for identical seed across two runs (3-leader)', () => {
-    const cast: LeaderId[] = ['chump', 'carnage', 'starmless'];
+    const cast: LeaderId[] = ['chump', 'carnage', 'burnem'];
     const a = runGame('alpha', cast);
     const b = runGame('alpha', cast);
     expect(a).toEqual(b);
   });
 
   it('produces different final state for different seeds', () => {
-    const cast: LeaderId[] = ['chump', 'carnage', 'starmless'];
+    const cast: LeaderId[] = ['chump', 'carnage', 'burnem'];
     const a = runGame('alpha', cast);
     const b = runGame('beta', cast);
     expect(a).not.toEqual(b);
   });
 
   it('property: 25 random seeds are each deterministic across two runs', () => {
-    const cast: LeaderId[] = ['chump', 'carnage', 'starmless'];
+    const cast: LeaderId[] = ['chump', 'carnage', 'burnem'];
     for (let i = 0; i < 25; i++) {
       const seed = `prop-${i}`;
       const a = runGame(seed, cast);

@@ -6,7 +6,7 @@ import { nextRandom } from '../rng';
 import { buildToward, launchSalvo, type BuildPlanEntry } from './aggression';
 
 /**
- * Starmless — Cautious + Scapegoat personality (P4c.2 rework).
+ * Burn'em — Cautious + Scapegoat personality (P4c.2 rework).
  *
  * Defensive baseline, but with a new kill instinct: launches when retaliating
  * OR when a finishable (low-population) opponent exists. Low launch cap — he
@@ -14,21 +14,21 @@ import { buildToward, launchSalvo, type BuildPlanEntry } from './aggression';
  */
 const PROPAGANDA_COST = 1;
 const DEPLOY_COST = 4;
-const STARMLESS_FINISH_POP_M = 8;
-const STARMLESS_MAX_LAUNCHES = 2;
+const BURNEM_FINISH_POP_M = 8;
+const BURNEM_MAX_LAUNCHES = 2;
 
 // Factory target 7 (starts at 6) so at most one factory is built per low-AP
 // round — leaving budget for the missile + warhead stock the kill instinct
 // needs. A plan with warheads but NO delivery vehicle would recreate the
 // zero-fire bug, so the missile entry is mandatory.
-const STARMLESS_BUILD_PLAN: BuildPlanEntry[] = [
+const BURNEM_BUILD_PLAN: BuildPlanEntry[] = [
   { build: { item: 'factory' }, target: 7 },
   { build: { item: 'missile' }, target: 2 },
   { build: { item: 'warhead', yield: 'small' }, target: 3 },
   { build: { item: 'defence', type: 'shield' }, target: 2 },
 ];
 
-export function planStarmless(state: GameState, leaderId: LeaderId): Order[] {
+export function planBurnem(state: GameState, leaderId: LeaderId): Order[] {
   const me = state.leaders[leaderId];
   if (!me || !me.alive) return [];
 
@@ -54,7 +54,7 @@ export function planStarmless(state: GameState, leaderId: LeaderId): Order[] {
     }
     // Scapegoat roll (reads rngState without advancing shared state).
     const roll = nextRandom(state.rngState).value;
-    const doScapegoat = roll < AI_SCORING_WEIGHTS.starmlessScapegoatPct;
+    const doScapegoat = roll < AI_SCORING_WEIGHTS.burnemScapegoatPct;
     if (doScapegoat) {
       const candidates = others.filter((t) => t !== primaryAttacker);
       if (candidates.length > 0) {
@@ -72,7 +72,7 @@ export function planStarmless(state: GameState, leaderId: LeaderId): Order[] {
   } else {
     // New P4c.2 kill instinct: finish off a low-population opponent.
     const finishable = others
-      .filter((t) => state.leaders[t].population <= STARMLESS_FINISH_POP_M)
+      .filter((t) => state.leaders[t].population <= BURNEM_FINISH_POP_M)
       .sort((a, b) => state.leaders[a].population - state.leaders[b].population);
     if (finishable.length > 0) launchTarget = finishable[0];
   }
@@ -87,10 +87,10 @@ export function planStarmless(state: GameState, leaderId: LeaderId): Order[] {
   const salvo = launchSalvo(state, leaderId, {
     budget: offenceBudget,
     rankedTargets,
-    maxLaunches: STARMLESS_MAX_LAUNCHES,
+    maxLaunches: BURNEM_MAX_LAUNCHES,
   });
   const build = buildToward(
-    state, leaderId, STARMLESS_BUILD_PLAN, offenceBudget - salvo.apSpent,
+    state, leaderId, BURNEM_BUILD_PLAN, offenceBudget - salvo.apSpent,
   );
   budget -= salvo.apSpent + build.apSpent;
 

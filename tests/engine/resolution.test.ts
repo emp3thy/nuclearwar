@@ -83,7 +83,7 @@ describe('resolveRound', () => {
   });
 
   it('eliminates a leader and triggers Final Retaliation cascade', () => {
-    let s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'x' });
+    let s = initialState({ cast: ['chump', 'carnage', 'burnem'], difficulty: 'normal', seed: 'x' });
     // Chump fires 4 Large warheads at Carnage with 0 shields → 4th guaranteed to land.
     s.leaders.chump.stockpile.missiles = 4;
     s.leaders.chump.stockpile.warheadsLarge = 4;
@@ -101,7 +101,7 @@ describe('resolveRound', () => {
     };
     s = withOrders(s, 'chump', [launch, launch, launch, launch]);
     s = withOrders(s, 'carnage', []);
-    s = withOrders(s, 'starmless', []);
+    s = withOrders(s, 'burnem', []);
     const r = resolveRound(s);
     expect(r.state.leaders.carnage.alive).toBe(false);
     const kinds = r.events.map((e) => e.kind);
@@ -185,28 +185,28 @@ describe('resolveRound', () => {
 
   it('FR cascade impacts also update grudge (deterministic via overwhelmed-defences setup)', () => {
     // Setup: carnage dies from chump's launches AND has a heavy stockpile that fires
-    // 8 FR launches at chump+starmless. With shields=0 on both, pigeonhole guarantees
+    // 8 FR launches at chump+burnem. With shields=0 on both, pigeonhole guarantees
     // one target gets ≥4 incoming → 4th has 0% intercept → at least one FR hit lands.
     // That landed FR impact must attribute grudge to carnage (the dying leader).
-    let s = initialState({ cast: ['chump', 'carnage', 'starmless'], difficulty: 'normal', seed: 'fr-grudge' });
+    let s = initialState({ cast: ['chump', 'carnage', 'burnem'], difficulty: 'normal', seed: 'fr-grudge' });
     s.leaders.chump.stockpile.missiles = 4;
     s.leaders.chump.stockpile.warheadsLarge = 4;
     s.leaders.carnage.population = 5;
     s.leaders.carnage.stockpile.missiles = 8;
     s.leaders.carnage.stockpile.warheadsSmall = 8;
     s.leaders.chump.stockpile.shields = 0;
-    s.leaders.starmless.stockpile.shields = 0;
+    s.leaders.burnem.stockpile.shields = 0;
     const launch = {
       kind: 'launch' as const, target: 'carnage' as const, delivery: 'missile' as const,
       warhead: 'large' as const, targetType: 'people' as const,
     };
     s = withOrders(s, 'chump', [launch, launch, launch, launch]);
     s = withOrders(s, 'carnage', []);
-    s = withOrders(s, 'starmless', []);
+    s = withOrders(s, 'burnem', []);
     const r = resolveRound(s);
     const chumpGrudge = r.state.leaders.chump.grudge.carnage ?? 0;
-    const starmlessGrudge = r.state.leaders.starmless.grudge.carnage ?? 0;
-    expect(chumpGrudge + starmlessGrudge).toBeGreaterThan(0);
+    const burnemGrudge = r.state.leaders.burnem.grudge.carnage ?? 0;
+    expect(chumpGrudge + burnemGrudge).toBeGreaterThan(0);
   });
 });
 

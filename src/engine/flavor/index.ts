@@ -3,7 +3,7 @@ import { chumpBank } from './chump';
 import { khameneverhereBank } from './khameneverhere';
 import { netanyahooBank } from './netanyahoo';
 import { carnageBank } from './carnage';
-import { starmlessBank } from './starmless';
+import { burnemBank } from './burnem';
 import { mileighhemBank } from './mileighhem';
 
 export interface FlavorBank {
@@ -29,7 +29,7 @@ const BANKS: Partial<Record<LeaderId, FlavorBank>> = {
   khameneverhere: khameneverhereBank,
   netanyahoo: netanyahooBank,
   carnage: carnageBank,
-  starmless: starmlessBank,
+  burnem: burnemBank,
   'mileigh-hem': mileighhemBank,
 };
 

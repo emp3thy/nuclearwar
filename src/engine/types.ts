@@ -1,7 +1,7 @@
 export type LeaderId =
   | 'chump'
   | 'khameneverhere'
-  | 'starmless'
+  | 'burnem'
   | 'carnage'
   | 'mileigh-hem'
   | 'netanyahoo'

@@ -54,6 +54,13 @@
   gap: 3px;
 }
 
+/* Defined locally: CSS modules localize animation names in the shorthand,
+   so referencing the global @keyframes in tokens.css would not resolve. */
+@keyframes pulsedot {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.4); opacity: 1; }
+}
+
 .pulseDot {
   width: 6px;
   height: 6px;

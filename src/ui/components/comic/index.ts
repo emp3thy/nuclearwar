@@ -11,4 +11,5 @@ export { default as PhaseTrack } from './PhaseTrack';
 export { default as DamageBadge } from './DamageBadge';
 export { default as RelBadge } from './RelBadge';
 export { default as HoldButton } from './HoldButton';
+export { default as RoundBadge } from './RoundBadge';
 export { default as Ribbon } from './Ribbon';

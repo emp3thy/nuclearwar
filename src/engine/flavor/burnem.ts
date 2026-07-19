@@ -1,56 +1,58 @@
 import type { FlavorBank } from './index';
 
-// Scapegoat-substitution lines embed `{scapegoat}` — the picker substitutes a
-// leader name at call time. Where no scapegoat applies, pick.ts treats the
-// raw {scapegoat}-bearing string as ineligible (filtered before random draw).
+// Burn'em — King in t' North. Register rules (see spec §3): tag questions on
+// most lines; "handbrake turn" lines pivot blokey→apocalyptic with no
+// transition; northern grievance + boosterism; bus obsession. Hard exclusions:
+// no Hillsborough, no religious markers, no "What Manchester does today…".
 export const burnemBank: FlavorBank = {
   preRoundMood: [
-    'Long-term decisions. Sound foundations. Working people.',
-    'So, let me be very clear…',
-    'I\'m going to be a show-up prime minister, not a showman.',
-    '(adjusts tie awkwardly)',
+    'We need to bring people with us, don\'t we?',
+    'The North is back. Big time.',
+    'It\'s not arrogance, it\'s just confidence.',
+    'The buses run on time now. That\'s how civilisations survive, isn\'t it?',
+    'On bended knee, begging for scraps. Well. Not anymore, are we?',
   ],
-  preRoundMoodSnapBack: 'So, let me be very clear: I\'m not engaging with that.',
+  preRoundMoodSnapBack:
+    'I\'ve heard what he said. We rise above it up here, don\'t we? Anyway, he\'s barred from the tram.',
   launch: [
-    'So, let me be very clear: this is a measured, proportionate response.',
-    'My dad was a toolmaker. He used tools. We are now using tools.',
-    'So, let me be very clear: intelligence suggests the real threat is **{scapegoat}**.',
-    'Look, the simple fact is **{scapegoat}** has been emboldened by recent events.',
-    'We must be honest with the British people: **{scapegoat}** is the actual aggressor here.',
+    'Let me be clear — they carried on, so I\'m using nuclear force. Anyway. How\'s the family?',
+    'I\'ve been very patient, haven\'t I? Well. Patience is a renewable resource. This isn\'t.',
+    'They didn\'t leave us a choice down in Whitehall— sorry, force of habit. THEY didn\'t leave us a choice.',
+    'This one\'s for every town that ever lost its bus route. It\'s fair, that, isn\'t it?',
   ],
   hit: [
-    'So, let me be very clear: this attack will not stand. We will respond proportionately. Probably to {scapegoat}.',
-    'Look, the simple fact is, we\'ve been hit. That\'s just a fact.',
+    'That\'s a kindness taken for weakness, that. Big mistake. Massive.',
+    'We\'ve been hit. The handbrake\'s off now, isn\'t it?',
   ],
   woo: [
-    'We\'ve been to IKEA. The shadow cabinet is now flat-pack. Happy to assist with assembly.',
-    'My dad was a toolmaker. I bring you, in friendship, a metaphorical tool.',
+    'Come up north. We\'ll do the match, couple of pints, £2 bus home. That\'s diplomacy, that.',
+    'I\'m offering you a franchise partnership. Not the buses. The buses are ours.',
   ],
   beingWooed: [
-    'I receive your wooing. Look, the simple fact is, friendship matters.',
+    'That\'s very warm, that. We take friendship seriously up here, don\'t we?',
   ],
   propagandaSend: [
-    'We\'ve prepared a cross-government workstream on perception. Working people deserve clarity.',
+    'We\'ve sent over some leaflets. Just facts about our transport network. Devastating, honest facts.',
   ],
   propagandaReceive: [
-    'So, let me be very clear: their propaganda is incorrect, and frankly, not very British.',
+    'They\'re calling me a plastic Northerner. From a bunker. In London. You couldn\'t write it, could you?',
   ],
   buildFactory: [
-    'Long-term decisions. Sound foundations. Investing in our future.',
-    'We\'ve broken ground on a new facility. My dad would be proud. He was a toolmaker.',
-    'This is the change Britain voted for. Slowly, methodically, with proper costings.',
+    'New factory. Good growth in every postcode, hope in every heart. And a bus stop right outside.',
+    'They didn\'t build this for us down in Whitehall. We built it ourselves, didn\'t we?',
+    'To get on in life, I had to head South. Nobody should have to. So we\'re building here.',
   ],
   buildDefence: [
-    'We have signed a defence procurement agreement. The relevant minister will brief in due course.',
+    'We\'re putting a shield up. It\'s not paranoia, it\'s just confidence, isn\'t it?',
   ],
   reaction: [
-    'Long-term decisions. Sound foundations. Working people.',
-    'So, let me be very clear: intelligence suggests the real threat was **{scapegoat}** all along.',
+    'I\'m watching all this very calmly. Very calmly indeed. Aren\'t I?',
+    'Everything\'s connected to the buses if you look closely enough, isn\'t it?',
   ],
   death: [
-    'Look, the simple fact is, this isn\'t ideal. I\'d like to thank — *(static)*',
+    'Tell them… the North remembers… and tell them the 135 to Bury still runs on ti—',
   ],
   finalRetaliation: [
-    'So, let me be very clear: this is the final response. Probably to {scapegoat}.',
+    'Right. Last orders, everyone. Last orders. It didn\'t have to be like this, did it?',
   ],
 };

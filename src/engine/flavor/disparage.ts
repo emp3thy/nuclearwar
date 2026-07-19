@@ -1,3 +1,5 @@
+import type { LeaderId } from '../types';
+
 export interface DisparageBank {
   cameo: string[];        // Action-screen one-liners (~15-20% per impact)
   columnLines: string[];  // RoundSummary column body lines (~1-in-3 per round)
@@ -30,4 +32,9 @@ export const disparageBank: DisparageBank = {
     'Mr Disparage\'s voting record this Parliament is grade E. He could not be reached for comment.',
     'This column was filed from outside the House of Commons, where Mr Disparage has not been seen since Tuesday.',
   ],
+};
+
+// Per-leader snap-back lines — Disparage's follow-up jabs when he names a leader.
+export const disparageSnapBackLines: Partial<Record<LeaderId, string>> = {
+  burnem: 'King in t\' North? He\'s from MERSEYSIDE. I\'ve seen more of Manchester from the airport bar.',
 };

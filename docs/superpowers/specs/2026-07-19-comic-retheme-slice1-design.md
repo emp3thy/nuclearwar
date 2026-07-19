@@ -36,7 +36,7 @@ Self-hosted via `@fontsource` packages, imported in `main.tsx`:
 | Family | Package | Weights |
 |---|---|---|
 | Anton | `@fontsource/anton` | 400 |
-| Playfair Display | `@fontsource/playfair-display` | 400, 700, 900 + italics |
+| Playfair Display | `@fontsource/playfair-display` | 400, 700, 900 upright; 400, 700 italic (900-italic is not used by the handoff and is not imported) |
 | Work Sans | `@fontsource/work-sans` | 400–800 |
 | JetBrains Mono | `@fontsource/jetbrains-mono` | 400, 700 |
 | Bowlby One | `@fontsource/bowlby-one` | 400 |
@@ -49,8 +49,10 @@ No runtime external fetch; deterministic builds.
 
 Supersedes the old PNG/flag-fill portrait spec. Geometric caricature SVGs from `design_handoff_nuke_game/portraits.jsx`, ported to typed components.
 
-- `src/ui/portraits/` — one file per leader (`chump.tsx`, `netanyahoo.tsx`, `khameneverhere.tsx`, `starmless.tsx`, `carnage.tsx`, `mileighhem.tsx`, `disparage.tsx`, `groucho.tsx`), each exporting an SVG face component; `index.ts` exports a `FACES` record keyed by leader id.
+- `src/ui/portraits/faces.tsx` — a single file containing all eight face SVG components as named exports (`ChumpFace`, `NetanyahooFace`, `KhameneverhereFace`, `StarmlessFace`, `CarnageFace`, `MileighFace`, `DisparageFace`, `GrouchoFace`), ported from `portraits.jsx`. One file, not one-per-leader: the faces are small sibling functions that always change together, matching the handoff's own layout.
+- `src/ui/portraits/index.ts` — exports `FACES` (face component per portrait id), `PORTRAIT_META` (signature color + flag per AI/cameo id), `HUMAN_ACCENTS` (per-slot accent), and the `extractFlag`/`stripFlag` helpers (see §5).
 - `src/ui/components/Portrait.tsx` — the single consumer-facing component: `<Portrait leaderId={id} size={px} />`. Sizes are free pixel values per call site (handoff convention: 48–200px), not a fixed token scale.
+  - **Prop type:** `leaderId: LeaderId | 'disparage'`. `'disparage'` is a non-playable cameo, deliberately absent from the engine's `LeaderId` union; the widened prop makes `DisparageFace`/`PORTRAIT_META.disparage` reachable now so slices 3–4 (Disparage cameo/column) need no API change. Slice 1 never renders it. `isHuman` (which takes `LeaderId`) is only consulted for non-`'disparage'` ids; `'disparage'` always takes the AI branch.
   - **AI leader:** signature-color background, the leader's `FACES` SVG, halftone multiply overlay.
   - **Human slot (`player1`–`player5`):** Groucho-disguise SVG (glasses + moustache + cigar), differentiated by per-slot accent color (fixed per slot: player1 `--cyan`, player2 `--green`, player3 `--yellow-soft`, player4 `--magenta-deep`, player5 `--ink-soft`) plus the player's chosen-country flag badge.
   - Dispatches on `isHuman(leaderId)` from `src/engine/state.ts`.
@@ -73,6 +75,8 @@ Rebuild `src/ui/screens/Setup.tsx` + `Setup.module.css` to the handoff layout (`
 
 - Max-width 1180px on `.paper`. Two-column grid (`minmax(0,1.6fr) minmax(0,1fr)`) ≥920px; single column below.
 - **Left:** "The Table" cast picker — 2-col grid of rotated cast tiles (3px ink border, 4px offset shadow, ±1.4° rotation; 64px `<Portrait>`, name in Anton, country/profile in mono, 2-line clamped mood quote in Patrick Hand, POP/⚙/AP stat tags, magenta "PICKED" stamp when selected; hover lifts to rotation 0 + translateY(−2px)).
+  - **Stat tags:** each tile `Tag` carries the handoff's per-tile overrides — `fontSize: 9`, `padding: '2px 5px'` (screens-1.jsx lines 70–72), not the base 10px / 3px 7px from `tokens.css`. Applied via `Tag`'s `style` prop or an equivalent `styles.tileTag` class.
+  - **Meta line:** the handoff shows plain `USA · COWARD`; engine `country` strings embed the flag (`"🇺🇸 US"`), and the `<Portrait>` badge already shows that flag. The meta line therefore renders `stripFlag(profile.country) · profile-copy` — `stripFlag` (exported from `src/ui/portraits` alongside `extractFlag`) removes a leading flag/emoji plus following whitespace, returning the string unchanged when no flag is present. No doubled flag on the tile.
 - **Right:** stacked panels — human roster, difficulty, begin panel with live opponent count.
 - **Header copy:** kicker "A PARODY IN POOR TASTE", title "NUKE!" (magenta "!"), tagline "Everybody plays. **Nobody** wins.", yellow ribbon "SELECT YOUR ENEMIES".
 - **Difficulty labels** (mapped to existing engine values): easy = "Fine, Probably", normal = "Not Great", hard = "We're Cooked". Selected option: ink bg, paper text, magenta check square.
@@ -83,6 +87,7 @@ Rebuild `src/ui/screens/Setup.tsx` + `Setup.module.css` to the handoff layout (`
 ## 6. Testing & verification
 
 - Existing vitest + testing-library suite stays green; Setup behavior tests updated for new markup (queries by role/label, not old class names).
+- **Opponent-count assertions must be scoped.** In the new markup a bare `screen.getByText(/2/)` matches multiple elements (the cast hint "Pick 2–4 opponents. You're already at the table.", the `POP {n}M` stat tags from `LEADER_PROFILES`, and the count element itself) and throws. The begin-gate test asserts the live count via a scoped query — e.g. `within()` on the begin panel, a function matcher for the exact `2/4` composite text, or an accessible name/testid on the count element. Unscoped digit regexes against the whole screen are forbidden.
 - New render tests: `Portrait` AI vs human variant; `HoldButton` fires `onComplete` after hold, cancels on early release.
 - Visual verification: `npm run dev` side-by-side with the prototype (`design_handoff_nuke_game/index.html`).
 

@@ -47,7 +47,7 @@ export interface Leader {
   alive: boolean;
   /** how friendly *they* feel toward me; raised by my wooing */
   favourability: Partial<Record<LeaderId, number>>;
-  /** Khameneverhere grudge counter; raised when *they* hit me */
+  /** Persistent per-leader grudge counter; raised when *they* land a hit on me. Consumed by Khameneverhere targeting, Burn'em provocation, and final-retaliation weighting. */
   grudge: Partial<Record<LeaderId, number>>;
   /** Carnage threat-doubling input; rounds since *they* hit me */
   recentAggressionFrom: Partial<Record<LeaderId, number>>;

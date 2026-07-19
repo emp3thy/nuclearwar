@@ -419,6 +419,7 @@ His column **never proposes a counterfactual** — only criticises what just hap
 - "Make no mistake: this is what happens when you don't elect me. Pints."
 - "The Establishment did this. The Blob. The Quango. The Whoever. Not me."
 - "I told them. They didn't listen. They're paying for it now. So am I, in pints."
+- "King in t' North? He's from MERSEYSIDE. I've seen more of Manchester from the airport bar."
 
 ### Footer absentee-MP notes (rotated)
 

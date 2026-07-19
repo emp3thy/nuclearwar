@@ -10,7 +10,7 @@ import styles from './AiConferring.module.css';
 const LINES: Partial<Record<LeaderId, string>> = {
   chump: 'is on the phone yelling at his generals.',
   khameneverhere: 'has filed orders. The orders are unsigned.',
-  burnem: 'is consulting his shadow cabinet, slowly.',
+  burnem: 'is asking what this does to the buses, isn\'t he?',
   carnage: 'polishes his glasses. Files orders calmly.',
   'mileigh-hem': 'is revving something offscreen.',
   netanyahoo: 'is adding a fresh red line to the bomb diagram.',

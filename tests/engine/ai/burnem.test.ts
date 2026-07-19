@@ -89,7 +89,7 @@ describe('Burn\'em (Handbrake Turn)', () => {
     expect(orders.filter((o) => o.kind === 'launch').length).toBe(0);
   });
 
-  it('patience fallback with only 2 survivors fires before round 6', () => {
+  it('patience fallback with only 2 survivors fires at any round with 2 survivors', () => {
     const s = initialState({ cast: ['burnem', 'chump'], difficulty: 'normal', seed: 'be5' });
     s.round = 2;
     s.leaders.burnem.ap = 10;

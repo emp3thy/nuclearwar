@@ -1,0 +1,336 @@
+/* nuke — design tokens + base layer
+ * Political-cartoon comic-book / four-color tabloid.
+ * Heavy ink, cream newsprint, halftone, CMYK accents.
+ */
+
+:root {
+  /* Four-color comic palette */
+  --ink: #141214;
+  --ink-soft: #2a2528;
+  --paper: #f1e6cc;
+  --paper-bright: #f8eed4;
+  --paper-warm: #ece0bf;
+  --paper-edge: #d6c79e;
+  --paper-shadow: #b9a978;
+
+  /* CMYK-ish accents (slightly print-aged) */
+  --cyan: #1d7fb0;
+  --cyan-soft: #58a5cf;
+  --magenta: #c61f44;
+  --magenta-deep: #951129;
+  --yellow: #f3c318;
+  --yellow-soft: #e9b81e;
+  --green: #2e7a3c;
+
+  /* Leader signature colors */
+  --c-chump: #d6293f;
+  --c-chump-2: #f3c318;
+  --c-khamen: #1f5e3a;
+  --c-netan: #1a4d8c;
+  --c-starm: #8a1729;
+  --c-carnage: #b22535;
+  --c-mileigh: #e6a517;
+  --c-disparage: #5a3e8a;
+
+  /* Type */
+  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --font-tabloid: "Playfair Display", Georgia, serif;
+  --font-ui: "Work Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+  --font-pop: "Bowlby One", "Anton", sans-serif;
+  --font-hand: "Patrick Hand", "Comic Sans MS", cursive;
+  --font-bang: "Bangers", "Anton", sans-serif;
+
+  /* Spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* Borders / panels */
+  --border-1: 2px;
+  --border-2: 3px;
+  --border-3: 4px;
+  --radius: 0px; /* comic panels are mostly square */
+  --radius-soft: 6px;
+
+  /* Shadows — hard "ink offset" rather than soft drop */
+  --offset-sm: 3px 3px 0 var(--ink);
+  --offset-md: 5px 5px 0 var(--ink);
+  --offset-lg: 8px 8px 0 var(--ink);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--ink);
+}
+
+body {
+  font-family: var(--font-ui);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================================
+ * Paper / halftone / grain
+ * ============================================================ */
+
+.paper {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,0.45) 0%, transparent 50%),
+    radial-gradient(circle at 88% 82%, rgba(0,0,0,0.05) 0%, transparent 60%),
+    repeating-linear-gradient(43deg, transparent 0 5px, rgba(0,0,0,0.012) 5px 6px),
+    repeating-linear-gradient(-47deg, transparent 0 4px, rgba(120,80,40,0.018) 4px 5px);
+}
+
+.halftone-cyan { background-image: radial-gradient(var(--cyan) 1px, transparent 1.4px); background-size: 6px 6px; }
+.halftone-magenta { background-image: radial-gradient(var(--magenta) 1px, transparent 1.4px); background-size: 6px 6px; }
+.halftone-yellow { background-image: radial-gradient(var(--yellow) 1.2px, transparent 1.6px); background-size: 5px 5px; }
+.halftone-ink { background-image: radial-gradient(var(--ink) 0.8px, transparent 1.2px); background-size: 5px 5px; }
+
+/* ============================================================
+ * Comic panel
+ * ============================================================ */
+
+.panel {
+  position: relative;
+  background: var(--paper-bright);
+  border: var(--border-3) solid var(--ink);
+  box-shadow: var(--offset-md);
+  padding: var(--s-4);
+}
+.panel.tight { padding: var(--s-3); }
+.panel.flat { box-shadow: none; }
+.panel.dark { background: var(--ink); color: var(--paper); }
+.panel.tilt-l { transform: rotate(-0.6deg); }
+.panel.tilt-r { transform: rotate(0.6deg); }
+.panel.tilt-r-1 { transform: rotate(1.2deg); }
+.panel.tilt-l-1 { transform: rotate(-1.2deg); }
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 4px 10px;
+  display: inline-block;
+  margin: -22px 0 12px -22px;
+  transform: rotate(-1.5deg);
+}
+
+/* ============================================================
+ * Type utilities
+ * ============================================================ */
+
+.display { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; line-height: 0.95; }
+.tabloid { font-family: var(--font-tabloid); }
+.pop { font-family: var(--font-pop); }
+.hand { font-family: var(--font-hand); }
+.bang { font-family: var(--font-bang); letter-spacing: 0.03em; }
+.mono { font-family: var(--font-mono); }
+.upper { text-transform: uppercase; }
+.italic { font-style: italic; }
+
+/* ============================================================
+ * Stamps / badges
+ * ============================================================ */
+
+.stamp {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  background: var(--magenta);
+  color: var(--paper);
+  padding: 4px 10px;
+  border: 2px solid var(--paper);
+  outline: 2px solid var(--ink);
+  text-transform: uppercase;
+  transform: rotate(-6deg);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.stamp.ink { background: var(--ink); }
+.stamp.cyan { background: var(--cyan); }
+.stamp.yellow { background: var(--yellow); color: var(--ink); }
+.stamp.green { background: var(--green); }
+
+.tag {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  background: var(--ink);
+  color: var(--paper);
+}
+.tag.cyan { background: var(--cyan); }
+.tag.magenta { background: var(--magenta); }
+.tag.yellow { background: var(--yellow); color: var(--ink); }
+.tag.green { background: var(--green); }
+.tag.outline { background: transparent; color: var(--ink); border: 2px solid var(--ink); }
+
+/* ============================================================
+ * Buttons
+ * ============================================================ */
+
+.btn {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-2) solid var(--ink);
+  box-shadow: var(--offset-sm);
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 80ms ease;
+}
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: var(--offset-sm); }
+.btn.lg { font-size: 22px; padding: 14px 28px; box-shadow: var(--offset-md); }
+.btn.xl { font-size: 32px; padding: 18px 38px; box-shadow: var(--offset-lg); }
+.btn.primary { background: var(--magenta); color: var(--paper); }
+.btn.danger { background: var(--ink); color: var(--paper); }
+.btn.cyan { background: var(--cyan); color: var(--paper); }
+.btn.ghost { background: transparent; box-shadow: none; border: 2px dashed var(--ink); }
+
+/* ============================================================
+ * Speech bubble
+ * ============================================================ */
+
+.bubble {
+  position: relative;
+  display: inline-block;
+  background: var(--paper-bright);
+  color: var(--ink);
+  border: var(--border-2) solid var(--ink);
+  padding: 10px 14px;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  max-width: 280px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.bubble::after, .bubble::before {
+  content: "";
+  position: absolute;
+  width: 0; height: 0;
+}
+.bubble.tail-bl::before {
+  bottom: -14px; left: 18px;
+  border-left: 12px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 14px solid var(--ink);
+}
+.bubble.tail-bl::after {
+  bottom: -10px; left: 21px;
+  border-left: 9px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 11px solid var(--paper-bright);
+}
+.bubble.tail-tl::before {
+  top: -14px; left: 18px;
+  border-left: 6px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 14px solid var(--ink);
+}
+.bubble.tail-tl::after {
+  top: -10px; left: 21px;
+  border-left: 4px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 11px solid var(--paper-bright);
+}
+.bubble.thought {
+  border-radius: 26px;
+  border-style: dashed;
+}
+
+/* ============================================================
+ * Burst / sound effects
+ * ============================================================ */
+
+.burst {
+  display: inline-block;
+  font-family: var(--font-bang);
+  font-size: 32px;
+  color: var(--paper);
+  background: var(--magenta);
+  padding: 12px 16px;
+  border: 3px solid var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transform: rotate(-7deg);
+  clip-path: polygon(
+    0 12%, 12% 0%, 24% 14%, 36% 0%, 50% 16%, 64% 0%, 76% 14%, 88% 0%, 100% 14%,
+    96% 36%, 100% 52%, 90% 70%, 100% 88%, 84% 100%, 70% 88%, 56% 100%, 42% 90%, 28% 100%, 14% 88%, 0 100%,
+    8% 76%, 0 60%, 10% 44%, 0 28%
+  );
+}
+
+/* ============================================================
+ * Scrollbar (light)
+ * ============================================================ */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--ink); border: 1px solid var(--paper); }
+*::-webkit-scrollbar-track { background: var(--paper-edge); }
+
+/* ============================================================
+ * App-level layout
+ * ============================================================ */
+
+.app {
+  min-height: 100vh;
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.app-stage {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.screen {
+  min-height: 100vh;
+  width: 100%;
+}
+
+
+/* Utility */
+.row { display: flex; gap: var(--s-3); }
+.col { display: flex; flex-direction: column; gap: var(--s-3); }
+.grow { flex: 1; }
+.center { display: flex; align-items: center; justify-content: center; }
+.between { display: flex; justify-content: space-between; align-items: center; }
+.gap-2 { gap: var(--s-2); }
+.gap-3 { gap: var(--s-3); }
+.gap-4 { gap: var(--s-4); }
+.gap-5 { gap: var(--s-5); }
+.wrap { flex-wrap: wrap; }
+.tc { text-align: center; }
+
+/* Animations (subtle) */
+@keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pop { 0% { transform: scale(0.85); opacity: 0; } 60% { transform: scale(1.06); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes pulsedot { 0%, 100% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.4); opacity: 1; } }
+@keyframes wobble { 0%, 100% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } }
+@keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+.fadein { animation: fadein 240ms ease-out both; }
+.popin { animation: pop 260ms cubic-bezier(0.4, 0.0, 0.2, 1) both; }
+.wobble { animation: wobble 4s ease-in-out infinite; }

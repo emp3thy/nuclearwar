@@ -1,3 +1,20 @@
+import '@fontsource/anton';
+import '@fontsource/playfair-display/400.css';
+import '@fontsource/playfair-display/700.css';
+import '@fontsource/playfair-display/900.css';
+import '@fontsource/playfair-display/400-italic.css';
+import '@fontsource/playfair-display/700-italic.css';
+import '@fontsource/work-sans/400.css';
+import '@fontsource/work-sans/500.css';
+import '@fontsource/work-sans/600.css';
+import '@fontsource/work-sans/700.css';
+import '@fontsource/work-sans/800.css';
+import '@fontsource/jetbrains-mono/400.css';
+import '@fontsource/jetbrains-mono/700.css';
+import '@fontsource/bowlby-one';
+import '@fontsource/patrick-hand';
+import '@fontsource/bangers';
+import './tokens.css';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 

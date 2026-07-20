@@ -1,7 +1,7 @@
-# Graph Report - nuke  (2026-07-19)
+# Graph Report - nuke  (2026-07-20)
 
 ## Corpus Check
-- 150 files · ~204,248 words
+- 143 files · ~189,196 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `89b1b04d`
+- Built from commit: `9285f03e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,12 +25,12 @@
 - [[_COMMUNITY_Community 7|Community 7]]
 - [[_COMMUNITY_Community 8|Community 8]]
 - [[_COMMUNITY_Community 9|Community 9]]
-- [[_COMMUNITY_Community 11|Community 11]]
+- [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_Community 12|Community 12]]
-- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 13|Community 13]]
 - [[_COMMUNITY_Community 15|Community 15]]
 - [[_COMMUNITY_Community 18|Community 18]]
-- [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
 - [[_COMMUNITY_Community 22|Community 22]]
 - [[_COMMUNITY_Community 23|Community 23]]
 - [[_COMMUNITY_Community 40|Community 40]]
@@ -116,7 +116,7 @@ Nodes (11): stripFlag(), pickSubhead(), makeGame(), deriveBoxScore(), deriveFore
 Cohesion: 0.13
 Nodes (20): planCarnage (Rational + Opportunist), planChump (Coward), planKhameneverhere (Grudge), planMileighHem (Glass cannon), planNetanyahoo (Warmonger), defenceVisibilityScore, opportunismScore, threatScore (+12 more)
 
-### Community 11 - "Community 11"
+### Community 10 - "Community 10"
 Cohesion: 0.13
 Nodes (3): canLaunch(), warheadsLeftFor(), findLastIndexMatching()
 
@@ -124,7 +124,7 @@ Nodes (3): canLaunch(), warheadsLeftFor(), findLastIndexMatching()
 Cohesion: 0.33
 Nodes (9): BurnemFace(), CarnageFace(), ChumpFace(), DisparageFace(), GrouchoFace(), KhameneverhereFace(), MileighFace(), NetanyahooFace() (+1 more)
 
-### Community 14 - "Community 14"
+### Community 13 - "Community 13"
 Cohesion: 0.24
 Nodes (3): analyseOrderSequence(), Planning(), projectInventory()
 
@@ -150,9 +150,9 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `initialState()` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 6`, `Community 8`?**
   _High betweenness centrality (0.137) - this node is a cross-community bridge._
-- **Why does `isHuman()` connect `Community 6` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 8`, `Community 14`, `Community 15`?**
+- **Why does `isHuman()` connect `Community 6` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 8`, `Community 13`, `Community 15`?**
   _High betweenness centrality (0.115) - this node is a cross-community bridge._
-- **Why does `dispatch()` connect `Community 2` to `Community 6`, `Community 7`, `Community 9`, `Community 15`, `Community 20`?**
+- **Why does `dispatch()` connect `Community 2` to `Community 6`, `Community 7`, `Community 9`, `Community 15`, `Community 21`?**
   _High betweenness centrality (0.103) - this node is a cross-community bridge._
 - **Are the 23 inferred relationships involving `initialState()` (e.g. with `reduce()` and `seedFromString()`) actually correct?**
   _`initialState()` has 23 INFERRED edges - model-reasoned connections that need verification._

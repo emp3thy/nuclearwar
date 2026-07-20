@@ -3,34 +3,6 @@
     "mtime": 1778494811.4489436,
     "hash": "918a09522938d635597b1971c57d8060"
   },
-  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\app.jsx": {
-    "mtime": 1784464594.611702,
-    "hash": "39ec4787c048deafd59ca1aa9da7122c"
-  },
-  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\data.jsx": {
-    "mtime": 1784464594.6365132,
-    "hash": "5d4b1793dc7669044560dc7ee302606d"
-  },
-  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\portraits.jsx": {
-    "mtime": 1784464594.6701393,
-    "hash": "b6650899a26b29cfa0b012aa4f1f7b5c"
-  },
-  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\screens-1.jsx": {
-    "mtime": 1784464594.6834793,
-    "hash": "eddc69b1635ff3d926564bc97ea76839"
-  },
-  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\screens-2.jsx": {
-    "mtime": 1784464594.6960347,
-    "hash": "b4a96b4f3de05b0dfa64dce4c49abd9b"
-  },
-  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\screens-3.jsx": {
-    "mtime": 1784464594.7100258,
-    "hash": "a7d6d4eda62694907a9a59b8904ab5c8"
-  },
-  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\ui.jsx": {
-    "mtime": 1784464594.7462962,
-    "hash": "a0879fcc34bfee3228369db9cb481bc2"
-  },
   "C:\\Users\\gethi\\source\\nuke\\src\\engine\\balance.ts": {
     "mtime": 1784483067.2876253,
     "hash": "a9bd3f4d77c3a0318fa28e9441bb7116"
@@ -220,8 +192,8 @@
     "hash": "b57e642d194a4f631a658e391ee0339d"
   },
   "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\MushroomCloudPhoto.tsx": {
-    "mtime": 1784483067.30536,
-    "hash": "055c054317e0fcb981965ce557e95dcd"
+    "mtime": 1784571797.0656586,
+    "hash": "68b964671f0c5a0161d94733efba70f1"
   },
   "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\Portrait.tsx": {
     "mtime": 1784483067.3064213,
@@ -304,12 +276,12 @@
     "hash": "73c71a3f4410f955462bc9a903d1d3d4"
   },
   "C:\\Users\\gethi\\source\\nuke\\src\\ui\\content\\cast.ts": {
-    "mtime": 1784483067.340503,
-    "hash": "52a9177e1ae5fb98a4766023255979d9"
+    "mtime": 1784571779.9639137,
+    "hash": "8671c4ca89f26866abe8ef2de72821fa"
   },
   "C:\\Users\\gethi\\source\\nuke\\src\\ui\\portraits\\faces.tsx": {
-    "mtime": 1784483067.342503,
-    "hash": "223599b8c7e651532860da0ca05a6764"
+    "mtime": 1784571778.5684195,
+    "hash": "fa78a3bd767175558b3de637dc4663ef"
   },
   "C:\\Users\\gethi\\source\\nuke\\src\\ui\\portraits\\index.ts": {
     "mtime": 1784483067.342503,
@@ -356,8 +328,8 @@
     "hash": "ac2aa38113477940df325ff1bea24672"
   },
   "C:\\Users\\gethi\\source\\nuke\\src\\ui\\util\\newspaper.ts": {
-    "mtime": 1784483067.367622,
-    "hash": "e0b6f55b1f0009b6232c748b75592d18"
+    "mtime": 1784571795.2093046,
+    "hash": "7883ea3febb495ca1b843129d8213ea3"
   },
   "C:\\Users\\gethi\\source\\nuke\\src\\ui\\util\\projection.ts": {
     "mtime": 1778741110.816218,
@@ -611,14 +583,6 @@
     "mtime": 1779030302.7032845,
     "hash": "5067d41c005573bce946820b55eafd49"
   },
-  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\index.html": {
-    "mtime": 1784464594.651425,
-    "hash": "de5e7ea1e71969c6b0c679f424c69d96"
-  },
-  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\README.md": {
-    "mtime": 1784464594.5907657,
-    "hash": "3a89a198b3b71e497e7bda90abfbb917"
-  },
   "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\flavour-bank.md": {
     "mtime": 1784483067.2648857,
     "hash": "d398baebc3d19b687e93d20bf1d8fd84"
@@ -680,8 +644,8 @@
     "hash": "97ba08279e74d9bd16405b50198f02bb"
   },
   "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-07-19-comic-retheme-slice1.md": {
-    "mtime": 1784483067.2671506,
-    "hash": "e95f019645542d4f27572ff89bcc29ad"
+    "mtime": 1784571836.6292338,
+    "hash": "e60f63b95de79cd0b9d703e1db3552cc"
   },
   "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\research\\2026-07-19-burnham-research.md": {
     "mtime": 1784483067.269152,
@@ -720,27 +684,27 @@
     "hash": "edf2b55b8c817ed58d48237561d156bd"
   },
   "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-05-20-visual-design-portrait-system-design.md": {
-    "mtime": 1784483067.270147,
-    "hash": "7daa665e2e43957e32852767d1627b64"
+    "mtime": 1784571824.902598,
+    "hash": "4ceaf17851a42c233e56bbb2ec128e74"
   },
   "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-07-19-burnem-leader-swap-design.md": {
     "mtime": 1784483067.2711482,
     "hash": "576965f5ce50de3f20a38b39de658d31"
   },
   "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-07-19-comic-retheme-slice1-design.md": {
-    "mtime": 1784483067.273149,
-    "hash": "a6409f4bf20e2956ba9d5541cf631424"
+    "mtime": 1784571822.4813933,
+    "hash": "fc9bc4b4dd95a92c3c4583a40a1a0a8a"
   },
   "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-07-19-comic-retheme-slice2-design.md": {
-    "mtime": 1784483067.2741475,
-    "hash": "e9ec77d193948ef386ae9766bf664d4c"
+    "mtime": 1784571836.5203612,
+    "hash": "4f312d37b6e4ffe2346451e4a2045ba8"
   },
   "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-07-19-comic-retheme-slice3-design.md": {
-    "mtime": 1784483067.2756548,
-    "hash": "d205399a5140b5bded27863ed3576134"
+    "mtime": 1784571836.5495012,
+    "hash": "1dd19b98d1a18fb114f1f28368083e1d"
   },
   "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-07-19-comic-retheme-slice4-design.md": {
-    "mtime": 1784483067.2776663,
-    "hash": "3ba6028c6dfcf369aa824e7d28a01acf"
+    "mtime": 1784571836.5975056,
+    "hash": "e2a1a305380eacc8d1179f445df579d6"
   }
 }

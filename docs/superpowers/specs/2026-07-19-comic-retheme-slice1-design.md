@@ -4,6 +4,8 @@
 **Status:** approved in brainstorming session
 **Supersedes:** `2026-05-20-visual-design-portrait-system-design.md` (parchment direction, AI-generated PNG portraits, flag-fill human slots)
 
+> **Note (2026-07-20):** the `design_handoff_nuke_game/` prototype bundle referenced throughout this spec was a temporary handoff artifact and has been deleted. The implemented code in `src/ui/` is the source of truth; paths below are historical.
+
 ## 0. Context
 
 A complete hi-fi design handoff lives at `design_handoff_nuke_game/` — a working HTML/JSX prototype of all seven screens in a political-cartoon comic-book / four-color tabloid aesthetic, with design tokens, shared primitives, geometric SVG caricature portraits, and final copy. See its `readme.md` for the full screen-by-screen description.

@@ -1,4 +1,4 @@
-/** Per-leader satirical copy for the Setup cast tiles (from the design handoff). */
+/** Per-leader satirical copy for the Setup cast tiles. */
 export const CAST_COPY: Record<string, { profile: string; mood: string }> = {
   chump: { profile: 'Coward', mood: "Many people are saying we should hit somebody. We won't, but we should." },
   khameneverhere: { profile: 'Grudge', mood: 'Orders filed. Orders unsigned.' },

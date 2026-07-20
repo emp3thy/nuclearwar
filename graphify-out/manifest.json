@@ -1,0 +1,746 @@
+{
+  "C:\\Users\\gethi\\source\\nuke\\vite.config.ts": {
+    "mtime": 1778494811.4489436,
+    "hash": "918a09522938d635597b1971c57d8060"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\app.jsx": {
+    "mtime": 1784464594.611702,
+    "hash": "39ec4787c048deafd59ca1aa9da7122c"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\data.jsx": {
+    "mtime": 1784464594.6365132,
+    "hash": "5d4b1793dc7669044560dc7ee302606d"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\portraits.jsx": {
+    "mtime": 1784464594.6701393,
+    "hash": "b6650899a26b29cfa0b012aa4f1f7b5c"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\screens-1.jsx": {
+    "mtime": 1784464594.6834793,
+    "hash": "eddc69b1635ff3d926564bc97ea76839"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\screens-2.jsx": {
+    "mtime": 1784464594.6960347,
+    "hash": "b4a96b4f3de05b0dfa64dce4c49abd9b"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\screens-3.jsx": {
+    "mtime": 1784464594.7100258,
+    "hash": "a7d6d4eda62694907a9a59b8904ab5c8"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\ui.jsx": {
+    "mtime": 1784464594.7462962,
+    "hash": "a0879fcc34bfee3228369db9cb481bc2"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\balance.ts": {
+    "mtime": 1784483067.2876253,
+    "hash": "a9bd3f4d77c3a0318fa28e9441bb7116"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\builds.ts": {
+    "mtime": 1778741110.7993793,
+    "hash": "95a29ccb3806a445a8267a9ea924a6f9"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\cameo.ts": {
+    "mtime": 1778619198.4311461,
+    "hash": "c1b0612a5dfd62bb74bf42a69fc50918"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\combat.ts": {
+    "mtime": 1778741110.801388,
+    "hash": "ea0c824cc422e34c06f79ac61b7d7806"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\diplomacy.ts": {
+    "mtime": 1778741110.801388,
+    "hash": "4cfdaddb2d3651ae563405873de78ab5"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\finalRetaliation.ts": {
+    "mtime": 1778405182.192143,
+    "hash": "e55a909bf586c31180cd08a2355485ea"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\index.ts": {
+    "mtime": 1779030302.708107,
+    "hash": "934ed186da6bba94e4bbb85a0b365a8d"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\launches.ts": {
+    "mtime": 1778836323.931565,
+    "hash": "07fe61a2b5e3c6bfa7797ff3c01b644a"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\masthead.ts": {
+    "mtime": 1778619198.4594316,
+    "hash": "6e7f7644ce3f7f6f15f76874059f7c66"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\orders.ts": {
+    "mtime": 1778741110.801388,
+    "hash": "f4a1a14457afd08df21bb1986c5fcf48"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\propaganda.ts": {
+    "mtime": 1778363723.704167,
+    "hash": "cd173c858df64b39f006eea3e76c1908"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\reducer.ts": {
+    "mtime": 1778494811.409497,
+    "hash": "e45d90a3ba40bfefc3dbe59ceef66f69"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\resolution.ts": {
+    "mtime": 1779221278.2333672,
+    "hash": "2a99c005fafb8e47a989c65512e2571d"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\rng.ts": {
+    "mtime": 1778363723.704167,
+    "hash": "1a4f5f90989d200cfa9b00b121f1dc80"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\state.ts": {
+    "mtime": 1779030302.709108,
+    "hash": "7d075ec16c5a41e7b154b6317c861419"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\types.ts": {
+    "mtime": 1784483067.2916234,
+    "hash": "2a70104753b7262c6da4946a26e481ed"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\winConditions.ts": {
+    "mtime": 1779030302.7101092,
+    "hash": "8ff2e2cc6ef8d777a3baf4f2637b1562"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\aggression.ts": {
+    "mtime": 1779030302.7042837,
+    "hash": "744dc4f36e6aa08039a79edf90242e0b"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\burnem.ts": {
+    "mtime": 1784483067.285471,
+    "hash": "9ae9adfe7d43586d2573b7f496d3033e"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\carnage.ts": {
+    "mtime": 1779030302.7042837,
+    "hash": "cfade2743d6096b3354a99a02dde6895"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\chump.ts": {
+    "mtime": 1779030302.705285,
+    "hash": "db7f60e1698568d49b37324a94281779"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\dispatch.ts": {
+    "mtime": 1784483067.2866244,
+    "hash": "c48fa8c44b1656c11b9e7383065151ff"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\index.ts": {
+    "mtime": 1778446742.662085,
+    "hash": "2f2ba8a9f4dd0010be47f48e19334c37"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\khameneverhere.ts": {
+    "mtime": 1779030302.706016,
+    "hash": "dcb3129187dec2e90a7ea7273aae3a44"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\lookahead.ts": {
+    "mtime": 1779221278.2333672,
+    "hash": "233cc19bdffd1289691c49a327da21bc"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\mileighhem.ts": {
+    "mtime": 1779030302.706016,
+    "hash": "3f146f396db0a0630f4562c986b25dd8"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\netanyahoo.ts": {
+    "mtime": 1779030302.7071123,
+    "hash": "f69a3de6306da6cada00c1cc7a317ee7"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\ai\\scoring.ts": {
+    "mtime": 1778405182.192143,
+    "hash": "eee089af6cf93b6834efb7e332bb6b17"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\flavor\\burnem.ts": {
+    "mtime": 1784483067.288624,
+    "hash": "753197758b13a10b41457438a9901352"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\flavor\\carnage.ts": {
+    "mtime": 1778619198.4311461,
+    "hash": "3765c8f9debe9c6b57c27841ca0dbd38"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\flavor\\chump.ts": {
+    "mtime": 1778619198.4331548,
+    "hash": "681f95e44e2bd24f32e9da40678fe42c"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\flavor\\disparage.ts": {
+    "mtime": 1784483067.2896233,
+    "hash": "82604602e98d4743d3d8be8408136c35"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\flavor\\index.ts": {
+    "mtime": 1784483067.2906265,
+    "hash": "a1670ee37153522d6291aaa479a89423"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\flavor\\khameneverhere.ts": {
+    "mtime": 1778619198.4558773,
+    "hash": "73a1c99f0c10743c7665fffd89878dc2"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\flavor\\mileighhem.ts": {
+    "mtime": 1778619198.4558773,
+    "hash": "83ecf040de824d53ef49d9f77578f5da"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\flavor\\netanyahoo.ts": {
+    "mtime": 1778619198.458424,
+    "hash": "354459cdab466c6021d1fac8b2760ac0"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\engine\\flavor\\pick.ts": {
+    "mtime": 1778619198.4594316,
+    "hash": "bc2f70f6ff2c4a9ea14d45d490e3a96b"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\App.tsx": {
+    "mtime": 1778619198.5756888,
+    "hash": "d9008e6824505527d874829074230fa8"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\css-modules.d.ts": {
+    "mtime": 1778494811.4293509,
+    "hash": "4df7ee4da00c18291f9674a3c31fa6f9"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\main.tsx": {
+    "mtime": 1784483067.340503,
+    "hash": "96bb5bc4b79dc12d9c15f10a1a4c6f51"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\store.ts": {
+    "mtime": 1778619198.5917623,
+    "hash": "950dc3ce97cd1f3330cc0d7c785d7bc2"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\ApBudget.tsx": {
+    "mtime": 1784483067.2926238,
+    "hash": "22bd3dd9d023f14744c7602770fc6322"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\BuildGrid.tsx": {
+    "mtime": 1784483067.2946253,
+    "hash": "7fefcd7fc860f7d5301b4bf3aa61b603"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\DefenceGrid.tsx": {
+    "mtime": 1784483067.295628,
+    "hash": "ed29249c0a17534d475a6bb8b784bafd"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\DisparageCard.tsx": {
+    "mtime": 1784483067.297711,
+    "hash": "cf8f8eca470aaebd04ea366352d74663"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\DisparageColumn.tsx": {
+    "mtime": 1784483067.3017154,
+    "hash": "98248c5f6b60368f6ef463d730212e47"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\LaunchCell.tsx": {
+    "mtime": 1784483067.3037174,
+    "hash": "b57e642d194a4f631a658e391ee0339d"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\MushroomCloudPhoto.tsx": {
+    "mtime": 1784483067.30536,
+    "hash": "055c054317e0fcb981965ce557e95dcd"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\Portrait.tsx": {
+    "mtime": 1784483067.3064213,
+    "hash": "8c7aaf1d964673fc70edb4d50c2916c1"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\SoftWarnPanel.tsx": {
+    "mtime": 1784483067.3081074,
+    "hash": "0acdd0fe4dc03967efd40c06e480a4fa"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\TargetRow.tsx": {
+    "mtime": 1784483067.3109705,
+    "hash": "5c55315d9ecbd0ed877c3e79954a7b52"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\WorldMap.tsx": {
+    "mtime": 1784483067.3126917,
+    "hash": "f74d90457e29d9e49c58a1f7536f3c03"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\ApMeter.tsx": {
+    "mtime": 1784483067.3157022,
+    "hash": "cd94ee4ff8e77a44de22b75576f03111"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\Btn.tsx": {
+    "mtime": 1784483067.3179374,
+    "hash": "daff0b8486f8552b4a45aa6204b2223f"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\Bubble.tsx": {
+    "mtime": 1784483067.31994,
+    "hash": "15be36bcd93ca5c7a611241651fe2d28"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\Burst.tsx": {
+    "mtime": 1784483067.3209388,
+    "hash": "318dbf6f091629a1a1a199e553c2ad05"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\DamageBadge.tsx": {
+    "mtime": 1784483067.3229375,
+    "hash": "eb3833df3de1542ed8645830cb823658"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\Halftone.tsx": {
+    "mtime": 1784483067.3239403,
+    "hash": "2c3217392a6bb362ea00becf82f29f0b"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\HoldButton.tsx": {
+    "mtime": 1784483067.326465,
+    "hash": "b322abd324d4e153d2a8b166961e0375"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\index.ts": {
+    "mtime": 1784483067.3385012,
+    "hash": "b667197c4db4dc6686b2ba6aa2dd30c7"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\Panel.tsx": {
+    "mtime": 1784483067.327463,
+    "hash": "ede7c37cb20f1f23edb9c5f0dc4a7102"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\PhaseTrack.tsx": {
+    "mtime": 1784483067.328462,
+    "hash": "3314c1d4e6ad0d242cd91b0b31211e83"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\RelBadge.tsx": {
+    "mtime": 1784483067.330971,
+    "hash": "563280dc3aaa0d7277766474a8d4b173"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\Ribbon.tsx": {
+    "mtime": 1784483067.3339844,
+    "hash": "8a24c842bfb1d58c893690b4b1ff1ebe"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\RoundBadge.tsx": {
+    "mtime": 1784483067.3354933,
+    "hash": "9a01114a1eac752d037aebfda7857355"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\Stamp.tsx": {
+    "mtime": 1784483067.3365028,
+    "hash": "bfae4319cffd3481384bbacc1f5e72ab"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\Stat.tsx": {
+    "mtime": 1784483067.3375037,
+    "hash": "86cd9e437537cadb5fd6e0ce25bf6a5b"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\components\\comic\\Tag.tsx": {
+    "mtime": 1784483067.3385012,
+    "hash": "73c71a3f4410f955462bc9a903d1d3d4"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\content\\cast.ts": {
+    "mtime": 1784483067.340503,
+    "hash": "52a9177e1ae5fb98a4766023255979d9"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\portraits\\faces.tsx": {
+    "mtime": 1784483067.342503,
+    "hash": "223599b8c7e651532860da0ca05a6764"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\portraits\\index.ts": {
+    "mtime": 1784483067.342503,
+    "hash": "9e231d24c75bdd3d64b3e77a1f202cfc"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\screens\\Action.tsx": {
+    "mtime": 1784483067.3455029,
+    "hash": "0a044db7e6e6beab8d283454a2fee7b2"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\screens\\AiConferring.tsx": {
+    "mtime": 1784483067.3475864,
+    "hash": "bfad7807c2413dcfa545c16df5932c46"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\screens\\HotseatHandoff.tsx": {
+    "mtime": 1784483067.3515818,
+    "hash": "c66275ce1c51eae546a1c41ca25c1aed"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\screens\\Planning.tsx": {
+    "mtime": 1784483067.3545792,
+    "hash": "02ae0e5d5441073e6b63c392695a8756"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\screens\\RoundSummary.tsx": {
+    "mtime": 1784483067.3590999,
+    "hash": "0c71bbec850835e310449d3a85424125"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\screens\\Setup.tsx": {
+    "mtime": 1784483067.3641,
+    "hash": "390c61ed864e9335c1783c457df596ac"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\screens\\Winners.tsx": {
+    "mtime": 1784483067.365612,
+    "hash": "30258ac07ae238fdc66bb5e7df60cdd4"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\util\\arrays.ts": {
+    "mtime": 1778741110.812708,
+    "hash": "be5ba01a6b7da0577ff898db0228728c"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\util\\eventGrouping.ts": {
+    "mtime": 1779036658.11529,
+    "hash": "62ddf36a71f176ca9e474f549a7ce517"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\util\\eventText.ts": {
+    "mtime": 1784483067.367622,
+    "hash": "ac2aa38113477940df325ff1bea24672"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\util\\newspaper.ts": {
+    "mtime": 1784483067.367622,
+    "hash": "e0b6f55b1f0009b6232c748b75592d18"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\src\\ui\\util\\projection.ts": {
+    "mtime": 1778741110.816218,
+    "hash": "7d1f22e9d238160b8c3168d6d97eddf8"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai-duel.test.ts": {
+    "mtime": 1784483067.36963,
+    "hash": "203d6756ec98ddbaeea3b95093d57db8"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\analyseOrderSequence.test.ts": {
+    "mtime": 1778741110.820234,
+    "hash": "955d45b418920343370575c2f3bd1f5b"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\balance.test.ts": {
+    "mtime": 1784483067.3756282,
+    "hash": "29ba4dcc612c29a82bd61aa87da68c06"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\builds.test.ts": {
+    "mtime": 1778363723.704167,
+    "hash": "10414f741dee838a992de49fd4de1cb4"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\cameo.test.ts": {
+    "mtime": 1784483067.3756282,
+    "hash": "d2c45d7239c0c32a62d80b3b30ed5cb2"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\combat.test.ts": {
+    "mtime": 1778741110.8212428,
+    "hash": "b05f4ac44ffb5f82a58c425a809c8311"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\deployDefence.test.ts": {
+    "mtime": 1778741110.821849,
+    "hash": "1e1d879efab4367ccf560d88a8093c1b"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\determinism.test.ts": {
+    "mtime": 1784483067.376718,
+    "hash": "18809c0b698648347756a908080e6c52"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\diplomacy.test.ts": {
+    "mtime": 1778741110.821849,
+    "hash": "84fa936dd041da6e9f39a3404352230b"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\finalRetaliation.test.ts": {
+    "mtime": 1784483067.3777163,
+    "hash": "8474253f5489c1de7f4c5d23e0aaf4c3"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\integration.test.ts": {
+    "mtime": 1784483067.379719,
+    "hash": "7c47346436679fbf6e380bfa6612ed85"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\intercept.deployed.test.ts": {
+    "mtime": 1778741110.823311,
+    "hash": "5260cf07fba5460ee0c7ceba7103c32a"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\launches.test.ts": {
+    "mtime": 1778836323.9365156,
+    "hash": "4570d6c7896d04859bffc8ad85a101bf"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\masthead.test.ts": {
+    "mtime": 1778619198.6426938,
+    "hash": "c3b1c954c49b9a57914b228f7c092351"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\orders.test.ts": {
+    "mtime": 1778741110.8238184,
+    "hash": "57f1a3fc54da0749eb6d27246506fbba"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\orders.woo.test.ts": {
+    "mtime": 1778741110.8244746,
+    "hash": "d1c06352395976c3c09ae8e584edda04"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\propaganda.test.ts": {
+    "mtime": 1778363723.7113218,
+    "hash": "ca12b39fdb9dbaded9dc68e726ed7bb4"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\reducer.test.ts": {
+    "mtime": 1784483067.3807187,
+    "hash": "5cd68fe2f7de01f63fbcc7ab78f050ba"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\resolution.test.ts": {
+    "mtime": 1784483067.3817177,
+    "hash": "bfe59bf25063d9329caa7601ec8b9162"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\rng.test.ts": {
+    "mtime": 1778363723.7113218,
+    "hash": "5a628b46e60465c49a86b03e6f8c131c"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\state.test.ts": {
+    "mtime": 1784483067.3817177,
+    "hash": "97a8b5a25ee7bf3ddf773191ce24b7fd"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\winConditions.test.ts": {
+    "mtime": 1784483067.383719,
+    "hash": "846d21f2e70285d04774c3e26e6e68f9"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai\\aggression.test.ts": {
+    "mtime": 1784483067.3706312,
+    "hash": "3ee3497e64edfc96c44e7c573ed02642"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai\\burnem.test.ts": {
+    "mtime": 1784483067.3706312,
+    "hash": "96cc7b5a22b6eb6e36f86e1e8ad236c6"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai\\carnage.test.ts": {
+    "mtime": 1784483067.3716297,
+    "hash": "136601de9c6d9be915ae4e7c4b4f6f0e"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai\\chump.test.ts": {
+    "mtime": 1779030302.7123065,
+    "hash": "8f27d72b0f20cb8311f50c2e02d31a8f"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai\\dispatcher.test.ts": {
+    "mtime": 1784483067.3726282,
+    "hash": "dc29fe9d8f6add2205a11d1a0a4cf0ba"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai\\khameneverhere.test.ts": {
+    "mtime": 1779030302.7123065,
+    "hash": "150182edc1bf22eb828dff736930e583"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai\\lookahead.test.ts": {
+    "mtime": 1784483067.3736298,
+    "hash": "1c786fa5fe31be4d972895f98df3def6"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai\\mileighhem.test.ts": {
+    "mtime": 1779030302.7147317,
+    "hash": "c431def74b9f1ee33d56ea70354eaab7"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai\\netanyahoo.test.ts": {
+    "mtime": 1784483067.3746316,
+    "hash": "f817160e4265082950c132ec161f85f6"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\ai\\scoring.test.ts": {
+    "mtime": 1778405182.2014048,
+    "hash": "2bfe39c534ccd2dfb300365953867b4e"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\engine\\flavor\\pick.test.ts": {
+    "mtime": 1784483067.3787196,
+    "hash": "5f242270e3f35fb5f8bf14b16a6d999c"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\helpers\\scripted-orders.ts": {
+    "mtime": 1778741110.8263838,
+    "hash": "e259b7abac42e6fc31a7f06f9dea5586"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\Action.playback.test.tsx": {
+    "mtime": 1784483067.386227,
+    "hash": "e800a882b5b6463a743f706d44dcf4a7"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\Action.playbackSteps.test.ts": {
+    "mtime": 1784483067.3872404,
+    "hash": "7e63a160dde39d6155a42fe8618c01fe"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\AiConferring.test.tsx": {
+    "mtime": 1784483067.3892374,
+    "hash": "ae5074c660fcd038aa2e2a40e71e5955"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\ApBudget.test.tsx": {
+    "mtime": 1784483067.3902357,
+    "hash": "ede968d45be450931dd3e51993756822"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\DisparageCard.test.tsx": {
+    "mtime": 1784483067.3912387,
+    "hash": "0bd5bf06cdcb581102065c0d834ff704"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\eventGrouping.test.ts": {
+    "mtime": 1779036658.1180239,
+    "hash": "7981a390c43b416705b1931b6a5ca567"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\eventText.test.ts": {
+    "mtime": 1784483067.4123046,
+    "hash": "75236f8c1907a5c7cc1ca22d73374ea7"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\HoldButton.test.tsx": {
+    "mtime": 1784483067.3922377,
+    "hash": "4b9c9be103ce3b4c413acf51d2150453"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\HotseatHandoff.test.tsx": {
+    "mtime": 1784483067.394241,
+    "hash": "666e792af39d4c1d2a13969290c9c975"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\newspaper.test.ts": {
+    "mtime": 1784483067.413305,
+    "hash": "4df08fae6a81891b73a14f4fbb2ffdac"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\Planning.actionGrid.test.tsx": {
+    "mtime": 1784483067.39677,
+    "hash": "b0e3a5663dfb1ba92053627161fefd58"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\Planning.ordersQueue.test.tsx": {
+    "mtime": 1784483067.3997853,
+    "hash": "5beac95a06ffbd7301097f114e2f3a4b"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\Planning.seal.test.tsx": {
+    "mtime": 1784483067.4017813,
+    "hash": "b245f97b6901f6b320dc04ac7d14cc17"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\Planning.softwarn.test.tsx": {
+    "mtime": 1784483067.4037814,
+    "hash": "55a15d0fd81f20b67eced47738b52e84"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\Planning.targetRow.test.tsx": {
+    "mtime": 1784483067.404783,
+    "hash": "b2e1e1dc4e4de441674960c4f5fc4b26"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\Portrait.test.tsx": {
+    "mtime": 1784483067.4062939,
+    "hash": "1337f8e5415299f3a1e74781cee534d3"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\projection.test.ts": {
+    "mtime": 1778741110.8292735,
+    "hash": "d2a744fb93caa6543939222247559041"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\RoundBadge.test.tsx": {
+    "mtime": 1784483067.407303,
+    "hash": "5b63bc9d48f644fbb00b97a28c15f251"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\RoundSummary.render.test.tsx": {
+    "mtime": 1784483067.4083028,
+    "hash": "9d11bb25eabdf025117fb44a8a0fb1e1"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\roundSummary.test.ts": {
+    "mtime": 1779036658.1180239,
+    "hash": "880beb66c24348dc8007d9326471aea6"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\Setup.multihuman.test.tsx": {
+    "mtime": 1784483067.4103086,
+    "hash": "e0de9ca01061e96cfab9fecfeb656f7e"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\setup.ts": {
+    "mtime": 1778494811.4451826,
+    "hash": "39529208dfc584ff87969cf460d5f8e5"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\store.multihuman.test.ts": {
+    "mtime": 1778619198.760136,
+    "hash": "914bf1e6b741821cc2f1b440e5b07970"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\Winners.test.tsx": {
+    "mtime": 1784483067.4103086,
+    "hash": "08f02e730ce1310176ceb3fa09a02b86"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\tests\\ui\\WorldMap.test.tsx": {
+    "mtime": 1784483067.4113033,
+    "hash": "c50798f08eaade4c019e736d3d7380ac"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\CLAUDE.md": {
+    "mtime": 1778595859.0316677,
+    "hash": "2ed67c68f28bc1ef95ac24167431d7e8"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\index.html": {
+    "mtime": 1778494811.4054797,
+    "hash": "60894cb2c36538f0c5f9a42f4e2a8e1d"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\README.md": {
+    "mtime": 1779030302.7032845,
+    "hash": "5067d41c005573bce946820b55eafd49"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\index.html": {
+    "mtime": 1784464594.651425,
+    "hash": "de5e7ea1e71969c6b0c679f424c69d96"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\design_handoff_nuke_game\\README.md": {
+    "mtime": 1784464594.5907657,
+    "hash": "3a89a198b3b71e497e7bda90abfbb917"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\flavour-bank.md": {
+    "mtime": 1784483067.2648857,
+    "hash": "d398baebc3d19b687e93d20bf1d8fd84"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\mockups\\action-screen.html": {
+    "mtime": 1778358531.1855452,
+    "hash": "b8ced61f801107a4c2ca8e31cdcedf06"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\mockups\\planning-screen.html": {
+    "mtime": 1778358531.2015426,
+    "hash": "875710a192fbc88f0207f8e8ff79848d"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\mockups\\reactions-screen.html": {
+    "mtime": 1778358531.2015426,
+    "hash": "9018d15e176bfaee301cd328eeae3c90"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\mockups\\round-summary.html": {
+    "mtime": 1778358531.2015426,
+    "hash": "ac70cd1a3e0307fa3d69a19a2da2bb07"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-05-09-phase-1-engine-core.md": {
+    "mtime": 1778363723.701615,
+    "hash": "be99b4fdb7a721ec1e4a02d6f3b22b37"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-05-09-phase-2-ai-personalities.md": {
+    "mtime": 1778405182.192143,
+    "hash": "47b37cee61c2a05f59c928d27c523e19"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-05-10-phase-2-5-player-slot.md": {
+    "mtime": 1778440275.8402038,
+    "hash": "3b8788f8c5b9dab253f1673b5c553f02"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-05-11-phase-3-ui-shell.md": {
+    "mtime": 1778486523.4395554,
+    "hash": "a87761ca6cbd6aa7abd67b33e61c99d1"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-05-12-phase-4a-satire-hotseat.md": {
+    "mtime": 1778595151.223009,
+    "hash": "60025be8a11c36b670272638ef5d27ea"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-05-13-phase-4b-balance-planning-rework.md": {
+    "mtime": 1778688052.8638532,
+    "hash": "bbf14c7c8946e12ad3c8f7c6e52b2b24"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-05-14-phase-4c-slice1-bomber-reuse.md": {
+    "mtime": 1778774025.1401148,
+    "hash": "a3de6ed30b0c178d3ea10931d501efb6"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-05-17-phase-4c-slice2-ai-aggression.md": {
+    "mtime": 1779014815.1829062,
+    "hash": "87bdf7916e6950baedfb3ee69467e59c"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-05-19-phase-4c-slice3-lookahead-sliding-window.md": {
+    "mtime": 1779221278.2333672,
+    "hash": "77644e8b614558b420409e5eb5df5ad7"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-07-19-burnem-leader-swap.md": {
+    "mtime": 1784483067.2658854,
+    "hash": "97ba08279e74d9bd16405b50198f02bb"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\plans\\2026-07-19-comic-retheme-slice1.md": {
+    "mtime": 1784483067.2671506,
+    "hash": "e95f019645542d4f27572ff89bcc29ad"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\research\\2026-07-19-burnham-research.md": {
+    "mtime": 1784483067.269152,
+    "hash": "edd2a232963aedee041745a31fe12f65"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-05-08-nuke-design.md": {
+    "mtime": 1778358531.2015426,
+    "hash": "2f57a9c05f7c3161a1f85ab9dffe86c6"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-05-10-phase-2-5-player-slot-design.md": {
+    "mtime": 1778439174.614022,
+    "hash": "8d966d154475fcdb6a2807081d5a98e5"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-05-11-phase-3-ui-design.md": {
+    "mtime": 1778485009.1178572,
+    "hash": "bf974b46db008e6ce521594661586dc2"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-05-12-phase-4a-satire-hotseat-design.md": {
+    "mtime": 1778594266.557366,
+    "hash": "c8947f0a38687f2e6a7000099baf0437"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-05-13-phase-4b-balance-planning-rework-design.md": {
+    "mtime": 1778687219.4734936,
+    "hash": "a1aaa28b40b3ddddb557dc83e8c42da7"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-05-14-phase-4c-slice1-bomber-reuse-design.md": {
+    "mtime": 1778773543.788707,
+    "hash": "42330d036d5493f0fe945969d9e8bcf5"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-05-16-phase-4c-slice2-ai-aggression-design.md": {
+    "mtime": 1778953538.588071,
+    "hash": "b13d0c2b09bcb7d71895eabc0fe9ceca"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-05-19-phase-4c-slice3-lookahead-sliding-window-design.md": {
+    "mtime": 1779221278.2333672,
+    "hash": "edf2b55b8c817ed58d48237561d156bd"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-05-20-visual-design-portrait-system-design.md": {
+    "mtime": 1784483067.270147,
+    "hash": "7daa665e2e43957e32852767d1627b64"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-07-19-burnem-leader-swap-design.md": {
+    "mtime": 1784483067.2711482,
+    "hash": "576965f5ce50de3f20a38b39de658d31"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-07-19-comic-retheme-slice1-design.md": {
+    "mtime": 1784483067.273149,
+    "hash": "a6409f4bf20e2956ba9d5541cf631424"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-07-19-comic-retheme-slice2-design.md": {
+    "mtime": 1784483067.2741475,
+    "hash": "e9ec77d193948ef386ae9766bf664d4c"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-07-19-comic-retheme-slice3-design.md": {
+    "mtime": 1784483067.2756548,
+    "hash": "d205399a5140b5bded27863ed3576134"
+  },
+  "C:\\Users\\gethi\\source\\nuke\\docs\\superpowers\\specs\\2026-07-19-comic-retheme-slice4-design.md": {
+    "mtime": 1784483067.2776663,
+    "hash": "3ba6028c6dfcf369aa824e7d28a01acf"
+  }
+}

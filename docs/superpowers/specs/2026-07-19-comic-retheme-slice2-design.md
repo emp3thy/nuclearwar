@@ -1,5 +1,7 @@
 # nuke — comic-tabloid re-theme, slice 2: Planning + HotseatHandoff + AiConferring
 
+> **Note (2026-07-20):** the `design_handoff_nuke_game/` prototype bundle referenced in this document was a temporary handoff artifact and has been deleted. The implemented code in `src/ui/` is the source of truth; paths below are historical.
+
 **Date:** 2026-07-19
 **Status:** draft for review
 **Depends on:** `2026-07-19-comic-retheme-slice1-design.md` (tokens.css, fonts, `<Portrait>`, comic primitives incl. `Panel`, `Tag`, `Stamp`, `Btn`, `Stat`, `ApMeter`, `RelBadge`, `HoldButton`, `Ribbon`) — slice 1 must land first.

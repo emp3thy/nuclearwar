@@ -1,5 +1,7 @@
 # Comic Re-theme Slice 1 (Foundation + Setup) Implementation Plan
 
+> **Note (2026-07-20):** the `design_handoff_nuke_game/` prototype bundle referenced in this document was a temporary handoff artifact and has been deleted. The implemented code in `src/ui/` is the source of truth; paths below are historical.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Land the comic-tabloid design foundation (tokens, fonts, SVG portrait system, shared comic primitives) and re-theme the Setup screen to the design handoff.

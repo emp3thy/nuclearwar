@@ -3,9 +3,7 @@
  *
  * Typed section models (forecast, market, box score, news stories, photo
  * caption, corrections) computed from live game state + the round's
- * ResolutionEvents. No React. The handoff's NEWS_* arrays in
- * design_handoff_nuke_game/data.jsx are shape+copy reference only — nothing
- * is imported from the prototype.
+ * ResolutionEvents. No React.
  */
 import type { GameState, LeaderId, ResolutionEvent } from '../../engine/types';
 import { stripFlag } from '../portraits';

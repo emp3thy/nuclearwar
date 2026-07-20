@@ -1,5 +1,5 @@
 /**
- * nuke — geometric caricature portraits (from the design handoff).
+ * nuke — geometric caricature portraits.
  * Each leader rendered as a flat geometric SVG composition.
  * Recognizable through silhouette + signature color + key prop, never literal likeness.
  * Deliberate placeholders: commissioned art can replace bodies with no API change.

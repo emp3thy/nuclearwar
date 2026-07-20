@@ -41,3 +41,7 @@ coverage/
 
 # Worktrees (Windows-on-git hazard; never commit them)
 .worktrees/
+
+# graphify: the graph itself is committed; its AST cache is local build scratch
+# (content-hash keyed, regenerates on every code change)
+graphify-out/cache/

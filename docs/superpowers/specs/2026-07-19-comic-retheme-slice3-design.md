@@ -1,5 +1,7 @@
 # nuke — comic-tabloid re-theme, slice 3: Action screen (world map)
 
+> **Note (2026-07-20):** the `design_handoff_nuke_game/` prototype bundle referenced in this document was a temporary handoff artifact and has been deleted. The implemented code in `src/ui/` is the source of truth; paths below are historical.
+
 **Date:** 2026-07-19
 **Status:** spec for phase 3 of the comic re-theme
 **Depends on:** slice 1 (`2026-07-19-comic-retheme-slice1-design.md`) — tokens.css, fonts, `<Portrait>`, and the shared comic primitives in `src/ui/components/comic/` must exist before this slice starts.

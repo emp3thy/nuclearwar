@@ -1,8 +1,7 @@
 /**
  * MushroomCloudPhoto — the RoundSummary's stylised mushroom-cloud "photo"
- * frame. SVG lifted from design_handoff_nuke_game/screens-3.jsx; gradient and
- * pattern ids are unique per instance (useId) so the component is safe to
- * reuse on one page.
+ * frame. Gradient and pattern ids are unique per instance (useId) so the
+ * component is safe to reuse on one page.
  */
 import { useId } from 'react';
 import Stamp from './comic/Stamp';

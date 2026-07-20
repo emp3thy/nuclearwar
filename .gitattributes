@@ -1,0 +1,17 @@
+# graphify knowledge graph — generated output, but committed (see CLAUDE.md).
+# Custom merge driver resolves regeneration conflicts instead of leaving
+# conflict markers in machine-written JSON.
+graphify-out/graph.json merge=graphify-merge
+
+# Collapse generated graph output in diffs; keep it out of language stats.
+graphify-out/** linguist-generated=true
+graphify-out/graph.json -diff
+graphify-out/graph.html -diff
+
+# Normalise line endings so the Windows checkout stops churning CRLF into diffs.
+* text=auto
+*.ts text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.md text eol=lf

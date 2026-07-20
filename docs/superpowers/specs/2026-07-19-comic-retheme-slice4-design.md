@@ -1,5 +1,7 @@
 # nuke — comic-tabloid re-theme, slice 4: RoundSummary newspaper + Winners
 
+> **Note (2026-07-20):** the `design_handoff_nuke_game/` prototype bundle referenced in this document was a temporary handoff artifact and has been deleted. The implemented code in `src/ui/` is the source of truth; paths below are historical.
+
 **Date:** 2026-07-19
 **Status:** approved for implementation
 **Depends on:** slice 1 (`2026-07-19-comic-retheme-slice1-design.md` — tokens.css, fonts, `<Portrait>`, comic primitives), slices 2–3 (Planning/Handoff/Conferring, Action). This slice assumes those deliverables are merged: `src/ui/tokens.css`, `src/ui/components/Portrait.tsx`, `src/ui/components/comic/*` (`Panel`, `Halftone`, `Tag`, `Stamp`, `Btn`, `RelBadge`, `Burst`, …) all exist.

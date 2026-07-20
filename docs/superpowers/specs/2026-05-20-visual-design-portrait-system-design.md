@@ -1,7 +1,7 @@
 # nuke — visual design direction & portrait system
 
 **Date:** 2026-05-20
-**Status:** SUPERSEDED by `2026-07-19-comic-retheme-slice1-design.md` — visual direction replaced by the comic-tabloid design handoff (`design_handoff_nuke_game/`); geometric SVG portraits replace the PNG pipeline and flag-fill human variant described here.
+**Status:** SUPERSEDED by `2026-07-19-comic-retheme-slice1-design.md` — visual direction replaced by the comic-tabloid re-theme; geometric SVG portraits replace the PNG pipeline and flag-fill human variant described here.
 
 This spec captures three top-level look-and-feel decisions and the full portrait system that sits on top of them. It is the first concrete elaboration of the 2026-05-08 base design (`docs/superpowers/specs/2026-05-08-nuke-design.md`) and the four parchment-phone mockups in `docs/superpowers/mockups/`.
 

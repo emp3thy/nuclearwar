@@ -15,3 +15,7 @@ graphify-out/graph.html -diff
 *.css text eol=lf
 *.json text eol=lf
 *.md text eol=lf
+*.sh text eol=lf
+
+# Git hooks must stay LF — a CRLF shebang breaks the interpreter.
+scripts/git-hooks/* text eol=lf

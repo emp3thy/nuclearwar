@@ -1,3 +1,9 @@
+## Branching (MANDATORY)
+
+`main` is protected: direct pushes are blocked (GitHub branch protection, admins included) and merging requires a PR with the Claude BugBot check green. Never commit feature work straight to `main` — branch, push the branch, open a PR, let it merge.
+
+After a fresh clone, install the local hooks once: `sh scripts/install-git-hooks.sh`. It adds a `pre-push` guard (rejects direct pushes to main before the round-trip) alongside graphify's hooks. Emergency bypass is `git push --no-verify`; the server rule still catches it.
+
 ## graphify
 
 This project has a graphify knowledge graph at graphify-out/.

@@ -3,16 +3,19 @@ import { topGrudgeTarget } from './scoring';
 import { buildToward, launchSalvo, type BuildPlanEntry } from './aggression';
 
 /**
- * Khameneverhere — Grudge personality (P4c.2 rework).
+ * Khameneverhere — Grudge personality, vengeance-goes-large doctrine (slice 1).
  *
  * Very aggressive, launch-focused. Ranks targets by grudge (top grudge first,
  * then remaining living leaders). Launch-first uncapped salvo, then build the
- * remainder toward a raised stockpile with medium warheads. No diplomacy.
+ * remainder toward a raised stockpile. Large is front-loaded among warheads
+ * (right after delivery) so his grudge strikes land large when AP allows;
+ * medium and small are fallback yields so he is never disarmed. No diplomacy.
  */
 const KHAMENEVERHERE_BUILD_PLAN: BuildPlanEntry[] = [
-  { build: { item: 'missile' }, target: 6 },
-  { build: { item: 'warhead', yield: 'small' }, target: 4 },
-  { build: { item: 'warhead', yield: 'medium' }, target: 3 },
+  { build: { item: 'missile' }, target: 5 },
+  { build: { item: 'warhead', yield: 'large' }, target: 2 },
+  { build: { item: 'warhead', yield: 'medium' }, target: 2 },
+  { build: { item: 'warhead', yield: 'small' }, target: 2 },
 ];
 
 export function planKhameneverhere(state: GameState, leaderId: LeaderId): Order[] {

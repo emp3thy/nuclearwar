@@ -4,19 +4,22 @@ import { threatScore, wasAttackedBy } from './scoring';
 import { buildToward, launchSalvo, type BuildPlanEntry } from './aggression';
 
 /**
- * Netanyahoo — Warmonger personality (P4c.2 rework).
+ * Netanyahoo — Warmonger personality, big-but-rare doctrine (slice 1).
  *
  * Hardest-hitting personality. Launch-first (uncapped salvo), then build the
- * remainder toward a yield ramp. Chump-exception preserved: no launch at Chump
- * until Chump has attacked first. Propaganda exclusively at Chump.
+ * remainder toward large warheads over volume — Netanyahoo does not do small
+ * nukes. Large is front-loaded (right after delivery) so `buildToward` reaches
+ * it before AP runs out; because large costs 3 AP, he arms slowly, producing
+ * rare but devastating strikes. Medium is the fallback yield when AP can't
+ * stretch to large. Chump-exception preserved: no launch at Chump until Chump
+ * has attacked first. Propaganda exclusively at Chump.
  */
 const PROPAGANDA_COST = 1;
 
 const NETANYAHOO_BUILD_PLAN: BuildPlanEntry[] = [
-  { build: { item: 'missile' }, target: 6 },
-  { build: { item: 'warhead', yield: 'small' }, target: 4 },
-  { build: { item: 'warhead', yield: 'medium' }, target: 3 },
-  { build: { item: 'warhead', yield: 'large' }, target: 2 },
+  { build: { item: 'missile' }, target: 4 },
+  { build: { item: 'warhead', yield: 'large' }, target: 3 },
+  { build: { item: 'warhead', yield: 'medium' }, target: 2 },
 ];
 
 export function planNetanyahoo(state: GameState, leaderId: LeaderId): Order[] {

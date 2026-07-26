@@ -46,12 +46,13 @@ describe('Khameneverhere aggression (P4c.2)', () => {
     expect(launches.every((o) => o.kind === 'launch' && o.target === 'carnage')).toBe(true);
   });
 
-  it('builds medium warheads into the ramp', () => {
+  it('builds large warheads (grudge goes large) with medium as fallback', () => {
     const s = initialState({ cast: ['khameneverhere', 'carnage'], difficulty: 'normal', seed: 'ka2' });
     s.leaders.khameneverhere.stockpile.missiles = 6;
     s.leaders.khameneverhere.stockpile.warheadsSmall = 4;
-    s.leaders.khameneverhere.ap = 12;
+    s.leaders.khameneverhere.ap = 24;
     const orders = planKhameneverhere(s, 'khameneverhere');
+    expect(orders.some((o) => o.kind === 'build-warhead' && o.yield === 'large')).toBe(true);
     expect(orders.some((o) => o.kind === 'build-warhead' && o.yield === 'medium')).toBe(true);
   });
 });

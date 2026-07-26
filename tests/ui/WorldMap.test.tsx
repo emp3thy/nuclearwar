@@ -84,9 +84,9 @@ describe('<WorldMap>', () => {
       />,
     );
     expect(container.textContent).toContain('🛡');
-    // Impact rings are dashed magenta ellipses rx=9/11.5 — absent on intercepts.
-    expect(container.querySelector('ellipse[rx="9"]')).toBeNull();
-    expect(container.querySelector('ellipse[rx="11.5"]')).toBeNull();
+    // Impact rings are dashed magenta ellipses rx=13/17 — absent on intercepts.
+    expect(container.querySelector('ellipse[rx="13"]')).toBeNull();
+    expect(container.querySelector('ellipse[rx="17"]')).toBeNull();
   });
 
   it('renders the propaganda trail with the paper icon', () => {
@@ -108,7 +108,7 @@ describe('<WorldMap>', () => {
       />,
     );
     expect(container.textContent).toContain('🤝');
-    expect(container.querySelector('path[stroke="var(--green)"][stroke-dasharray="0.8 0.6"]')).not.toBeNull();
+    expect(container.querySelector('path[stroke="var(--green)"][stroke-dasharray="2 1.5"]')).not.toBeNull();
   });
 
   it('renders the build icon above the actor for build events', () => {
@@ -126,7 +126,7 @@ describe('<WorldMap>', () => {
       />,
     );
     // Two targets → two sets of impact rings.
-    expect(container.querySelectorAll('ellipse[rx="9"]')).toHaveLength(2);
+    expect(container.querySelectorAll('ellipse[rx="13"]')).toHaveLength(2);
     // Both targets highlighted magenta.
     expect(markerEllipse(container, 'carnage').getAttribute('fill')).toBe('var(--magenta)');
     expect(markerEllipse(container, 'player1').getAttribute('fill')).toBe('var(--magenta)');

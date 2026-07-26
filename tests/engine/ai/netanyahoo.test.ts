@@ -95,13 +95,16 @@ describe('Netanyahoo aggression (P4c.2)', () => {
     expect(orders.filter((o) => o.kind === 'launch').length).toBeGreaterThanOrEqual(2);
   });
 
-  it('builds toward a yield ramp (medium/large warheads), not only small', () => {
+  it('builds toward the big-but-rare doctrine: large warheads, medium fallback, never small', () => {
+    // warheadsSmall starts at 0 (not pre-stocked to any old-plan target) so this
+    // scenario genuinely discriminates the new plan from the old small-first one.
     const s = initialState({ cast: ['netanyahoo', 'carnage'], difficulty: 'normal', seed: 'na3' });
     s.leaders.netanyahoo.stockpile.missiles = 6;
-    s.leaders.netanyahoo.stockpile.warheadsSmall = 4;
-    s.leaders.netanyahoo.ap = 12;
+    s.leaders.netanyahoo.ap = 24;
     const orders = planNetanyahoo(s, 'netanyahoo');
+    expect(orders.some((o) => o.kind === 'build-warhead' && o.yield === 'large')).toBe(true);
     expect(orders.some((o) => o.kind === 'build-warhead' && o.yield === 'medium')).toBe(true);
+    expect(orders.some((o) => o.kind === 'build-warhead' && o.yield === 'small')).toBe(false);
   });
 
   it('emits builds before launches (validateOrderSequence ordering)', () => {

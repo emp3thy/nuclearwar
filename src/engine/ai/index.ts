@@ -5,11 +5,37 @@ import { isHuman } from '../state';
 import { dispatch } from './dispatch';
 import { bestTargetByLookahead } from './lookahead';
 
-const DIFFICULTY_RANDOM_PCT: Record<Difficulty, number> = {
-  easy: 0.3,
+export const DIFFICULTY_RANDOM_PCT: Record<Difficulty, number> = {
+  easy: 0.12,
   normal: 0.1,
   hard: 0,
 };
+
+/**
+ * Candidate pool for random order-swaps in `applyRandomization`. Non-easy
+ * difficulties get the full 8-item pool. Easy excludes `build-warhead`
+ * medium/large — those are the source of easy's chaotic big/concentrated
+ * strikes (12.4% of easy launches were large, ~3x normal) — so easy's noise
+ * stays non-lethal: it varies the game without manufacturing big strikes.
+ */
+export function randomizationCandidates(diff: Difficulty): Order[] {
+  const full: Order[] = [
+    { kind: 'build-factory' },
+    { kind: 'build-missile' },
+    { kind: 'build-bomber' },
+    { kind: 'build-warhead', yield: 'small' },
+    { kind: 'build-warhead', yield: 'medium' },
+    { kind: 'build-warhead', yield: 'large' },
+    { kind: 'build-defence', type: 'shield' },
+    { kind: 'build-defence', type: 'aa' },
+  ];
+  if (diff === 'easy') {
+    return full.filter(
+      (o) => !(o.kind === 'build-warhead' && (o.yield === 'medium' || o.yield === 'large')),
+    );
+  }
+  return full;
+}
 
 export function planAi(state: GameState, leaderId: LeaderId, difficulty?: Difficulty): Order[] {
   const me = state.leaders[leaderId];
@@ -62,7 +88,7 @@ export function planAi(state: GameState, leaderId: LeaderId, difficulty?: Diffic
 
   // Easy / Normal randomization: replace each order with probability difficulty-pct.
   if (DIFFICULTY_RANDOM_PCT[diff] > 0) {
-    orders = applyRandomization(state, leaderId, orders, DIFFICULTY_RANDOM_PCT[diff]);
+    orders = applyRandomization(state, leaderId, orders, DIFFICULTY_RANDOM_PCT[diff], diff);
   }
 
   return orders;
@@ -73,20 +99,12 @@ function applyRandomization(
   leaderId: LeaderId,
   orders: Order[],
   pct: number,
+  diff: Difficulty,
 ): Order[] {
   let rngState = state.rngState;
   const me = state.leaders[leaderId];
   let remainingBudget = me.ap;
-  const candidates: Order[] = [
-    { kind: 'build-factory' },
-    { kind: 'build-missile' },
-    { kind: 'build-bomber' },
-    { kind: 'build-warhead', yield: 'small' },
-    { kind: 'build-warhead', yield: 'medium' },
-    { kind: 'build-warhead', yield: 'large' },
-    { kind: 'build-defence', type: 'shield' },
-    { kind: 'build-defence', type: 'aa' },
-  ];
+  const candidates = randomizationCandidates(diff);
 
   const out: Order[] = [];
   for (const o of orders) {

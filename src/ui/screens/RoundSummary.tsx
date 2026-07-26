@@ -9,12 +9,13 @@ import DisparageColumn from '../components/DisparageColumn';
 import { Btn, RelBadge, Stamp } from '../components/comic';
 import {
   BOX_SCORE_EMPTY,
-  CLASSIFIEDS,
   deriveBoxScore,
   deriveForecast,
   deriveMarket,
   derivePhotoCaption,
   deriveStories,
+  pickAdvert,
+  pickClassifieds,
   pickCorrection,
 } from '../util/newspaper';
 import styles from './RoundSummary.module.css';
@@ -84,11 +85,12 @@ export default function RoundSummary({ state, dispatch }: ScreenProps) {
   const survivors = game.cast.filter((id) => game.leaders[id].alive).length;
   const survivorsPop = game.cast.reduce((acc, id) => acc + game.leaders[id].population, 0);
 
-  const forecast = deriveForecast(thisRoundLost);
+  const forecast = deriveForecast(thisRoundLost, reportedRound);
   const market = deriveMarket(game, state.prevPopulations);
   const boxScore = deriveBoxScore(state.events, game.leaders);
   const stories = deriveStories(game, state.events, state.prevPopulations);
   const photoCaption = derivePhotoCaption(state.events, game.leaders);
+  const advert = pickAdvert(reportedRound);
   const lostStamp = thisRoundLost > 0 ? `−${thisRoundLost}M` : undefined;
 
   // Eliminated this round = alive=false AND prev > 0 (detection preserved).
@@ -293,8 +295,8 @@ export default function RoundSummary({ state, dispatch }: ScreenProps) {
 
             <section className={styles.sideSec}>
               <div className={styles.sideHead}>CLASSIFIEDS</div>
-              {CLASSIFIEDS.map((c) => (
-                <p key={c.tag} className={styles.classified}>
+              {pickClassifieds(reportedRound).map((c, i) => (
+                <p key={i} className={styles.classified}>
                   <strong className={styles.classifiedTag}>{c.tag}</strong>
                   {c.text}
                 </p>
@@ -303,10 +305,12 @@ export default function RoundSummary({ state, dispatch }: ScreenProps) {
 
             <div className={styles.adBlock}>
               <div className={styles.adLabel}>ADVERTISEMENT</div>
-              <div className={styles.adTitle}>NUCLEAR<br />DUCKS</div>
-              <div className={styles.adCopy}>
-                If it walks, talks, and quacks — it's covered. Limited supply.
+              <div className={styles.adTitle}>
+                {advert.title.split('\n').map((line, i) => (
+                  <span key={i}>{i > 0 && <br />}{line}</span>
+                ))}
               </div>
+              <div className={styles.adCopy}>{advert.body}</div>
             </div>
           </aside>
         </div>

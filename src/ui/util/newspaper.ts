@@ -33,26 +33,114 @@ export interface Forecast {
  * data.jsx pairs HEAVY with uv 5; this ladder reserves UV 5 for BIBLICAL so
  * the scale has headroom (spec §4.1). Do not "fix" it back.
  */
-export function deriveForecast(thisRoundLost: number): Forecast {
-  const tier =
-    thisRoundLost === 0 ? { outlook: 'FALLOUT: NONE', temp: '20°', tempLabel: 'seasonal, suspicious', uv: 1, fallout: 'None reported' } :
-    thisRoundLost <= 5 ? { outlook: 'FALLOUT: LIGHT', temp: '400°', tempLabel: 'localised high', uv: 2, fallout: 'Light, drifting east' } :
-    thisRoundLost <= 14 ? { outlook: 'FALLOUT: HEAVY', temp: '1,200°', tempLabel: 'ground zero high', uv: 4, fallout: 'Heavy, drifting east' } :
-    { outlook: 'FALLOUT: BIBLICAL', temp: '5,800°', tempLabel: 'surface of the sun, briefly', uv: 5, fallout: 'Total, drifting everywhere' };
+const FORECAST_TIERS = {
+  none: { outlook: 'FALLOUT: NONE', temp: '20°', tempLabel: 'seasonal, suspicious', uv: 1 },
+  light: { outlook: 'FALLOUT: LIGHT', temp: '400°', tempLabel: 'localised high', uv: 2 },
+  heavy: { outlook: 'FALLOUT: HEAVY', temp: '1,200°', tempLabel: 'ground zero high', uv: 4 },
+  biblical: { outlook: 'FALLOUT: BIBLICAL', temp: '5,800°', tempLabel: 'surface of the sun, briefly', uv: 5 },
+};
 
-  const lost = thisRoundLost > 0;
+/**
+ * Ironic row-set variants, keyed by whether this round drew blood. Rotating
+ * by round (rather than by the finer-grained fallout tier) keeps the same
+ * "hit"/"calm" state reading differently round-to-round (spec §2.3).
+ */
+type RowSet = ForecastRow[];
+
+const CALM_ROWSETS: RowSet[] = [
+  [
+    { label: 'Fallout', value: 'None reported' },
+    { label: 'Visibility', value: 'Unlimited. For now.' },
+    { label: 'Wind', value: 'Light breeze' },
+    { label: 'Outlook', value: 'Worse. Always worse.' },
+  ],
+  [
+    { label: 'Fallout', value: 'None reported. Suspicious.' },
+    { label: 'Visibility', value: 'Unlimited. Make the most of it.' },
+    { label: 'Wind', value: 'Calm, ominously so.' },
+    { label: 'Outlook', value: 'Fine. For now.' },
+  ],
+  [
+    { label: 'Fallout', value: 'Nothing on the wind but rumour.' },
+    { label: 'Visibility', value: 'Clear. Historians will note the date.' },
+    { label: 'Wind', value: 'Light breeze, holding its breath.' },
+    { label: 'Outlook', value: 'A pause. Not a peace.' },
+  ],
+];
+
+const HIT_ROWSETS: RowSet[] = [
+  [
+    { label: 'Fallout', value: 'Confirmed. Drifting east, as fallout does.' },
+    { label: 'Visibility', value: 'Nil to 200 yards.' },
+    { label: 'Wind', value: 'Mushroom-shaped, gusting to apocalyptic.' },
+    { label: 'Outlook', value: 'Worse. Always worse.' },
+  ],
+  [
+    { label: 'Fallout', value: 'Present and accounted for.' },
+    { label: 'Visibility', value: 'Nil to 200 yards, improves once the dust is you.' },
+    { label: 'Wind', value: 'Brisk, radioactive, unseasonal.' },
+    { label: 'Outlook', value: 'Unseasonably terminal.' },
+  ],
+  [
+    { label: 'Fallout', value: 'Heavier than advertised.' },
+    { label: 'Visibility', value: "Ash-limited. Bring a torch, or don't bother." },
+    { label: 'Wind', value: 'Gusting toward whichever border complains loudest.' },
+    { label: 'Outlook', value: 'Grim, with a chance of grimmer.' },
+  ],
+];
+
+export function deriveForecast(thisRoundLost: number, reportedRound: number): Forecast {
+  const tier =
+    thisRoundLost === 0 ? FORECAST_TIERS.none :
+    thisRoundLost <= 5 ? FORECAST_TIERS.light :
+    thisRoundLost <= 14 ? FORECAST_TIERS.heavy :
+    FORECAST_TIERS.biblical;
+
+  const sets = thisRoundLost > 0 ? HIT_ROWSETS : CALM_ROWSETS;
+  const rows = sets[(reportedRound - 1) % sets.length];
+
   return {
     outlook: tier.outlook,
     temp: tier.temp,
     tempLabel: tier.tempLabel,
     uv: tier.uv,
-    rows: [
-      { label: 'Fallout', value: tier.fallout },
-      { label: 'Visibility', value: lost ? 'Nil to 200 yards' : 'Unlimited. For now.' },
-      { label: 'Wind', value: lost ? 'Mushroom-shaped' : 'Light breeze' },
-      { label: 'Outlook', value: 'Worse. Always worse.' },
-    ],
+    rows,
   };
+}
+
+/* ============================================================
+ * ADVERTISEMENT
+ * ============================================================ */
+
+export interface Advert {
+  title: string;
+  body: string;
+}
+
+/**
+ * Locked 15-entry pool (spec §2.1): original surreal inanity + prepper spoof,
+ * Nuclear Ducks / Tinned Sunshine register. No borrowed comedy quotes.
+ */
+export const ADVERTS: readonly Advert[] = [
+  { title: 'Nuclear Ducks', body: 'They float. They glow. They outlive you. £2 each, 3 for the end of the world.' },
+  { title: 'Tinned Sunshine', body: 'Open in the event of nuclear winter. May contain bees. Definitely contains bees. Aisle 4, keeps for years.' },
+  { title: 'Powdered Optimism', body: 'Just add water and look away. One tub lasts a whole denial. Now hope-free.' },
+  { title: 'A Small Amount of Later', body: 'Buy time. Not much. Some. Terms shorter than expected.' },
+  { title: 'Pre-Apologised Letters', body: 'Regret, posted in advance. Box of 50, stamps optional.' },
+  { title: 'Spare Ceiling', body: 'For when yours leaves suddenly. Fits most skies. Flat-packed, like everything now.' },
+  { title: 'Genuine Distance', body: 'Put some between yourself and things. Miles or feelings. By the yard, cut to length.' },
+  { title: 'Assorted Consequences', body: "Grab bag. Some yours, some the neighbours'. No refunds, obviously." },
+  { title: 'Emergency Trousers (B)', body: "Filling a need — because you've filled yours. Sold in pairs; you'll go through the first." },
+  { title: 'Emergency Trousers (C)', body: 'The alert came. So did you. Step into something dignified. Or these.' },
+  { title: 'Your Own Private Nuke', body: 'Why wait for a superpower? Deter the neighbours today. Collateral: the neighbours. 0% APR, 100% MAD.' },
+  { title: 'The Family-Size Warhead', body: 'Big enough to share. Nobody will. Serves everyone, once.' },
+  { title: 'Backyard Silo Kit', body: 'Turn that unloved patio into mutually assured deterrence. Flat-packed, spade not included.' },
+  { title: 'The Doomsday Direct-Debit', body: "Prep now, pay later. There is no later. Prep now. Cancel anytime (you can't)." },
+  { title: "Prepper's Pantry", body: "Forty years of beans for the forty minutes you have left. You've always bean prepared. Bulk only." },
+];
+
+export function pickAdvert(reportedRound: number): Advert {
+  return ADVERTS[(reportedRound - 1) % ADVERTS.length];
 }
 
 /* ============================================================
@@ -414,6 +502,11 @@ export const CORRECTIONS: readonly string[] = [
   'CORRECTION: Yesterday we reported 14M dead. It was 15M. We regret the optimism.',
   "CORRECTION: Mr Chump was described as 'a stable genius.' This was his description.",
   'CORRECTION: The duck was, in fact, nuclear. We apologise to the duck.',
+  'CORRECTION: The Ministry of Defence denies denying anything. We regret the confusion.',
+  "CORRECTION: 'Surgical strike' was reviewed by our medical desk and rejected.",
+  'CORRECTION: We described the ceasefire as "holding." It was not holding. Nothing is holding.',
+  'CORRECTION: The general we quoted has since been promoted, demoted, and promoted again. We regret nothing, because we no longer know what happened.',
+  'CORRECTION: An earlier edition named the aggressor. All parties have since claimed the title. We defer to the crater.',
 ];
 
 export function pickCorrection(reportedRound: number): string {
@@ -430,4 +523,23 @@ export const CLASSIFIEDS: readonly Classified[] = [
   { tag: 'WANTED', text: 'Delivery system for Large warhead. Will not fly itself, apparently.' },
   { tag: 'LOST', text: "Iran's signed orders. Last seen never. Reward: plausible deniability." },
   { tag: 'PERSONAL', text: 'Lonely glass cannon seeks 100% aggression. ¡Viva la libertad, carajo!' },
+  { tag: 'FOR SALE', text: 'Slightly-used bunker. One careful owner, several careless neighbours.' },
+  { tag: 'WANTED', text: 'Someone to explain the chain of command. Urgently.' },
+  { tag: 'FOUND', text: 'One (1) launch key. Turns out it was in the other pocket.' },
+  { tag: 'SERVICES', text: 'Will draft a strongly-worded letter to any nation, any grievance. Postage not included.' },
+  { tag: 'FOR SALE', text: 'Gently detonated warhead casing. Ideal planter. Some assembly required.' },
+  { tag: 'WANTED', text: 'Volunteer to stand closer to the blast, for scientific curiosity.' },
+  { tag: 'NOTICE', text: 'The Ministry of Reassurance regrets it has nothing reassuring to say.' },
+  { tag: 'PERSONAL', text: 'Retired general, all limbs present, seeks quiet hobby. No missiles, please.' },
+  { tag: 'FOR SALE', text: 'Emergency trousers, gently worn. See also: emergency.' },
+  { tag: 'WANTED', text: "A neighbour who isn't planning something. Any neighbour." },
+  { tag: 'LOST', text: 'The point of all this. Last seen sometime before round one.' },
+  { tag: 'SERVICES', text: 'Bunker cleaning, hazard pay negotiable, references from survivors only.' },
 ];
+
+export function pickClassifieds(reportedRound: number, n = 4): Classified[] {
+  const start = (reportedRound - 1) % CLASSIFIEDS.length;
+  return Array.from({ length: Math.min(n, CLASSIFIEDS.length) }, (_, i) =>
+    CLASSIFIEDS[(start + i) % CLASSIFIEDS.length],
+  );
+}

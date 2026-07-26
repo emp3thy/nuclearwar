@@ -4,14 +4,16 @@ import { isHuman } from '../../engine/state';
 import { extractFlag } from '../portraits';
 import Portrait from '../components/Portrait';
 import { Btn, Halftone, Panel, RelBadge, Stamp, Tag } from '../components/comic';
+import { deriveAwards, humanDemiseLine } from '../util/demise';
 import styles from './Winners.module.css';
 
 function pickHeadline(outcome: WinOutcome, leaders: GameState['leaders']): string {
   switch (outcome.type) {
     case 'apocalypse': return 'WINNER: NOBODY';
     case 'survivor':
-    case 'pyrrhic':
       return `${leaders[outcome.winner].name.toUpperCase()} WINS`;
+    case 'pyrrhic':
+      return `LAST TO FALL: ${leaders[outcome.winner].name.toUpperCase()}`;
   }
 }
 
@@ -40,6 +42,8 @@ export default function Winners({ state, dispatch }: ScreenProps) {
   const outcome = game.outcome!;
   const headline = pickHeadline(outcome, game.leaders);
   const subLine = pickSubLine(outcome, game.leaders, state.initialPopulations);
+  const awards = deriveAwards(game, state.initialPopulations);
+  const epitaph = humanDemiseLine(game, state.initialPopulations, 'player1');
 
   const tollRows = game.cast.map((id) => {
     const leader = game.leaders[id];
@@ -91,7 +95,7 @@ export default function Winners({ state, dispatch }: ScreenProps) {
                   rotate={14}
                   style={{ fontSize: 14, padding: '5px 12px' }}
                 >
-                  {outcome.type === 'survivor' ? 'SURVIVOR' : 'PYRRHIC'}
+                  {outcome.type === 'survivor' ? 'SURVIVOR' : 'LAST TO FALL'}
                 </Stamp>
               </div>
             </div>
@@ -99,12 +103,39 @@ export default function Winners({ state, dispatch }: ScreenProps) {
           <div className={styles.heroText}>
             <h1 className={styles.headline}>{headline}</h1>
             <p className={styles.subline}>"{subLine}"</p>
+            <p className={styles.epitaph}>{epitaph}</p>
             <div className={styles.buttonRow}>
               <Btn variant="primary" size="lg" onClick={newGame}>New Game</Btn>
               <Btn size="lg" onClick={sameCast}>Same Cast, Again</Btn>
             </div>
           </div>
         </div>
+
+        {awards.length > 0 && (
+          <Panel title="Honours (Dishonours)" style={{ marginTop: 32, background: 'var(--paper)', color: 'var(--ink)' }}>
+            <div className={styles.tableScroll}>
+              <div className={styles.awardsList}>
+                {awards.map((award) => {
+                  const leader = game.leaders[award.leaderId];
+                  const mine = isHuman(award.leaderId);
+                  return (
+                    <div
+                      key={award.title}
+                      className={`${styles.awardRow} ${mine ? styles.awardMine : ''}`}
+                    >
+                      <span className={styles.awardTitle}>{award.title}</span>
+                      <span className={`${styles.cellLeader} ${styles.leaderCell}`}>
+                        <Portrait leaderId={award.leaderId} size={36} flag={flagFor(award.leaderId)} />
+                        <strong>{leader.name}{mine ? ' (you)' : ''}</strong>
+                      </span>
+                      <span className={styles.awardDetail}>{award.detail}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </Panel>
+        )}
 
         <Panel title="Death Toll" style={{ marginTop: 32, background: 'var(--paper)', color: 'var(--ink)' }}>
           <div className={styles.tableScroll}>

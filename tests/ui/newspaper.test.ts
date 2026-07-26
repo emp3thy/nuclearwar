@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
+  ADVERTS,
+  pickAdvert,
+  CLASSIFIEDS,
+  pickClassifieds,
   deriveForecast,
   deriveMarket,
   deriveBoxScore,
@@ -26,14 +30,14 @@ describe('deriveForecast', () => {
       [15, 'FALLOUT: BIBLICAL', 5],
     ];
     for (const [lost, outlook, uv] of cases) {
-      const f = deriveForecast(lost);
+      const f = deriveForecast(lost, 1);
       expect(f.outlook).toBe(outlook);
       expect(f.uv).toBe(uv);
     }
   });
 
   it('reports quiet conditions when nothing was lost', () => {
-    const f = deriveForecast(0);
+    const f = deriveForecast(0, 1);
     expect(f.temp).toBe('20°');
     expect(f.rows).toEqual([
       { label: 'Fallout', value: 'None reported' },
@@ -44,15 +48,60 @@ describe('deriveForecast', () => {
   });
 
   it('reports fallout conditions when people were lost', () => {
-    const f = deriveForecast(15);
+    const f = deriveForecast(15, 1);
     expect(f.temp).toBe('5,800°');
     expect(f.tempLabel).toBe('surface of the sun, briefly');
     expect(f.rows).toEqual([
-      { label: 'Fallout', value: 'Total, drifting everywhere' },
-      { label: 'Visibility', value: 'Nil to 200 yards' },
-      { label: 'Wind', value: 'Mushroom-shaped' },
+      { label: 'Fallout', value: 'Confirmed. Drifting east, as fallout does.' },
+      { label: 'Visibility', value: 'Nil to 200 yards.' },
+      { label: 'Wind', value: 'Mushroom-shaped, gusting to apocalyptic.' },
       { label: 'Outlook', value: 'Worse. Always worse.' },
     ]);
+  });
+});
+
+describe('deriveForecast (round-varied, tier preserved)', () => {
+  it('maps damage to the right tier outlook + uv', () => {
+    expect(deriveForecast(0, 1).outlook).toBe('FALLOUT: NONE');
+    expect(deriveForecast(0, 1).uv).toBe(1);
+    expect(deriveForecast(3, 1).outlook).toBe('FALLOUT: LIGHT');
+    expect(deriveForecast(10, 1).outlook).toBe('FALLOUT: HEAVY');
+    expect(deriveForecast(10, 1).uv).toBe(4);
+    expect(deriveForecast(20, 1).outlook).toBe('FALLOUT: BIBLICAL');
+    expect(deriveForecast(20, 1).uv).toBe(5);
+  });
+  it('same damage tier reads differently across rounds (rows rotate)', () => {
+    const a = deriveForecast(10, 1).rows.map((r) => r.value).join('|');
+    const b = deriveForecast(10, 2).rows.map((r) => r.value).join('|');
+    expect(a).not.toBe(b);
+  });
+});
+
+describe('adverts', () => {
+  it('pool is exactly 15 with non-empty title + body', () => {
+    expect(ADVERTS).toHaveLength(15);
+    for (const a of ADVERTS) {
+      expect(a.title.length).toBeGreaterThan(0);
+      expect(a.body.length).toBeGreaterThan(0);
+    }
+  });
+  it('pickAdvert rotates by round and wraps', () => {
+    expect(pickAdvert(1)).toBe(ADVERTS[0]);
+    expect(pickAdvert(2)).not.toBe(pickAdvert(1));
+    expect(pickAdvert(16)).toBe(pickAdvert(1)); // 15-wrap
+  });
+});
+
+describe('classifieds (rotation)', () => {
+  it('pool is at least 16', () => {
+    expect(CLASSIFIEDS.length).toBeGreaterThanOrEqual(16);
+  });
+  it('pickClassifieds returns n distinct items and rotates by round', () => {
+    const r1 = pickClassifieds(1, 4);
+    const r2 = pickClassifieds(2, 4);
+    expect(r1).toHaveLength(4);
+    expect(new Set(r1.map((c) => c.text)).size).toBe(4); // distinct within a round
+    expect(r1.map((c) => c.text).join('|')).not.toBe(r2.map((c) => c.text).join('|'));
   });
 });
 
@@ -281,11 +330,15 @@ describe('derivePhotoCaption', () => {
 });
 
 describe('pickCorrection', () => {
-  it('rotates through the three corrections by reported round', () => {
-    expect(CORRECTIONS).toHaveLength(3);
+  it('rotates through the corrections pool by reported round and wraps', () => {
     expect(pickCorrection(1)).toBe(CORRECTIONS[0]);
     expect(pickCorrection(2)).toBe(CORRECTIONS[1]);
-    expect(pickCorrection(3)).toBe(CORRECTIONS[2]);
-    expect(pickCorrection(4)).toBe(CORRECTIONS[0]);
+    expect(pickCorrection(CORRECTIONS.length + 1)).toBe(CORRECTIONS[0]);
+  });
+});
+
+describe('corrections (pool)', () => {
+  it('pool is at least 8', () => {
+    expect(CORRECTIONS.length).toBeGreaterThanOrEqual(8);
   });
 });

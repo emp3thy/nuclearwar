@@ -117,7 +117,9 @@ export default function Winners({ state, dispatch }: ScreenProps) {
               <div className={styles.awardsList}>
                 {awards.map((award) => {
                   const leader = game.leaders[award.leaderId];
-                  const mine = isHuman(award.leaderId);
+                  // Viewer = player1, consistent with the epitaph and death-toll
+                  // "(you)" convention; multi-human per-player scorecards are out of scope.
+                  const mine = award.leaderId === 'player1';
                   return (
                     <div
                       key={award.title}

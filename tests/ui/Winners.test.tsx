@@ -62,10 +62,32 @@ describe('<Winners>', () => {
     expect(screen.getByText('☢')).toBeInTheDocument();
   });
 
-  it('marks a pyrrhic winner with the PYRRHIC stamp', () => {
+  it('gives the pyrrhic outcome an honest headline instead of a "WINS" lie', () => {
     render(<Winners state={makeState({ type: 'pyrrhic', winner: 'chump' })} dispatch={vi.fn()} />);
-    expect(screen.getByText('CHUMP WINS')).toBeInTheDocument();
-    expect(screen.getByText('PYRRHIC')).toBeInTheDocument();
+    expect(screen.getByText('LAST TO FALL: CHUMP')).toBeInTheDocument();
+    expect(screen.queryByText('CHUMP WINS')).not.toBeInTheDocument();
+    expect(screen.getAllByText('LAST TO FALL').length).toBeGreaterThan(0);
+  });
+
+  it('renders an Awards panel for the pyrrhic outcome from outcome data alone (sparse log)', () => {
+    render(<Winners state={makeState({ type: 'pyrrhic', winner: 'chump' })} dispatch={vi.fn()} />);
+    expect(screen.getByText('Honours (Dishonours)')).toBeInTheDocument();
+  });
+
+  it('renders an Awards panel with LAST ONE STANDING for the survivor outcome', () => {
+    render(<Winners state={makeState({ type: 'survivor', winner: 'carnage' })} dispatch={vi.fn()} />);
+    expect(screen.getByText('Honours (Dishonours)')).toBeInTheDocument();
+    expect(screen.getByText('LAST ONE STANDING')).toBeInTheDocument();
+  });
+
+  it('omits the Awards panel when there are no awards (apocalypse, empty log)', () => {
+    render(<Winners state={makeState({ type: 'apocalypse' })} dispatch={vi.fn()} />);
+    expect(screen.queryByText('Honours (Dishonours)')).not.toBeInTheDocument();
+  });
+
+  it('shows the human epitaph line', () => {
+    render(<Winners state={makeState({ type: 'survivor', winner: 'carnage' })} dispatch={vi.fn()} />);
+    expect(screen.getByText(/Rufus T\. Firefly was eliminated/)).toBeInTheDocument();
   });
 
   it('New Game dispatches BACK_TO_SETUP', () => {

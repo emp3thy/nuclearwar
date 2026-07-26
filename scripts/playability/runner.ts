@@ -5,7 +5,7 @@ import { reduce } from '../../src/engine/reducer';
 import { planAi } from '../../src/engine/ai';
 import { isHuman } from '../../src/engine/state';
 import type { Difficulty, GameState, LeaderId, ResolutionEvent } from '../../src/engine/types';
-import { humanOrders } from './humanPolicy';
+import { POLICIES, type PolicyName } from './humanPolicy';
 
 // Fixed cast for the whole study so difficulty is the only independent variable:
 // the human (player1) plus a spread of AI personalities — coward, rational,
@@ -81,7 +81,9 @@ function countEvents(events: ResolutionEvent[]) {
 export function playOneGame(
   difficulty: Difficulty,
   seed: string,
+  policy: PolicyName = 'cautious',
 ): { record: GameRecord; beats: RoundBeat[] } {
+  const humanPlay = POLICIES[policy];
   let s: GameState = initialState({ cast: CAST, difficulty, seed });
   let rounds = 0;
   let humanEliminatedRound: number | null = null;
@@ -100,7 +102,7 @@ export function playOneGame(
   while (!s.outcome && rounds < ROUND_CAP) {
     for (const id of CAST) {
       if (!s.leaders[id]?.alive) continue;
-      const orders = isHuman(id) ? humanOrders(s, id) : planAi(s, id);
+      const orders = isHuman(id) ? humanPlay(s, id) : planAi(s, id);
       s = reduce(s, { type: 'SUBMIT_ORDERS', leaderId: id, orders });
     }
     const logLenBefore = s.log.length;
@@ -201,7 +203,12 @@ function narrative(record: GameRecord, beats: RoundBeat[]): string {
   return lines.join('\n');
 }
 
-export function runLevel(difficulty: Difficulty, count: number, outRoot: string): {
+export function runLevel(
+  difficulty: Difficulty,
+  count: number,
+  outRoot: string,
+  policy: PolicyName = 'cautious',
+): {
   level: Difficulty;
   count: number;
   dir: string;
@@ -214,7 +221,7 @@ export function runLevel(difficulty: Difficulty, count: number, outRoot: string)
 
   for (let i = 0; i < count; i++) {
     const seed = `${difficulty}-${i}`;
-    const { record, beats } = playOneGame(difficulty, seed);
+    const { record, beats } = playOneGame(difficulty, seed, policy);
     records.push(record);
     narratives.push(narrative(record, beats));
   }
@@ -226,7 +233,7 @@ export function runLevel(difficulty: Difficulty, count: number, outRoot: string)
   );
   writeFileSync(
     join(dir, 'games.md'),
-    `# ${difficulty} — ${count} games (human = player1, measured-reactive policy)\n\n` +
+    `# ${difficulty} — ${count} games (human = player1, ${policy} policy)\n\n` +
       `Cast: ${CAST.join(', ')}\n\n` +
       narratives.join('\n\n') +
       '\n',

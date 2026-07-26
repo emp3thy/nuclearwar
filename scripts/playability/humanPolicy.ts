@@ -1,89 +1,221 @@
 import type { GameState, LeaderId, Order } from '../../src/engine/types';
 import { validateOrderSequence, totalApCost } from '../../src/engine/orders';
 
-/**
- * A deterministic "casual but competent" human policy for the player1 slot.
- *
- * Design intent (documented so the playability study is interpretable): this is
- * a *measured reactive* human, not an optimiser and not a warmonger.
- *  - invests in economy early,
- *  - keeps a shield up once threatened,
- *  - always retaliates when hit (at the biggest grudge-holder),
- *  - finishes off a badly-wounded rival if one exists,
- *  - does NOT open with a first strike,
- *  - spends leftover AP on propaganda against attackers / occasional wooing,
- *  - banks whatever is left.
- *
- * Orders are emitted producers-before-consumers and each candidate is validated
- * against the growing sequence + remaining AP, so the returned list is always a
- * legal, affordable submission (the reducer would silently drop an illegal one).
- */
-export function humanOrders(state: GameState, id: LeaderId = 'player1'): Order[] {
-  const me = state.leaders[id];
-  if (!me || !me.alive) return [];
+export type PolicyName = 'cautious' | 'aggressive' | 'balanced' | 'turtle';
 
-  const budget = me.ap;
-  const orders: Order[] = [];
+type Adder = (o: Order) => boolean;
 
-  const tryAdd = (o: Order): boolean => {
+/** Greedy add-if-legal helper shared by all policies. */
+function adder(state: GameState, id: LeaderId, budget: number, orders: Order[]): Adder {
+  return (o: Order): boolean => {
     const candidate = [...orders, o];
     if (totalApCost(candidate) > budget) return false;
     if (!validateOrderSequence(state, id, candidate).ok) return false;
     orders.push(o);
     return true;
   };
+}
 
-  const others = state.cast.filter((t) => t !== id && state.leaders[t]?.alive);
+function aliveOthers(state: GameState, id: LeaderId): LeaderId[] {
+  return state.cast.filter((t) => t !== id && state.leaders[t]?.alive);
+}
 
+/**
+ * Shared assumption (per design): once someone lands a hit on you, you defend
+ * and retaliate at the attacker, escalating toward eliminating them when it is
+ * a *reasonable* fight (they are finishable or not vastly stronger than you).
+ * Returns true if the player was under attack this round.
+ *
+ * `maxRetal` caps retaliatory launches (cautious keeps it low, balanced higher).
+ * Builds a missile+warhead on the fly when stock is short (producers-first,
+ * validated by the sequence checker).
+ */
+function respondToAttackers(
+  state: GameState,
+  id: LeaderId,
+  tryAdd: Adder,
+  maxRetal: number,
+): boolean {
+  const me = state.leaders[id];
+  const others = aliveOthers(state, id);
   const attackers = others
     .filter((t) => (me.grudge[t] ?? 0) > 0)
     .sort((a, b) => (me.grudge[b] ?? 0) - (me.grudge[a] ?? 0));
+  if (attackers.length === 0) return false;
 
-  const threatened = attackers.length > 0;
+  // Defend first: deploy whatever interceptors are in stock.
+  tryAdd({ kind: 'deploy-defence', type: 'shield' });
+  tryAdd({ kind: 'deploy-defence', type: 'aa' });
 
-  // 1. Early economy: invest in a factory in the opening rounds.
-  if (state.round <= 2) tryAdd({ kind: 'build-factory' });
+  const primary = attackers[0];
+  const atk = state.leaders[primary];
+  // "Reasonable attack": worth chasing elimination if the attacker is
+  // finishable or not far stronger than us. Otherwise a single warning shot.
+  const reasonable = atk.population <= 12 || atk.population <= me.population * 1.5;
+  const toFinish = Math.ceil(atk.population / 2); // small warhead ≈ 2 pop damage
+  const want = reasonable ? Math.min(toFinish, maxRetal) : 1;
 
-  // 2. Defence: keep a shield in the bank once the game turns hot.
-  if ((threatened || state.round >= 3) && me.stockpile.shields === 0) {
-    tryAdd({ kind: 'build-defence', type: 'shield' });
+  let fired = 0;
+  let guard = 0;
+  while (fired < want && guard < 12) {
+    guard++;
+    const launch: Order = {
+      kind: 'launch', target: primary, delivery: 'missile', warhead: 'small', targetType: 'people',
+    };
+    if (tryAdd(launch)) {
+      fired++;
+      continue;
+    }
+    // Out of ammo — build a missile + warhead, then try again next iteration.
+    const b1 = tryAdd({ kind: 'build-missile' });
+    const b2 = tryAdd({ kind: 'build-warhead', yield: 'small' });
+    if (!b1 && !b2) break; // no AP left to arm
   }
+  return true;
+}
 
-  // 3. Arm a single launcher + warhead if we have neither (producers first).
-  if (me.stockpile.missiles === 0) tryAdd({ kind: 'build-missile' });
-  const hasWarhead =
-    me.stockpile.warheadsSmall + me.stockpile.warheadsMedium + me.stockpile.warheadsLarge > 0;
-  if (!hasWarhead) tryAdd({ kind: 'build-warhead', yield: 'small' });
+/**
+ * CAUTIOUS — measured reactive: invests early, keeps a shield, defends and
+ * retaliates when hit (low escalation), finishes a wounded rival, never opens
+ * with a first strike, otherwise diplomacy + banking.
+ */
+export function cautious(state: GameState, id: LeaderId = 'player1'): Order[] {
+  const me = state.leaders[id];
+  if (!me || !me.alive) return [];
+  const orders: Order[] = [];
+  const tryAdd = adder(state, id, me.ap, orders);
+  const others = aliveOthers(state, id);
 
-  // 4. Offence: retaliate against the top attacker; otherwise finish a wounded
-  //    rival (<=10M). Never open with a first strike.
-  let target: LeaderId | undefined;
-  if (threatened) {
-    target = attackers[0];
-  } else {
+  if (state.round <= 2) tryAdd({ kind: 'build-factory' });
+  if (me.stockpile.shields === 0) tryAdd({ kind: 'build-defence', type: 'shield' });
+
+  const attacked = respondToAttackers(state, id, tryAdd, 2);
+
+  if (!attacked) {
+    // No first strike — only finish an already-wounded rival.
     const wounded = others
       .filter((t) => state.leaders[t].population <= 10)
       .sort((a, b) => state.leaders[a].population - state.leaders[b].population);
-    if (wounded.length > 0) target = wounded[0];
+    if (wounded.length > 0) {
+      const target = wounded[0];
+      if (!tryAdd({ kind: 'launch', target, delivery: 'missile', warhead: 'small', targetType: 'people' })) {
+        tryAdd({ kind: 'build-missile' });
+        tryAdd({ kind: 'build-warhead', yield: 'small' });
+        tryAdd({ kind: 'launch', target, delivery: 'missile', warhead: 'small', targetType: 'people' });
+      }
+    }
+    if (state.round % 3 === 0) {
+      const friendly = others
+        .filter((t) => (me.grudge[t] ?? 0) === 0)
+        .sort((a, b) => state.leaders[b].population - state.leaders[a].population);
+      if (friendly.length > 0) tryAdd({ kind: 'woo', target: friendly[0] });
+    }
   }
-  if (target !== undefined) {
-    tryAdd({ kind: 'launch', target, delivery: 'missile', warhead: 'small', targetType: 'people' });
-  }
-
-  // 5. Deploy a shield this round if threatened and one is available.
-  if (threatened) tryAdd({ kind: 'deploy-defence', type: 'shield' });
-
-  // 6. Propaganda against the worst attacker with leftover AP.
-  if (attackers.length > 0) tryAdd({ kind: 'propaganda', target: attackers[0] });
-
-  // 7. Occasional diplomacy: woo the strongest non-attacker every third round.
-  if (state.round % 3 === 0) {
-    const friendlyCandidates = others
-      .filter((t) => (me.grudge[t] ?? 0) === 0)
-      .sort((a, b) => state.leaders[b].population - state.leaders[a].population);
-    if (friendlyCandidates.length > 0) tryAdd({ kind: 'woo', target: friendlyCandidates[0] });
-  }
-
-  // 8. Bank the rest (no order needed).
   return orders;
 }
+
+/**
+ * BALANCED — economy + defence + measured offence. Retaliates hard when hit
+ * (defends and pushes to eliminate a reasonable attacker), pre-empts by
+ * finishing the weakest rival when unthreatened, but keeps investing rather
+ * than going all-in.
+ */
+export function balanced(state: GameState, id: LeaderId = 'player1'): Order[] {
+  const me = state.leaders[id];
+  if (!me || !me.alive) return [];
+  const orders: Order[] = [];
+  const tryAdd = adder(state, id, me.ap, orders);
+  const others = aliveOthers(state, id);
+
+  // Economy + standing defence.
+  if (state.round <= 3) tryAdd({ kind: 'build-factory' });
+  if (me.stockpile.shields === 0) tryAdd({ kind: 'build-defence', type: 'shield' });
+
+  const attacked = respondToAttackers(state, id, tryAdd, 4);
+
+  if (!attacked) {
+    // Unthreatened: opportunistically strike the weakest rival (pre-emptive but
+    // not indiscriminate — only the most vulnerable, and only a measured salvo).
+    const weakest = [...others].sort(
+      (a, b) => state.leaders[a].population - state.leaders[b].population,
+    )[0];
+    if (weakest !== undefined) {
+      let shots = 0;
+      let guard = 0;
+      while (shots < 2 && guard < 6) {
+        guard++;
+        const launch: Order = {
+          kind: 'launch', target: weakest, delivery: 'missile', warhead: 'small', targetType: 'people',
+        };
+        if (tryAdd(launch)) { shots++; continue; }
+        const b1 = tryAdd({ kind: 'build-missile' });
+        const b2 = tryAdd({ kind: 'build-warhead', yield: 'small' });
+        if (!b1 && !b2) break;
+      }
+    }
+  }
+  // Keep an extra warhead in reserve if AP remains.
+  tryAdd({ kind: 'build-warhead', yield: 'small' });
+  return orders;
+}
+
+/**
+ * AGGRESSIVE (all-in) — opens with a first strike round 1 and unloads every
+ * round: spends all AP building missile+small-warhead and firing at the
+ * strongest surviving rival. No defence, no diplomacy.
+ */
+export function aggressive(state: GameState, id: LeaderId = 'player1'): Order[] {
+  const me = state.leaders[id];
+  if (!me || !me.alive) return [];
+  const orders: Order[] = [];
+  const tryAdd = adder(state, id, me.ap, orders);
+  const others = aliveOthers(state, id);
+  if (others.length === 0) return orders;
+
+  if (state.round === 1) tryAdd({ kind: 'build-factory' });
+
+  const target = others.reduce((best, t) =>
+    state.leaders[t].population > state.leaders[best].population ? t : best,
+  );
+
+  let progressed = true;
+  while (progressed) {
+    progressed = false;
+    if (tryAdd({ kind: 'build-missile' })) progressed = true;
+    if (tryAdd({ kind: 'build-warhead', yield: 'small' })) progressed = true;
+    if (tryAdd({ kind: 'launch', target, delivery: 'missile', warhead: 'small', targetType: 'people' })) {
+      progressed = true;
+    }
+  }
+  return orders;
+}
+
+/**
+ * TURTLE — pure passive survival. Never launches; builds economy + stacks and
+ * deploys defence. (Not part of the 3-human study; kept for the solo baseline.)
+ */
+export function turtle(state: GameState, id: LeaderId = 'player1'): Order[] {
+  const me = state.leaders[id];
+  if (!me || !me.alive) return [];
+  const orders: Order[] = [];
+  const tryAdd = adder(state, id, me.ap, orders);
+  const others = aliveOthers(state, id);
+  const threatened = others.some((t) => (me.grudge[t] ?? 0) > 0);
+
+  if (state.round <= 3) tryAdd({ kind: 'build-factory' });
+  tryAdd({ kind: 'build-defence', type: 'shield' });
+  if (me.stockpile.shields >= 1 || threatened) tryAdd({ kind: 'deploy-defence', type: 'shield' });
+  tryAdd({ kind: 'build-defence', type: 'aa' });
+  if (me.stockpile.aa >= 1) tryAdd({ kind: 'deploy-defence', type: 'aa' });
+  return orders;
+}
+
+export const POLICIES: Record<PolicyName, (state: GameState, id?: LeaderId) => Order[]> = {
+  cautious,
+  aggressive,
+  balanced,
+  turtle,
+};
+
+/** Back-compat default used by the original single-policy study. */
+export const humanOrders = cautious;

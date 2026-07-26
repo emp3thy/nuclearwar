@@ -48,9 +48,14 @@ const stats = {
     avgPlacement: round2(mean(rows.map((r) => r.humanPlacement))),
     placementDist: dist(rows.map((r) => String(r.humanPlacement))),
     avgFinalPop: round2(mean(rows.map((r) => r.humanFinalPop))),
-    avgEliminatedRound: round2(
-      mean(rows.filter((r) => r.humanEliminatedRound !== null).map((r) => r.humanEliminatedRound as number)),
-    ),
+    avgEliminatedRound: (() => {
+      const elim = rows
+        .filter((r) => r.humanEliminatedRound !== null)
+        .map((r) => r.humanEliminatedRound as number);
+      // null (not 0) when the human was never eliminated in any game, so the
+      // stat can't be misread as "eliminated at round 0".
+      return elim.length ? round2(mean(elim)) : null;
+    })(),
     avgLaunchesMade: round2(mean(rows.map((r) => r.humanLaunchesMade))),
     avgLaunchesReceived: round2(mean(rows.map((r) => r.humanLaunchesReceived))),
     avgHitsLanded: round2(mean(rows.map((r) => r.humanHitsLanded))),
